@@ -66,7 +66,8 @@ namespace PersonalInt
 	{
 		if (dataString.empty())
 		{
-			throw "DataString provided is NULL.\n";
+			char str[] = "DataString provided is NULL.\n";
+			throw str;
 		}
 
 		delete[] m_pArray;
@@ -172,12 +173,95 @@ namespace PersonalInt
 		}
 	}
 
-	BigInt BigInt::Add(const BigInt &lhs, const BigInt &rhs)
+	bool BigInt::CompareDigits(const BigInt &rhs)
 	{
-		int carry = 0;
+		int max = m_size;
+		for (int i = 0; i < max; ++i)
+		{
+			if (this->m_pArray[i] != rhs.m_pArray[i])
+				return false;
+		}
+		return true;
 	}
 
-	bool BigInt::LessThan(const BigInt &lhs, const BigInt &rhs)
+	BigInt BigInt::Add(const BigInt &rhs) const
+	{
+		if (m_size == 0 || rhs.m_size == 0)
+		{
+			return BigInt(*this);
+		}
+		else if ((m_isNegative && !rhs.m_isNegative) || (!m_isNegative && rhs.m_isNegative))
+		{
+			return Sub(rhs);
+		}
+		else // if both are of same sign
+		{
+			int carry = 0;
+			int sum;
+			string num;
+
+			if (this->m_isNegative)
+			{
+				num.reserve(std::max(this->m_size, rhs.m_size) + 1);
+			}
+
+			int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
+
+			for (; lhs_index >= 0 && rhs_index >= 0; --lhs_index, --rhs_index)
+			{
+				sum = carry + this->m_pArray[lhs_index] + rhs.m_pArray[rhs_index];
+				num += std::to_string(sum%10);
+				carry = sum / 10;
+			}
+
+			if (lhs_index)
+			{
+				for (; lhs_index >= 0; --lhs_index)
+				{
+					sum = carry + this->m_pArray[lhs_index];
+					num += std::to_string(sum % 10);
+					carry = sum / 10;
+				}
+			}
+			else if (rhs_index)
+			{
+				for (; rhs_index >= 0; --rhs_index)
+				{
+					sum = carry + rhs.m_pArray[lhs_index];
+					num += std::to_string(sum % 10);
+					carry = sum / 10;
+				}
+			}
+
+			if (this->m_isNegative)
+			{
+				num += "-";
+			}
+			std::reverse(num.begin(), num.end());
+
+			return BigInt(num);
+		}
+	}
+
+	BigInt BigInt::Sub(const BigInt &rhs) const
+	{
+		int carry = 0;
+
+		if (m_size == 0 || rhs.m_size == 0)
+		{
+			return BigInt(*this);
+		}
+		else if ((m_isNegative && !rhs.m_isNegative) || (!m_isNegative && rhs.m_isNegative))
+		{
+
+		}
+		else
+		{
+			return Add(rhs);
+		}
+	}
+
+	bool BigInt::LessThan(const BigInt &rhs) const
 	{
 		bool rc = false;
 
@@ -191,20 +275,22 @@ namespace PersonalInt
 		{
 			rc = false;
 		}
-		else if (this->m_isNegative && rhs.m_isNegative)
+		// if both have same sign
+		else
 		{
-			if (lhs.m_size < rhs.m_size)
+			// compare assuming them as positive
+			if (m_size < rhs.m_size)
 			{
 				rc = true;
 			}
-			else if (lhs.m_size > rhs.m_size)
+			else if (m_size > rhs.m_size)
 			{
 				rc = false;
 			}
-			else if (lhs.m_size == rhs.m_size)
+			else if (m_size == rhs.m_size)
 			{
-				int index = lhs.m_size;
-				if (lhs.m_pArray[index] < rhs.m_pArray[index])
+				int index = m_size;
+				if (m_pArray[index] < rhs.m_pArray[index])
 				{
 					rc = true;
 				}
@@ -213,17 +299,25 @@ namespace PersonalInt
 					rc = false;
 				}
 			}
-		}
-		else
-		{
-			// TODO :: Error situation
+
+			// if both are negative invert the answer
+			if (m_isNegative && rhs.m_isNegative)
+			{
+				rc = !rc;
+			}
 		}
 		return rc;
 	}
 
 	bool BigInt::operator== (const BigInt &r_bigInt)
 	{
+		bool rc = false;
 
+		if (this->m_size == r_bigInt.m_size && this->m_isNegative == r_bigInt.m_isNegative)
+		{
+			rc = CompareDigits(r_bigInt);
+		}
+		return rc;
 	}
 
 	bool BigInt::operator< (const BigInt &r_bigInt)
@@ -232,7 +326,7 @@ namespace PersonalInt
 		// If both are positive number
 		if (!this->m_isNegative && !r_bigInt.m_isNegative)
 		{
-			rc = LessThan(*this, r_bigInt);
+			rc = LessThan(r_bigInt);
 		}
 		// if lhs is negative but rhs is positive
 		else if (this->m_isNegative && !r_bigInt.m_isNegative)
@@ -247,15 +341,14 @@ namespace PersonalInt
 		// if both are neagtive negative
 		else if (this->m_isNegative && r_bigInt.m_isNegative)
 		{
-			rc = !(LessThan(*this, r_bigInt));
+			rc = !(LessThan(r_bigInt));
 		}
 		return rc;
 	}
 
 	bool BigInt::operator<= (const BigInt &r_bigInt)
 	{
-		bool rc = false;
-
+		return (*this == r_bigInt || *this < r_bigInt);
 	}
 
 	bool BigInt::operator> (const BigInt &r_bigInt)
@@ -264,7 +357,7 @@ namespace PersonalInt
 		// If both are positive number
 		if (!this->m_isNegative && !r_bigInt.m_isNegative)
 		{
-			rc = !(LessThan(*this, r_bigInt));
+			rc = !(LessThan(r_bigInt));
 		}
 		// if lhs is negative but rhs is positive
 		else if (this->m_isNegative && !r_bigInt.m_isNegative)
@@ -279,41 +372,47 @@ namespace PersonalInt
 		// if both are neagtive negative
 		else if (this->m_isNegative && r_bigInt.m_isNegative)
 		{
-			rc = LessThan(*this, r_bigInt);
+			rc = LessThan(r_bigInt);
 		}
 		return rc;
 	}
 
 	bool BigInt::operator>= (const BigInt &r_bigInt)
 	{
+		return (*this == r_bigInt || *this > r_bigInt);
 	}
-
+	
 	// Friend Overloaded operators
 	// Binary +
 	BigInt operator+(const BigInt &bigInt, long long int &value)
 	{
-
+		return bigInt.Add(BigInt(value));
 	}
 
 	BigInt operator+(long long int &value, const BigInt &bigInt)
 	{
+		return bigInt.Add(value);
 	}
 
 	BigInt operator+(const BigInt &l_bigInt, const BigInt &r_bigInt)
 	{
+		return l_bigInt.Add(r_bigInt);
 	}
 
 	// Binary -
 	BigInt operator-(const BigInt &bigInt, long long int &value)
 	{
+		return bigInt.Sub(BigInt(value));
 	}
 
 	BigInt operator-(long long int &value, const BigInt &bigInt)
 	{
+		return (BigInt(value)).Sub(bigInt);
 	}
 
 	BigInt operator-(const BigInt &l_bigInt, const BigInt &r_bigInt)
 	{
+		return l_bigInt.Sub(r_bigInt);
 	}
 
 	std::ostream& operator<< (std::ostream &out, const BigInt &bigInt)

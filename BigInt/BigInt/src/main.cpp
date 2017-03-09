@@ -8,21 +8,14 @@ using namespace PersonalInt;
 
 int main(int argc, char *argv[])
 {
-	string s_number;
+	BigInt a, b, c, d;
 
-	cout << "Enter a number : ";
-	cin >> s_number;
+	a = "1234";
+	b = "5678";
 
-	BigInt bigInt;
+	
 
-	bigInt = s_number;
-	cout << bigInt;
-
-	bigInt = 123456789;
-	cout << bigInt;
-
-	BigInt _bigInt(BigInt("123321"));
-	cout << _bigInt;
+	cout << "a = " << a << ", b = " << b << ", c << " << endl;
 
 	system("PAUSE");
 	return 0;

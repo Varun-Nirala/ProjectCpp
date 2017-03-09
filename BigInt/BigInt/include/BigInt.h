@@ -43,15 +43,15 @@ namespace PersonalInt
 			BigInt operator+() const;
 
 			// Friend Overloaded operators
-
+			
 			friend BigInt operator+(const BigInt &bigInt, long long int &value);		// Bigint + int
 			friend BigInt operator+(long long int &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator+(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt
 
-			friend BigInt operator+(const BigInt &bigInt, long long int &value);		// Bigint + int
-			friend BigInt operator+(long long int &value, const BigInt &bigInt);		// int + BigInt
-			friend BigInt operator+(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt
-
+			friend BigInt operator-(const BigInt &bigInt, long long int &value);		// Bigint + int
+			friend BigInt operator-(long long int &value, const BigInt &bigInt);		// int + BigInt
+			friend BigInt operator-(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt
+			
 			friend std::ostream& operator<< (std::ostream &out, const BigInt &bigInt);
 
 		private:
@@ -63,9 +63,12 @@ namespace PersonalInt
 
 			inline int ConvertToInt(const char &ch);
 
-			BigInt Add(const BigInt &lhs, const BigInt &rhs);
-			bool LessThan(const BigInt &lhs, const BigInt &rhs);
+			BigInt Add(const BigInt &rhs) const;
+			BigInt Sub(const BigInt &rhs) const;
+			bool LessThan(const BigInt &rhs) const;
 
+			// Assumes both have same size
+			inline bool CompareDigits(const BigInt &rhs);
 			void MakeCopy(const BigInt &bigInt);
 
 		private:
