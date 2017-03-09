@@ -26,6 +26,10 @@ namespace PersonalInt
 	}
 
 	BigInt::BigInt(const string &dataString)
+		:m_size(0),
+		m_isNegative(false),
+		m_pArray(NULL),
+		m_num(0)
 	{
 		try
 		{
@@ -39,6 +43,10 @@ namespace PersonalInt
 	}
 
 	BigInt::BigInt(const long long int &num)
+		:m_size(0),
+		m_isNegative(false),
+		m_pArray(NULL),
+		m_num(0)
 	{
 		string s_num = std::to_string(num);
 		InitializeWithString(s_num);

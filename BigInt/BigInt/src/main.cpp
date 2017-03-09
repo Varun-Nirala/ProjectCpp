@@ -82,32 +82,32 @@ int main(int argc, char *argv[])
 
 			case 3:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << "Num_A + Num_B" << num_a + num_b << endl;
+				cout << "Num_A + Num_B = " << num_a + num_b << endl;
 				break;
 
 			case 4:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << "Num_A - Num_B" << num_a - num_b << endl;
+				cout << "Num_A - Num_B = " << num_a - num_b << endl;
 				break;
 
 			case 5:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << (num_a < num_b) << endl;
+				cout << boolalpha << "Num_A < Num_B ? : " << (num_a < num_b) << endl;
 				break;
 
 			case 6:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << (num_a > num_b) << endl;
+				cout << boolalpha << "Num_A > Num_B ? : " << (num_a > num_b) << endl;
 				break;
 
 			case 7:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << (num_a <= num_b) << endl;
+				cout << boolalpha << "Num_A <= Num_B ? : " << (num_a <= num_b) << endl;
 				break;
 
 			case 8:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << (num_a >= num_b) << endl;
+				cout << boolalpha << "Num_A >= Num_B ? : " << (num_a >= num_b) << endl;
 				break;
 
 			case 9:
@@ -121,7 +121,5 @@ int main(int argc, char *argv[])
 		system("PAUSE");
 		choice = Menu();
 	}
-
-	system("PAUSE");
 	return 0;
 }
