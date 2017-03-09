@@ -43,7 +43,6 @@ namespace PersonalInt
 			BigInt operator+() const;
 
 			// Friend Overloaded operators
-			
 			friend BigInt operator+(const BigInt &bigInt, long long int &value);		// Bigint + int
 			friend BigInt operator+(long long int &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator+(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt

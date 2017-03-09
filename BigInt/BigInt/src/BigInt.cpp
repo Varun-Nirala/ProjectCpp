@@ -34,6 +34,7 @@ namespace PersonalInt
 		catch (std::string s_error)
 		{
 			std::cout << "Error:: " << s_error.c_str() << std::endl;
+			throw;
 		}
 	}
 
@@ -127,6 +128,7 @@ namespace PersonalInt
 		catch (std::string s_error)
 		{
 			std::cout << "Error:: " << s_error.c_str() << std::endl;
+			throw;
 		}
 		return *this;
 	}
@@ -203,6 +205,10 @@ namespace PersonalInt
 			if (this->m_isNegative)
 			{
 				num.reserve(std::max(this->m_size, rhs.m_size) + 1);
+			}
+			else
+			{
+				num.reserve(std::max(this->m_size, rhs.m_size));
 			}
 
 			int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
@@ -428,7 +434,6 @@ namespace PersonalInt
 		{
 			out << bigInt.m_pArray[i];
 		}
-		out << std::endl;
 		return out;
 	}
 
