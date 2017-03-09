@@ -183,7 +183,7 @@ namespace PersonalInt
 		}
 	}
 
-	bool BigInt::CompareDigits(const BigInt &rhs)
+	bool BigInt::CompareDigits(const BigInt &rhs) const
 	{
 		int max = m_size;
 		for (int i = 0; i < max; ++i)
@@ -257,21 +257,67 @@ namespace PersonalInt
 		}
 	}
 
+	// It assumes that this pointer have same or more number of digit as rhs have
+	// it do this - rhs operation and it wont change any sign
+	BigInt BigInt::SubHelper(const BigInt &rhs) const
+	{
+		if (*this == rhs)
+		{
+			return BigInt(0);
+		}
+		else
+		{
+			int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
+			int borrow = 0, borrow_index = m_size - 2;
+			int left, right;
+			string num;
+			num.reserve(m_size - 1);
+
+			for (; lhs_index >= 0 && rhs_index >= 0; --lhs_index, --rhs_index, --borrow_index)
+			{
+				left = this->m_pArray[lhs_index];
+				right = rhs.m_pArray[rhs_index];
+
+				if (borrow)
+				{
+					--left;
+					borrow = 0;
+				}
+
+				if (left < right)
+				{
+					left += 10;
+					borrow = 1;
+				}
+
+				num += std::to_string(left - right);
+			}
+			std::reverse(num.begin(), num.end());
+
+			return BigInt(num);
+		}
+	}
+
 	BigInt BigInt::Sub(const BigInt &rhs) const
 	{
-		int carry = 0;
-
+		int borrow = 0;
 		if (m_size == 0 || rhs.m_size == 0)
 		{
 			return BigInt(*this);
 		}
 		else if ((m_isNegative && !rhs.m_isNegative) || (!m_isNegative && rhs.m_isNegative))
 		{
-
+			BigInt rc = (m_size >= rhs.m_size) ? SubHelper(rhs) : rhs.SubHelper(*this);
+			(m_size >= rhs.m_size) ? (rc.m_isNegative = rhs.m_isNegative) : (rc.m_isNegative = this->m_isNegative);
+			return rc;
 		}
-		else
+		else if (m_isNegative && rhs.m_isNegative) // Both negative
 		{
 			return Add(rhs);
+		}
+		else // Both positive
+		{
+			return SubHelper(rhs);
 		}
 	}
 
@@ -323,7 +369,7 @@ namespace PersonalInt
 		return rc;
 	}
 
-	bool BigInt::operator== (const BigInt &r_bigInt)
+	bool BigInt::operator== (const BigInt &r_bigInt) const
 	{
 		bool rc = false;
 
@@ -334,7 +380,7 @@ namespace PersonalInt
 		return rc;
 	}
 
-	bool BigInt::operator< (const BigInt &r_bigInt)
+	bool BigInt::operator< (const BigInt &r_bigInt) const
 	{
 		bool rc = false;
 		// If both are positive number
@@ -360,12 +406,12 @@ namespace PersonalInt
 		return rc;
 	}
 
-	bool BigInt::operator<= (const BigInt &r_bigInt)
+	bool BigInt::operator<= (const BigInt &r_bigInt) const
 	{
 		return (*this == r_bigInt || *this < r_bigInt);
 	}
 
-	bool BigInt::operator> (const BigInt &r_bigInt)
+	bool BigInt::operator> (const BigInt &r_bigInt) const
 	{
 		bool rc = false;
 		// If both are positive number
@@ -391,7 +437,7 @@ namespace PersonalInt
 		return rc;
 	}
 
-	bool BigInt::operator>= (const BigInt &r_bigInt)
+	bool BigInt::operator>= (const BigInt &r_bigInt) const
 	{
 		return (*this == r_bigInt || *this > r_bigInt);
 	}

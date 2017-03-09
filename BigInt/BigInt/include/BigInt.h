@@ -32,12 +32,12 @@ namespace PersonalInt
 			BigInt& operator= (const long long int &num);
 			BigInt& operator= (BigInt &&bigInt);		// move assigment operator
 
-			bool operator== (const BigInt &r_bigInt);
-			bool operator< (const BigInt &r_bigInt);
-			bool operator<= (const BigInt &r_bigInt);
+			bool operator== (const BigInt &r_bigInt) const;
+			bool operator< (const BigInt &r_bigInt) const;
+			bool operator<= (const BigInt &r_bigInt) const;
 
-			bool operator> (const BigInt &r_bigInt);
-			bool operator>= (const BigInt &r_bigInt);
+			bool operator> (const BigInt &r_bigInt) const;
+			bool operator>= (const BigInt &r_bigInt) const;
 
 			BigInt operator-() const;
 			BigInt operator+() const;
@@ -64,10 +64,14 @@ namespace PersonalInt
 
 			BigInt Add(const BigInt &rhs) const;
 			BigInt Sub(const BigInt &rhs) const;
+
+			// It assumes that this pointer have same or more number of digit as rhs have
+			// it do this - rhs operation and it wont change any sign
+			BigInt SubHelper(const BigInt &rhs) const;
 			bool LessThan(const BigInt &rhs) const;
 
 			// Assumes both have same size
-			inline bool CompareDigits(const BigInt &rhs);
+			inline bool CompareDigits(const BigInt &rhs) const;
 			void MakeCopy(const BigInt &bigInt);
 
 		private:
