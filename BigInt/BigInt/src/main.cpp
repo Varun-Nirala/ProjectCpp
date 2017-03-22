@@ -17,11 +17,12 @@ int Menu()
 		cout << "2. Assign Var B a number.\n";
 		cout << "3. A + B.\n";
 		cout << "4. A - B.\n";
-		cout << "5. Compare A < B.\n";
-		cout << "6. Compare A > B.\n";
-		cout << "7. Compare A <= B.\n";
-		cout << "8. Compare A >= B.\n";
-		cout << "9. Display both number.\n";
+		cout << "5. A * B.\n";
+		cout << "6. Compare A < B.\n";
+		cout << "7. Compare A > B.\n";
+		cout << "8. Compare A <= B.\n";
+		cout << "9. Compare A >= B.\n";
+		cout << "10. Display both number.\n";
 		cout << "0. Exit\n";
 		cin >> choice;
 		if (cin.fail())
@@ -92,25 +93,30 @@ int main(int argc, char *argv[])
 
 			case 5:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << "Num_A < Num_B ? : " << (num_a < num_b) << endl;
+				cout << "Num_A * Num_B = " << num_a * num_b << endl;
 				break;
 
 			case 6:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << "Num_A > Num_B ? : " << (num_a > num_b) << endl;
+				cout << boolalpha << "Num_A < Num_B ? : " << (num_a < num_b) << endl;
 				break;
 
 			case 7:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << "Num_A <= Num_B ? : " << (num_a <= num_b) << endl;
+				cout << boolalpha << "Num_A > Num_B ? : " << (num_a > num_b) << endl;
 				break;
 
 			case 8:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
-				cout << boolalpha << "Num_A >= Num_B ? : " << (num_a >= num_b) << endl;
+				cout << boolalpha << "Num_A <= Num_B ? : " << (num_a <= num_b) << endl;
 				break;
 
 			case 9:
+				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
+				cout << boolalpha << "Num_A >= Num_B ? : " << (num_a >= num_b) << endl;
+				break;
+
+			case 10:
 				cout << "Num_A = " << num_a << ", Num_B = " << num_b << endl;
 				break;
 

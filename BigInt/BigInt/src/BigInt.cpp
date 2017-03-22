@@ -20,16 +20,30 @@ namespace PersonalInt
 	BigInt::BigInt()
 		:m_size(0),
 		m_isNegative(false),
-		m_pArray(NULL),
-		m_num(0)
+		m_pArray(NULL)
 	{
 	}
 
 	BigInt::BigInt(const string &dataString)
 		:m_size(0),
 		m_isNegative(false),
-		m_pArray(NULL),
-		m_num(0)
+		m_pArray(NULL)
+	{
+		try
+		{
+			InitializeWithString(dataString.c_str());
+		}
+		catch (std::string s_error)
+		{
+			std::cout << "Error:: " << s_error.c_str() << std::endl;
+			throw;
+		}
+	}
+
+	BigInt::BigInt(const char* dataString)
+		:m_size(0),
+		m_isNegative(false),
+		m_pArray(NULL)
 	{
 		try
 		{
@@ -45,23 +59,26 @@ namespace PersonalInt
 	BigInt::BigInt(const long long int &num)
 		:m_size(0),
 		m_isNegative(false),
-		m_pArray(NULL),
-		m_num(0)
+		m_pArray(NULL)
 	{
-		string s_num = std::to_string(num);
-		InitializeWithString(s_num);
+		InitializeWithString(std::to_string(num).c_str());
 	}
 
 	// Copy Constructor
 	BigInt::BigInt(const BigInt &bigInt)
+		:m_size(0),
+		m_isNegative(false),
+		m_pArray(NULL)
 	{
 		MakeCopy(bigInt);
 	}
 
 	// Move Constructor
 	BigInt::BigInt(BigInt &&bigInt)
+		:m_size(0),
+		m_isNegative(false),
+		m_pArray(NULL)
 	{
-		delete[] m_pArray;
 		m_size = bigInt.m_size;
 		m_pArray = bigInt.m_pArray;
 		m_isNegative = bigInt.m_isNegative;
@@ -71,9 +88,30 @@ namespace PersonalInt
 		bigInt.m_isNegative = false;
 	}
 
-	void BigInt::InitializeWithString(const std::string &dataString)
+	BigInt::~BigInt()
 	{
-		if (dataString.empty())
+		Clear();
+	}
+
+	void BigInt::Clear()
+	{
+		if (m_pArray)
+		{
+			delete[] m_pArray;
+			m_pArray = NULL;
+		}
+		m_size = 0;
+		m_isNegative = false;
+	}
+
+	long long int BigInt::size() const
+	{
+		return m_size;
+	}
+
+	void BigInt::InitializeWithString(const char *dataString)
+	{
+		if (std::strlen(dataString) == 0)
 		{
 			char str[] = "DataString provided is NULL.\n";
 			throw str;
@@ -82,8 +120,8 @@ namespace PersonalInt
 		delete[] m_pArray;
 		m_isNegative = false;
 
-		int size = dataString.size();
-		int index = 0, i = 0;
+		long long int size = std::strlen(dataString);
+		long long int index = 0, i = 0;
 
 		m_size = size;
 
@@ -100,7 +138,7 @@ namespace PersonalInt
 			ch = dataString[index];
 			if (isdigit(ch))
 			{
-				m_pArray[i] = ConvertToInt(ch);
+				m_pArray[i] = to_Int(ch);
 			}
 			else
 			{
@@ -109,9 +147,57 @@ namespace PersonalInt
 		}
 	}
 
-	int BigInt::ConvertToInt(const char &ch)
+	int BigInt::to_Int(const char ch) const
 	{
 		return std::move(ch - '0');
+	}
+
+	char BigInt::to_Char(const int digit) const
+	{
+		return std::move(digit + '0');
+	}
+
+	std::string BigInt::to_String() const
+	{
+		if (m_size == 0)
+			return "";
+
+		std::string rc;
+
+		rc.reserve(m_size);
+		long long int i;
+
+		for (i = 0; i < m_size; ++i)
+		{
+			rc.push_back(to_Char(m_pArray[i]));
+		}
+		return rc;
+	}
+
+	void BigInt::reverse(BigInt &bigInt)
+	{
+		long long int size = bigInt.size();
+		long long int start, last = size - 1;
+
+		for (long long int start = 0; start < size; ++start, --last)
+		{
+			std::swap(bigInt.m_pArray[start], bigInt.m_pArray[last]);
+		}
+	}
+
+	bool BigInt::reserve(long long int cap)
+	{
+		Clear();
+		m_pArray = new int[cap];
+		if (m_pArray)
+		{
+			m_size = cap;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	// Member Overloaded operators
@@ -131,7 +217,7 @@ namespace PersonalInt
 	{
 		try
 		{
-			InitializeWithString(dataString);
+			InitializeWithString(dataString.c_str());
 		}
 		catch (std::string s_error)
 		{
@@ -144,7 +230,7 @@ namespace PersonalInt
 	BigInt& BigInt::operator= (const long long int &num)
 	{
 		string s_num = std::to_string(num);
-		InitializeWithString(s_num);
+		InitializeWithString(s_num.c_str());
 		return *this;
 	}
 
@@ -177,7 +263,7 @@ namespace PersonalInt
 		m_pArray = new int[bigInt.m_size];
 		m_isNegative = bigInt.m_isNegative;
 
-		for (int i = 0; m_size; ++i)
+		for (long long int i = 0; m_size; ++i)
 		{
 			m_pArray[i] = bigInt.m_pArray[i];
 		}
@@ -185,8 +271,8 @@ namespace PersonalInt
 
 	bool BigInt::CompareDigits(const BigInt &rhs) const
 	{
-		int max = m_size;
-		for (int i = 0; i < max; ++i)
+		long long int max = m_size;
+		for (long long int i = 0; i < max; ++i)
 		{
 			if (this->m_pArray[i] != rhs.m_pArray[i])
 				return false;
@@ -219,7 +305,7 @@ namespace PersonalInt
 				num.reserve(std::max(this->m_size, rhs.m_size));
 			}
 
-			int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
+			long long int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
 
 			for (; lhs_index >= 0 && rhs_index >= 0; --lhs_index, --rhs_index)
 			{
@@ -263,13 +349,14 @@ namespace PersonalInt
 	{
 		if (*this == rhs)
 		{
-			return BigInt(0);
+			return BigInt();
 		}
 		else
 		{
-			int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
-			int borrow = 0, borrow_index = m_size - 2;
-			int left, right;
+			long long int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
+			int borrow = 0;
+			long long borrow_index = m_size - 2;
+			long long int left, right;
 			string num;
 			num.reserve(m_size - 1);
 
@@ -349,7 +436,7 @@ namespace PersonalInt
 			}
 			else if (m_size == rhs.m_size)
 			{
-				int index = m_size;
+				long long int index = m_size;
 				if (m_pArray[index] < rhs.m_pArray[index])
 				{
 					rc = true;
@@ -442,6 +529,16 @@ namespace PersonalInt
 		return (*this == r_bigInt || *this > r_bigInt);
 	}
 	
+	int& BigInt::operator[] (const long long int index)
+	{
+		return m_pArray[index];
+	}
+
+	const int& BigInt::operator[] (const long long int index) const
+	{
+		return m_pArray[index];
+	}
+
 	// Friend Overloaded operators
 	// Binary +
 	BigInt operator+(const BigInt &bigInt, long long int &value)
@@ -475,9 +572,25 @@ namespace PersonalInt
 		return l_bigInt.Sub(r_bigInt);
 	}
 
+	// Multiplication
+	BigInt operator*(const BigInt &bigInt, long long int &value)
+	{
+		return bigInt.LongMultplication(BigInt(value));
+	}
+
+	BigInt operator*(long long int &value, const BigInt &bigInt)
+	{
+		return (BigInt(value)).LongMultplication(bigInt);
+	}
+
+	BigInt operator*(const BigInt &l_bigInt, const BigInt &r_bigInt)
+	{
+		return l_bigInt.LongMultplication(r_bigInt);
+	}
+
 	std::ostream& operator<< (std::ostream &out, const BigInt &bigInt)
 	{
-		int i, size = bigInt.m_size;
+		long long int i, size = bigInt.m_size;
 
 		if (bigInt.m_isNegative)
 		{
@@ -491,4 +604,77 @@ namespace PersonalInt
 		return out;
 	}
 
+	/*
+	LONG MULTIPLICATION
+		multiply(a[1..p], b[1..q], base)							// Operands containing rightmost digits at index 1
+		product = [1..p + q]										//Allocate space for result
+		for b_i = 1 to q											// for all digits in b
+		carry = 0
+		for a_i = 1 to p											//for all digits in a
+		product[a_i + b_i - 1] += carry + a[a_i] * b[b_i]
+		carry = product[a_i + b_i - 1] / base
+		product[a_i + b_i - 1] = product[a_i + b_i - 1] mod base
+		product[b_i + p] += carry									// last digit comes from final carry
+		return product
+	*/
+	BigInt BigInt::LongMultplication(const BigInt &num2, int base) const
+	{
+		BigInt result;
+		long long int max, total_number = 0;
+		long long int index_2, index_1, num2size, num1size;
+
+		num1size = this->m_size;
+		num2size = num2.size();
+		
+		max = num1size + num2size;
+
+		result.reserve(num1size + num2size);	// Allocate max space required
+
+		int carry = 0;
+		for (index_2 = 0; index_2 < num2size; ++index_2)
+		{
+			carry = 0;
+			total_number++;
+			for (index_1 = 0; index_1 < num1size; ++index_1)
+			{
+				result[index_1 + index_2 - 1] += carry + (*this)[index_1] * num2[index_2];
+				carry = result[index_1 + index_2 - 1] / base;
+				result[index_1 + index_2 - 1] = result[index_1 + index_2 - 1] % base;
+				result[index_2 + num1size] += carry;
+				total_number++;
+			}
+		}
+		result.m_isNegative = (this->m_isNegative && num2.m_isNegative);
+
+		BigInt rc;
+		rc.reserve(total_number);
+
+		for (index_1 = 0; index_1 < total_number; ++index_1)
+		{
+			rc[index_1] = result[total_number - index_1];
+		}
+		rc.m_isNegative = result.m_isNegative;
+
+		std::cout << rc << std::endl;
+		return rc;
+	}
+
 }// namespace PersonalInt
+
+
+/*
+procedure karatsuba(num1, num2)
+	if (num1 < 10) or (num2 < 10)
+	return num1*num2
+	// calculates the size of the numbers 
+	m = max(size_base10(num1), size_base10(num2))
+	m2 = m / 2
+	// split the digit sequences about the middle 
+	high1, low1 = split_at(num1, m2)
+	high2, low2 = split_at(num2, m2)
+	// 3 calls made to numbers approximately half the size 
+	z0 = karatsuba(low1, low2)
+	z1 = karatsuba((low1 + high1), (low2 + high2))
+	z2 = karatsuba(high1, high2)
+	return (z2 * 10 ^ (2 * m2)) + ((z1 - z2 - z0) * 10 ^ (m2)) + (z0)
+*/
