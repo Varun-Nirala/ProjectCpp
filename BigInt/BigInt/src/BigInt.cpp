@@ -56,7 +56,7 @@ namespace PersonalInt
 		}
 	}
 
-	BigInt::BigInt(const long long int &num)
+	BigInt::BigInt(const __int64 &num)
 		:m_size(0),
 		m_isNegative(false),
 		m_pArray(NULL)
@@ -104,7 +104,7 @@ namespace PersonalInt
 		m_isNegative = false;
 	}
 
-	long long int BigInt::size() const
+	__int64 BigInt::size() const
 	{
 		return m_size;
 	}
@@ -120,8 +120,8 @@ namespace PersonalInt
 		delete[] m_pArray;
 		m_isNegative = false;
 
-		long long int size = std::strlen(dataString);
-		long long int index = 0, i = 0;
+		__int64 size = std::strlen(dataString);
+		__int64 index = 0, i = 0;
 
 		m_size = size;
 
@@ -165,7 +165,7 @@ namespace PersonalInt
 		std::string rc;
 
 		rc.reserve(m_size);
-		long long int i;
+		__int64 i;
 
 		for (i = 0; i < m_size; ++i)
 		{
@@ -176,16 +176,16 @@ namespace PersonalInt
 
 	void BigInt::reverse(BigInt &bigInt)
 	{
-		long long int size = bigInt.size();
-		long long int start, last = size - 1;
+		__int64 size = bigInt.size();
+		__int64 start, last = size - 1;
 
-		for (long long int start = 0; start < size; ++start, --last)
+		for (start = 0; start < size; ++start, --last)
 		{
 			std::swap(bigInt.m_pArray[start], bigInt.m_pArray[last]);
 		}
 	}
 
-	bool BigInt::reserve(long long int cap)
+	bool BigInt::reserve(__int64 cap)
 	{
 		Clear();
 		m_pArray = new int[cap];
@@ -227,7 +227,7 @@ namespace PersonalInt
 		return *this;
 	}
 
-	BigInt& BigInt::operator= (const long long int &num)
+	BigInt& BigInt::operator= (const __int64 &num)
 	{
 		string s_num = std::to_string(num);
 		InitializeWithString(s_num.c_str());
@@ -263,7 +263,7 @@ namespace PersonalInt
 		m_pArray = new int[bigInt.m_size];
 		m_isNegative = bigInt.m_isNegative;
 
-		for (long long int i = 0; m_size; ++i)
+		for (__int64 i = 0; m_size; ++i)
 		{
 			m_pArray[i] = bigInt.m_pArray[i];
 		}
@@ -271,8 +271,8 @@ namespace PersonalInt
 
 	bool BigInt::CompareDigits(const BigInt &rhs) const
 	{
-		long long int max = m_size;
-		for (long long int i = 0; i < max; ++i)
+		__int64 max = m_size;
+		for (__int64 i = 0; i < max; ++i)
 		{
 			if (this->m_pArray[i] != rhs.m_pArray[i])
 				return false;
@@ -305,7 +305,7 @@ namespace PersonalInt
 				num.reserve(std::max(this->m_size, rhs.m_size));
 			}
 
-			long long int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
+			__int64 lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
 
 			for (; lhs_index >= 0 && rhs_index >= 0; --lhs_index, --rhs_index)
 			{
@@ -353,10 +353,10 @@ namespace PersonalInt
 		}
 		else
 		{
-			long long int lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
+			__int64 lhs_index = m_size - 1, rhs_index = rhs.m_size - 1;
 			int borrow = 0;
 			long long borrow_index = m_size - 2;
-			long long int left, right;
+			__int64 left, right;
 			string num;
 			num.reserve(m_size - 1);
 
@@ -436,7 +436,7 @@ namespace PersonalInt
 			}
 			else if (m_size == rhs.m_size)
 			{
-				long long int index = m_size;
+				__int64 index = m_size;
 				if (m_pArray[index] < rhs.m_pArray[index])
 				{
 					rc = true;
@@ -529,24 +529,24 @@ namespace PersonalInt
 		return (*this == r_bigInt || *this > r_bigInt);
 	}
 	
-	int& BigInt::operator[] (const long long int index)
+	int& BigInt::operator[] (const __int64 index)
 	{
 		return m_pArray[index];
 	}
 
-	const int& BigInt::operator[] (const long long int index) const
+	const int& BigInt::operator[] (const __int64 index) const
 	{
 		return m_pArray[index];
 	}
 
 	// Friend Overloaded operators
 	// Binary +
-	BigInt operator+(const BigInt &bigInt, long long int &value)
+	BigInt operator+(const BigInt &bigInt, __int64 &value)
 	{
 		return bigInt.Add(BigInt(value));
 	}
 
-	BigInt operator+(long long int &value, const BigInt &bigInt)
+	BigInt operator+(__int64 &value, const BigInt &bigInt)
 	{
 		return bigInt.Add(value);
 	}
@@ -557,12 +557,12 @@ namespace PersonalInt
 	}
 
 	// Binary -
-	BigInt operator-(const BigInt &bigInt, long long int &value)
+	BigInt operator-(const BigInt &bigInt, __int64 &value)
 	{
 		return bigInt.Sub(BigInt(value));
 	}
 
-	BigInt operator-(long long int &value, const BigInt &bigInt)
+	BigInt operator-(__int64 &value, const BigInt &bigInt)
 	{
 		return (BigInt(value)).Sub(bigInt);
 	}
@@ -573,12 +573,12 @@ namespace PersonalInt
 	}
 
 	// Multiplication
-	BigInt operator*(const BigInt &bigInt, long long int &value)
+	BigInt operator*(const BigInt &bigInt, __int64 &value)
 	{
 		return bigInt.LongMultplication(BigInt(value));
 	}
 
-	BigInt operator*(long long int &value, const BigInt &bigInt)
+	BigInt operator*(__int64 &value, const BigInt &bigInt)
 	{
 		return (BigInt(value)).LongMultplication(bigInt);
 	}
@@ -590,7 +590,7 @@ namespace PersonalInt
 
 	std::ostream& operator<< (std::ostream &out, const BigInt &bigInt)
 	{
-		long long int i, size = bigInt.m_size;
+		__int64 i, size = bigInt.m_size;
 
 		if (bigInt.m_isNegative)
 		{
@@ -620,8 +620,8 @@ namespace PersonalInt
 	BigInt BigInt::LongMultplication(const BigInt &num2, int base) const
 	{
 		BigInt result;
-		long long int max, total_number = 0;
-		long long int index_2, index_1, num2size, num1size;
+		__int64 max, total_number = 0;
+		__int64 index_2, index_1, num2size, num1size;
 
 		num1size = this->m_size;
 		num2size = num2.size();

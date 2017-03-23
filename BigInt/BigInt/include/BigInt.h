@@ -5,7 +5,7 @@
 
 	@NOTE	: Currently only supports, Integers
 
-	@Assumption : No operation will reach the limit of number of digit crossing the size of long long int
+	@Assumption : No operation will reach the limit of number of digit crossing the size of __int64
 */
 
 #ifndef _BIGINT_H_
@@ -23,7 +23,7 @@ namespace PersonalInt
 			BigInt();
 			BigInt(const std::string &dataString);
 			BigInt(const char* dataString);
-			BigInt(const long long int &num);
+			BigInt(const __int64 &num);
 
 			BigInt(const BigInt &bigInt);
 			BigInt(BigInt &&bigInt);					// move copy constructor
@@ -32,16 +32,16 @@ namespace PersonalInt
 
 			void Clear();
 
-			bool reserve(long long int cap);
+			bool reserve(__int64 cap);
 
-			long long int size() const;
+			__int64 size() const;
 
 			std::string to_String() const;
 
 			// Member Overloaded operators
 			BigInt& operator= (const BigInt &bigInt);
 			BigInt& operator= (const std::string &dataString);
-			BigInt& operator= (const long long int &num);
+			BigInt& operator= (const __int64 &num);
 			BigInt& operator= (BigInt &&bigInt);		// move assigment operator
 
 			bool operator== (const BigInt &r_bigInt) const;
@@ -54,20 +54,20 @@ namespace PersonalInt
 			BigInt operator-() const;
 			BigInt operator+() const;
 
-			int& operator[] (const long long int index);
-			const int& operator[] (const long long int index) const;
+			int& operator[] (const __int64 index);
+			const int& operator[] (const __int64 index) const;
 
 			// Friend Overloaded operators
-			friend BigInt operator+(const BigInt &bigInt, long long int &value);		// Bigint + int
-			friend BigInt operator+(long long int &value, const BigInt &bigInt);		// int + BigInt
+			friend BigInt operator+(const BigInt &bigInt, __int64 &value);		// Bigint + int
+			friend BigInt operator+(__int64 &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator+(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt
 
-			friend BigInt operator-(const BigInt &bigInt, long long int &value);		// Bigint + int
-			friend BigInt operator-(long long int &value, const BigInt &bigInt);		// int + BigInt
+			friend BigInt operator-(const BigInt &bigInt, __int64 &value);		// Bigint + int
+			friend BigInt operator-(__int64 &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator-(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt
 			
-			friend BigInt operator*(const BigInt &bigInt, long long int &value);		// Bigint + int
-			friend BigInt operator*(long long int &value, const BigInt &bigInt);		// int + BigInt
+			friend BigInt operator*(const BigInt &bigInt, __int64 &value);		// Bigint + int
+			friend BigInt operator*(__int64 &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator*(const BigInt &l_bigInt, const BigInt &r_bigInt);
 
 			friend std::ostream& operator<< (std::ostream &out, const BigInt &bigInt);
@@ -77,7 +77,7 @@ namespace PersonalInt
 			bool isNegative() const;
 
 			void InitializeWithString(const char *dataString);
-			void InitializeWithLongInt(const long long int &num);
+			void InitializeWithLongInt(const __int64 &num);
 
 			inline int to_Int(const char ch) const;
 			inline char to_Char(const int digit) const;
@@ -103,7 +103,7 @@ namespace PersonalInt
 			inline void reverse(BigInt &bigInt);
 
 		private:
-			long long int	m_size;
+			__int64			m_size;
 			bool			m_isNegative;
 			int				*m_pArray;
 	};
