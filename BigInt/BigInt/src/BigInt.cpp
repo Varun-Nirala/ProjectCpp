@@ -188,10 +188,14 @@ namespace PersonalInt
 	bool BigInt::reserve(__int64 cap)
 	{
 		Clear();
-		m_pArray = new int[cap];
+		m_pArray = new int[cap - 1];
 		if (m_pArray)
 		{
 			m_size = cap;
+			for (__int64 i = 0; i < cap; ++i)
+			{
+				m_pArray[i] = 0;
+			}
 			return true;
 		}
 		else
@@ -607,7 +611,7 @@ namespace PersonalInt
 	/*
 	LONG MULTIPLICATION
 		multiply(a[1..p], b[1..q], base)							// Operands containing rightmost digits at index 1
-		product = [1..p + q]										//Allocate space for result
+		product = [1..p + q]										// Allocate space for result
 		for b_i = 1 to q											// for all digits in b
 		carry = 0
 		for a_i = 1 to p											//for all digits in a
@@ -631,32 +635,20 @@ namespace PersonalInt
 		result.reserve(num1size + num2size);	// Allocate max space required
 
 		int carry = 0;
-		for (index_2 = 0; index_2 < num2size; ++index_2)
+		for (index_2 = num2size - 1; index_2 >= 0; --index_2)
 		{
 			carry = 0;
-			total_number++;
-			for (index_1 = 0; index_1 < num1size; ++index_1)
+			for (index_1 = num1size - 1; index_1 >= 0; --index_1)
 			{
-				result[index_1 + index_2 - 1] += carry + (*this)[index_1] * num2[index_2];
-				carry = result[index_1 + index_2 - 1] / base;
-				result[index_1 + index_2 - 1] = result[index_1 + index_2 - 1] % base;
-				result[index_2 + num1size] += carry;
-				total_number++;
+				result[index_1 + index_2] += carry + (*this)[index_1] * num2[index_2];
+				carry = result[index_1 + index_2] / base;
+				result[index_1 + index_2] = result[index_1 + index_2] % base;
+				result[index_2 + num1size - 1] += carry;
 			}
 		}
 		result.m_isNegative = (this->m_isNegative && num2.m_isNegative);
-
-		BigInt rc;
-		rc.reserve(total_number);
-
-		for (index_1 = 0; index_1 < total_number; ++index_1)
-		{
-			rc[index_1] = result[total_number - index_1];
-		}
-		rc.m_isNegative = result.m_isNegative;
-
-		std::cout << rc << std::endl;
-		return rc;
+		std::cout << result << std::endl;
+		return result;
 	}
 
 }// namespace PersonalInt
