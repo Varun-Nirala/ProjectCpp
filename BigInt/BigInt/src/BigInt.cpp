@@ -73,11 +73,8 @@ namespace PersonalInt
 		MakeCopy(bigInt);
 	}
 
-	// Move Constructor
+	// Move Copy Constructor
 	BigInt::BigInt(BigInt &&bigInt)
-		:m_size(0),
-		m_isNegative(false),
-		m_pArray(NULL)
 	{
 		m_size = bigInt.m_size;
 		m_pArray = bigInt.m_pArray;
@@ -90,6 +87,8 @@ namespace PersonalInt
 
 	BigInt::~BigInt()
 	{
+		this;
+		std::cout << "Address : " << this << std::endl;
 		Clear();
 	}
 
@@ -142,6 +141,7 @@ namespace PersonalInt
 			}
 			else
 			{
+				Clear();
 				throw "InputData string contain non-numbric character.\n";
 			}
 		}
@@ -238,7 +238,7 @@ namespace PersonalInt
 		return *this;
 	}
 
-	BigInt& BigInt::operator= (BigInt &&bigInt)
+	BigInt& BigInt::operator= (BigInt &&bigInt)			// Move Assignment
 	{
 		if (this == &bigInt)
 		{
@@ -267,7 +267,7 @@ namespace PersonalInt
 		m_pArray = new int[bigInt.m_size];
 		m_isNegative = bigInt.m_isNegative;
 
-		for (__int64 i = 0; m_size; ++i)
+		for (__int64 i = 0; i < m_size; ++i)
 		{
 			m_pArray[i] = bigInt.m_pArray[i];
 		}
@@ -343,7 +343,7 @@ namespace PersonalInt
 			}
 			std::reverse(num.begin(), num.end());
 
-			return BigInt(num);
+			return std::move(BigInt(num));
 		}
 	}
 
@@ -385,7 +385,7 @@ namespace PersonalInt
 			}
 			std::reverse(num.begin(), num.end());
 
-			return BigInt(num);
+			return std::move(BigInt(num));
 		}
 	}
 
@@ -408,7 +408,7 @@ namespace PersonalInt
 		}
 		else // Both positive
 		{
-			return SubHelper(rhs);
+			return std::move(SubHelper(rhs));
 		}
 	}
 
@@ -648,7 +648,8 @@ namespace PersonalInt
 		}
 		result.m_isNegative = (this->m_isNegative && num2.m_isNegative);
 		std::cout << result << std::endl;
-		return result;
+		std::cout << (&result) << std::endl;
+		return std::move(result);
 	}
 
 }// namespace PersonalInt

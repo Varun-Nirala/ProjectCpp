@@ -42,6 +42,7 @@ namespace PersonalInt
 			BigInt& operator= (const BigInt &bigInt);
 			BigInt& operator= (const std::string &dataString);
 			BigInt& operator= (const __int64 &num);
+
 			BigInt& operator= (BigInt &&bigInt);		// move assigment operator
 
 			bool operator== (const BigInt &r_bigInt) const;
