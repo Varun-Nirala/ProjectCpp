@@ -115,10 +115,6 @@ namespace PersonalInt
 			char str[] = "DataString provided is NULL.\n";
 			throw str;
 		}
-
-		delete[] m_pArray;
-		m_isNegative = false;
-
 		__int64 size = std::strlen(dataString);
 		__int64 index = 0, i = 0;
 
@@ -205,7 +201,7 @@ namespace PersonalInt
 	}
 
 	// Member Overloaded operators
-	BigInt& BigInt::operator = (const BigInt &bigInt)
+	BigInt& BigInt::operator= (const BigInt &bigInt)
 	{
 		if (this == &bigInt)
 		{
@@ -216,9 +212,10 @@ namespace PersonalInt
 
 		return *this;
 	}
-
-	BigInt& BigInt::operator = (const std::string &dataString)
+	
+	BigInt& BigInt::operator= (const std::string &dataString)
 	{
+		Clear();
 		try
 		{
 			InitializeWithString(dataString.c_str());
@@ -233,6 +230,7 @@ namespace PersonalInt
 
 	BigInt& BigInt::operator= (const __int64 &num)
 	{
+		Clear();
 		string s_num = std::to_string(num);
 		InitializeWithString(s_num.c_str());
 		return *this;
@@ -259,10 +257,7 @@ namespace PersonalInt
 
 	void BigInt::MakeCopy(const BigInt &bigInt)
 	{
-		if (m_pArray)
-		{
-			delete[] m_pArray;
-		}
+		Clear();
 		m_size = bigInt.m_size;
 		m_pArray = new int[bigInt.m_size];
 		m_isNegative = bigInt.m_isNegative;
@@ -617,8 +612,6 @@ namespace PersonalInt
 			}
 		}
 		result.m_isNegative = (this->m_isNegative && num2.m_isNegative);
-		std::cout << result << std::endl;
-		std::cout << (&result) << std::endl;
 		return std::move(result);
 	}
 

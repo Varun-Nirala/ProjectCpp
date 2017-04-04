@@ -69,7 +69,9 @@ namespace PersonalInt
 			const int* const GetArray() const;
 			bool isNegative() const;
 
+			// Call Clear() before calling it
 			void InitializeWithString(const char *dataString);
+			
 			void InitializeWithLongInt(const __int64 &num);
 
 			inline int to_Int(const char ch) const;
