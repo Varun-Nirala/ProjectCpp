@@ -545,48 +545,18 @@ namespace PersonalInt
 
 	// Friend Overloaded operators
 	// Binary +
-	BigInt operator+(const BigInt &bigInt, __int64 &value)
-	{
-		return bigInt.Add(BigInt(value));
-	}
-
-	BigInt operator+(__int64 &value, const BigInt &bigInt)
-	{
-		return bigInt.Add(value);
-	}
-
 	BigInt operator+(const BigInt &l_bigInt, const BigInt &r_bigInt)
 	{
 		return l_bigInt.Add(r_bigInt);
 	}
 
 	// Binary -
-	BigInt operator-(const BigInt &bigInt, __int64 &value)
-	{
-		return bigInt.Sub(BigInt(value));
-	}
-
-	BigInt operator-(__int64 &value, const BigInt &bigInt)
-	{
-		return (BigInt(value)).Sub(bigInt);
-	}
-
 	BigInt operator-(const BigInt &l_bigInt, const BigInt &r_bigInt)
 	{
 		return l_bigInt.Sub(r_bigInt);
 	}
 
 	// Multiplication
-	BigInt operator*(const BigInt &bigInt, __int64 &value)
-	{
-		return bigInt.LongMultplication(BigInt(value));
-	}
-
-	BigInt operator*(__int64 &value, const BigInt &bigInt)
-	{
-		return (BigInt(value)).LongMultplication(bigInt);
-	}
-
 	BigInt operator*(const BigInt &l_bigInt, const BigInt &r_bigInt)
 	{
 		return l_bigInt.LongMultplication(r_bigInt);

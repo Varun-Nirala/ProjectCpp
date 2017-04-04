@@ -59,16 +59,8 @@ namespace PersonalInt
 			const int& operator[] (const __int64 index) const;
 
 			// Friend Overloaded operators
-			friend BigInt operator+(const BigInt &bigInt, __int64 &value);		// Bigint + int
-			friend BigInt operator+(__int64 &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator+(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt
-
-			friend BigInt operator-(const BigInt &bigInt, __int64 &value);		// Bigint + int
-			friend BigInt operator-(__int64 &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator-(const BigInt &l_bigInt, const BigInt &r_bigInt);	// BigInt + BigInt
-			
-			friend BigInt operator*(const BigInt &bigInt, __int64 &value);		// Bigint + int
-			friend BigInt operator*(__int64 &value, const BigInt &bigInt);		// int + BigInt
 			friend BigInt operator*(const BigInt &l_bigInt, const BigInt &r_bigInt);
 
 			friend std::ostream& operator<< (std::ostream &out, const BigInt &bigInt);
