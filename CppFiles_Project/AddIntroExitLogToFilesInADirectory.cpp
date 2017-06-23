@@ -18,34 +18,41 @@ struct dirent {
 	char d_name[256];			//	filename
 };	*/
 
-int GetAllFilesInAdir(const string &path, vector<string> &vec_files);
-string FormatPath(const string &path);
+int GetAllFilesInAdir(const string &szPath, vector<string> &vec_files);
+
+string FormatPath(const string &szPath);
+
 string ExtractFileNameAsString(struct dirent *ent);
-bool AddIntroOutroLogToFile(const string &szfileName, const vector<string> &v_funcToExclude);
+
+bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPrefix,
+			const string &szOutroLogPrefix, const vector<string> &v_funcToExclude);
+
 
 int main(int argc, char const *argv[])
 {
 	vector<string> vec_files;
 
-	//string path = R"(D:\Varun\Varun_Work\GitHubRepos\NiralaVarun\ProjectCpp\trunk\CppFiles_Project)";
-	string path(argv[1]);
+	//string szPath = R"(D:\Varun\Varun_Work\GitHubRepos\NiralaVarun\ProjectCpp\trunk\CppFiles_Project)";
+	string szPath(argv[1]);
+	string szIntroLogPrefix(argv[2]);
+	string szOutroLogPrefix(argv[3]);
 
-	string covertedPath = FormatPath(path);
+	string szConvertedPath = FormatPath(szPath);
 
-	if(EXIT_FAILURE == GetAllFilesInAdir(covertedPath, vec_files))
+	if(EXIT_FAILURE == GetAllFilesInAdir(szConvertedPath, vec_files))
 	{
 		cout << "Error :: Openingdir.\n";
 		return 1;
 	}
 
-	GetAllFilesInAdir(covertedPath, vec_files);
+	GetAllFilesInAdir(szConvertedPath, vec_files);
 
 	vector<string> v_funcToExclude;
 	vector<string>::iterator it;
 	for(it = vec_files.begin(); it != vec_files.end(); ++it)
 	{
-		string fileName = *it;
-		if(AddIntroOutroLogToFile(fileName, v_funcToExclude))
+		string szFileName = *it;
+		if(AddIntroOutroLogToFile(szFileName, szIntroLogPrefix, szOutroLogPrefix, v_funcToExclude))
 		{
 			cout << "SUCCESS :: Successfully Added to File : " << fileName << endl;
 		}
@@ -60,33 +67,37 @@ int main(int argc, char const *argv[])
 }
 
 /*************************************************************************
-*	@Function	:	bool AddIntroOutroLogToFile(const string &szfileName, 
-*					const vector<string> &v_funcToExclude)
-*	@breif		:	Add Intro and Exit Log to All Func, except those in @param2
+*	@Function	:	bool AddIntroOutroLogToFile(const string &szfileName,
+*						const string &szIntroLogPrefix,	const string &szOutroLogPrefix,
+*						const vector<string> &v_funcToExclude)
+*	@breif		:	Add Intro and Exit Log to All Func, except those in @param4
 *	@Param1		:	FileName to modify
-*	@Param2		:	reference to a vector of string which hold the function to exclude
+*	@Param2		:	String to use as prefix in Log while entering a Function
+*	@Param3		:	String to use as prefix in Log while exiting a Function
+*	@Param4		:	reference to a vector of string which hold the function to exclude
 *
 *	@return		:	SUCCESS or FAILURE
 *************************************************************************/
-bool AddIntroOutroLogToFile(const string &szfileName, const vector<string> &v_funcToExclude)
+bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPrefix,
+				const string &szOutroLogPrefix, const vector<string> &v_funcToExclude)
 {
 	
 }
 
 /*************************************************************************
-*	@Function	:	int GetAllFilesInAdir(const string &path, vector<string> &vec_files)
+*	@Function	:	int GetAllFilesInAdir(const string &szPath, vector<string> &vec_files)
 *	@breif		:	Store all files present in the directory path provided in @Param1
 *	@Param1		:	Absolute path of the directory
 *	@Param2		:	reference to a vector of string to hold the file names
 *
 *	@return		:	SUCCESS or FAILURE
 *************************************************************************/
-int GetAllFilesInAdir(const string &path, vector<string> &vec_files)
+int GetAllFilesInAdir(const string &szPath, vector<string> &vec_files)
 {
 	DIR *dir = NULL;
 	struct dirent *ent = NULL;
 
-	if ((dir = opendir(path.c_str())) != NULL)
+	if ((dir = opendir(szPath.c_str())) != NULL)
 	{
   		while ((ent = readdir(dir)) != NULL)
   		{
@@ -104,29 +115,29 @@ return EXIT_SUCCESS;
 }
 
 /*************************************************************************
-*	@Function	:	string FormatPath(const string &path)
+*	@Function	:	string FormatPath(const string &szPath)
 *	@breif		:	formats the path according to the windows, i.e replaces '\' with '\\'
 *	@Param1		:	path to format
 *
 *	@return		:	formatted string path
 *************************************************************************/
-string FormatPath(const string &path)
+string FormatPath(const string &szPath)
 {
-	string convertedPath;
+	string szConvertedPath;
 
-	for(char ch : path)
+	for(char ch : szPath)
 	{
 		if(ch == '\\')
 		{
-			convertedPath.push_back('\\');
-			convertedPath.push_back('\\');
+			szConvertedPath.push_back('\\');
+			szConvertedPath.push_back('\\');
 		}
 		else
 		{
-			convertedPath.push_back(ch);
+			szConvertedPath.push_back(ch);
 		}
 	}
-return convertedPath;
+return szConvertedPath;
 }
 
 /*************************************************************************
@@ -139,6 +150,6 @@ return convertedPath;
 *************************************************************************/
 string ExtractFileNameAsString(struct dirent *ent)
 {
-	string fileName(ent->d_name);
-return fileName;
+	string szFileName(ent->d_name);
+return szFileName;
 }
