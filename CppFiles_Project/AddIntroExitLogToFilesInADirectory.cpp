@@ -33,6 +33,10 @@ typedef enum
 	E_CT_SINGLE_MULTI_AND_CODE,				// Handle it carefully
 }E_COMMENT_TYPE;
 
+static void LOG_INFO(const string &szFunc, int line, const string &szMsg);
+static void LOG_DEBUG(const string &szFunc, int line, const string &szMsg);
+static void LOG_ERROR(const string &szFunc, int line, const string &szMsg);
+
 int GetAllFilesInAdir(const string &szPath, vector<string> &vec_files);
 
 string FormatPath(const string &szPath);
@@ -59,8 +63,8 @@ int main(int argc, char const *argv[])
 {
 	vector<string> vec_files;
 
-#ifndef USE_ARGS_PARAMETERS
-	string szPath = R"(D:\Varun\Varun_Work\GitHubRepos\NiralaVarun\ProjectCpp\trunk\CppFiles_Project)";
+#ifdef USE_ARGS_PARAMETERS
+	string szPath = R"(C:\Varun\GitHubRepo\ProjectCpp\trunk\CppFiles_Project\Test)";
 	string szIntroLogPrefix("VARUN_LOGGING_ENTER");
 	string szOutroLogPrefix("VARUN_LOGGING_EXIT");
 #else
@@ -73,7 +77,7 @@ int main(int argc, char const *argv[])
 
 	if(EXIT_FAILURE == GetAllFilesInAdir(szConvertedPath, vec_files))
 	{
-		cout << "Error :: Openingdir.\n";
+		LOG_ERROR(__func__, __LINE__, "Openingdir.");
 		return 1;
 	}
 
@@ -86,11 +90,11 @@ int main(int argc, char const *argv[])
 		string szFileName = *it;
 		if(AddIntroOutroLogToFile(szFileName, szIntroLogPrefix, szOutroLogPrefix, v_funcToExclude))
 		{
-			cout << "SUCCESS :: Successfully Added to File : " << szFileName << endl;
+			LOG_INFO(__func__, __LINE__, "SUCCESS :: Successfully Added to File : " + szFileName);
 		}
 		else
 		{
-			cout << "ERROR   :: Error Addeding to File : " << szFileName << endl;
+			LOG_ERROR(__func__, __LINE__, "Error Adding to File : " + szFileName);
 		}
 	}
 
@@ -119,6 +123,7 @@ bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPr
 
 	if(myFileStream.is_open())
 	{
+		int lineCount = 1;
 		vector<string> v_fileLines;
 		GetAllLinesOfFiles(myFileStream, v_fileLines);
 
@@ -149,15 +154,15 @@ bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPr
 			switch(e_CommentType)
 			{
 				case E_CT_NO_COMMENT :
-					cout << "INFO 	:: No Comment." << endl;
+					LOG_INFO(__func__, __LINE__, "No Comment.");
 					break;
 
 				case E_CT_SINGLE_LINE_START :
-					cout << "INFO 	:: Single Line Comment(Whole Line)." << endl;
+					LOG_INFO(__func__, __LINE__, "Single Line Comment(Whole Line).");
 					break;
 
 				case E_CT_SINGLE_LINE_MID :
-					cout << "INFO 	:: Single Line Comment(In Mid)." << endl;
+					LOG_INFO(__func__, __LINE__, "Single Line Comment(In Mid).");
 					break;
 
 				case E_CT_MULTI_LINE_START:
@@ -167,9 +172,9 @@ bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPr
 					}
 					else
 					{
-						cout << "ERROR   :: MultiLine Comment Start Error : Line : " << szfileLine << endl;
+						LOG_ERROR(__func__, __LINE__, "MultiLine Comment Start Error : Line : " + szfileLine);
 					}
-					cout << "INFO 	:: Multi Line Comment(Start)." << endl;
+					LOG_INFO(__func__, __LINE__, "Multi Line Comment(Start).");
 					break;
 
 				case E_CT_MULTI_LINE_START_MID:
@@ -179,9 +184,9 @@ bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPr
 					}
 					else
 					{
-						cout << "ERROR   :: MultiLine Comment Start Error : Line : " << szfileLine << endl;
+						LOG_ERROR(__func__, __LINE__, "MultiLine Comment Start Error : Line : " + szfileLine);
 					}
-					cout << "INFO 	:: Multi Line Comment(Start In Mid)." << endl;
+					LOG_INFO(__func__, __LINE__, "Multi Line Comment(Start In Mid).");
 					break;
 
 				case E_CT_MULTI_LINE_END_START :
@@ -191,9 +196,9 @@ bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPr
 					}
 					else
 					{
-						cout << "ERROR   :: MultiLine Comment End Error : Line : " << szfileLine << endl;
+						LOG_ERROR(__func__, __LINE__, "MultiLine Comment End Error : Line : " + szfileLine);
 					}
-					cout << "INFO 	:: Multi Line Comment End(Start)." << endl;
+					LOG_INFO(__func__, __LINE__, "Multi Line Comment End(Start).");
 					break;
 
 				case E_CT_MULTI_LINE_END_MID :
@@ -203,21 +208,21 @@ bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPr
 					}
 					else
 					{
-						cout << "ERROR   :: MultiLine Comment End Error : Line : " << szfileLine << endl;
+						LOG_ERROR(__func__, __LINE__, "MultiLine Comment End Error : Line : " + szfileLine);
 					}
-					cout << "INFO 	:: Multi Line Comment End(In Mid)." << endl;
+					LOG_INFO(__func__, __LINE__, "Multi Line Comment End(In Mid).");
 					break;
 
 				case E_CT_MULTI_LINE_ENDINALINE :
-					cout << "INFO 	:: Multi Line Comment Start and End(In A Line)." << endl;
+					LOG_INFO(__func__, __LINE__, "Multi Line Comment Start and End(In A Line).");
 					break;
 
 				case E_CT_SINGLE_MULTI_AND_CODE :
-					cout << "INFO 	:: Multi/Single Line Comment Start and End(In A Line)." << endl;
+					LOG_INFO(__func__, __LINE__, "Multi/Single Line Comment Start and End(In A Line).");
 					break;
 
 				default :
-					cout << "INFO 	:: Unhandled Situation." << endl;
+					LOG_INFO(__func__, __LINE__, "Unhandled Situation.");
 					break;
 			}
 		}
@@ -228,7 +233,7 @@ bool AddIntroOutroLogToFile(const string &szfileName, const string &szIntroLogPr
 	}
 	else
 	{
-		cout << "ERROR :: Error opening File  :: " << szfileName << endl;
+		LOG_ERROR(__func__, __LINE__, "Error opening File  :: " + szfileName);
 		rc = false;
 	}
 	return rc;
@@ -357,7 +362,7 @@ int GetAllFilesInAdir(const string &szPath, vector<string> &vec_files)
 	else
 	{
   		/* could not open directory */
-  		cout << "Error opening directory." << endl;
+  		LOG_ERROR(__func__, __LINE__, "Error opening directory.");
   		return EXIT_FAILURE;
 	}
 return EXIT_SUCCESS;
@@ -401,4 +406,19 @@ string ExtractFileNameAsString(struct dirent *ent)
 {
 	string szFileName(ent->d_name);
 return szFileName;
+}
+
+static void LOG_INFO(const string &szFunc, int line, const string &szMsg)
+{
+    cout << "INFO :: " << szFunc << "::" << line << " -> " << szMsg << "." << endl;
+}
+
+static void LOG_DEBUG(const string &szFunc, int line, const string &szMsg)
+{
+    cout << "DEBUG :: " << szFunc << "::" << line << " -> " << szMsg << "." << endl;
+}
+
+static void LOG_ERROR(const string &szFunc, int line, const string &szMsg)
+{
+    cout << "ERROR :: " << szFunc << "::" << line << " -> " << szMsg << "." << endl;
 }
