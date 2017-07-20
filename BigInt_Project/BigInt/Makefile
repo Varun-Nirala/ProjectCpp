@@ -1,29 +1,30 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -g -Wall
-INCLUDES = -I.\include
+CXXFLAGS = -std=c++11
 
-BUILD = ..\build
-SRC = .\src
+INC_DIR = ./include
+SRC_DIR = ./src
+BUILD_DIR = ../build
 
-SOURCES = $(wildcard src/*.cpp)
+INCFLAGS = $(addprefix -I,$(INC_DIR))
+CPPFLAGS ?= $(INCFLAGS) -MMD -MP
 
-OBJS_FILES = $(notdir $(SOURCES))
-OBJS = $(patsubst %.cpp, $(BUILD)\\%.o, $(OBJS_FILES))
+SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 
-#$(error VAR is $(OBJS))
+CPP_FILES = $(notdir $(SRC_FILES))
+OBJ_FILES = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(CPP_FILES))
 
-MAIN = main
+TARGET = $(BUILD_DIR)/main.exe
 
-.PHONY: all run clean
+.PHONY: all clean
 
-all:	$(MAIN)
+all:	$(TARGET)
 
-$(MAIN):	$(SOURCES)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(BUILD)\$(MAIN) $(OBJS)
+$(TARGET):	$(OBJ_FILES)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJ_FILES)
 
-.cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $(BUILD)\$(@F)
+$(OBJ_FILES):
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(patsubst %.o, %.cpp, $(SRC_DIR)/$(notdir $@)) -o $@
 
 clean:
-	cd $(BUILD)
-	rm -f *.o *.exe
+	del /Q ..\$(notdir $(BUILD_DIR))\*.*
+#USE THIS FOR OTHER THAN WINDOW $(RM) $(BUILD_DIR)\*.*
