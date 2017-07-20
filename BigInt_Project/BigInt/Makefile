@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++11 -g -Wall
 
 INC_DIR = ./include
 SRC_DIR = ./src
@@ -31,6 +31,6 @@ $(OBJ_FILES):
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(patsubst %.o, %.cpp, $(SRC_DIR)/$(notdir $@)) -o $@
 
 clean:
-	rd ..\$(notdir $(OUT_DIR))
+	rd /S /Q ..\$(notdir $(OUT_DIR))
 #del /Q ..\$(notdir $(OUT_DIR))\*.*					# TO DELETE ONLY FILES , /Q quitely
 #USE THIS FOR OTHER THAN WINDOW $(RM) $(OUT_DIR)\*.*
