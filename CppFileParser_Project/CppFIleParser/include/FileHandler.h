@@ -12,11 +12,11 @@ class FileHandler
 		FileHandler(const std::string &sFilepath);
 		~FileHandler();
 
-		std::string GetFileName();
+		std::string GetFileName() const;
 		bool Rename(const std::string &sNewName);
 
-		int GetSize();
-		std::string GetLine(int lineNumber);
+		size_t GetSize() const;
+		std::string GetLine(int lineNumber) const;
 
 		bool Replace(const std::string &sSrc, const std::string &sDst, bool bAllMatch = false, bool bCaseSensitiveSearch = true);
 
@@ -39,8 +39,13 @@ class FileHandler
 		int SearchLine(const std::string &sSrc, bool bCaseSensitiveSearch = true);
 		bool SearchLine(const std::string &sSrc, std::vector<int> &v_SearchIndexes, bool bCaseSensitiveSearch = true);
 
+		virtual void Display() const;
+
+		// FRIEND FUNCTIONS
+		friend std::ostream& operator<< (std::ostream &out, const FileHandler &fileHandler);
+
 	private:
-		bool ValidRange(int lineNumber);
+		bool ValidRange(int lineNumber) const;
 
 	private:
 		std::vector<std::string>		m_vFileLines;

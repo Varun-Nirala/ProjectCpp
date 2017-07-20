@@ -17,7 +17,7 @@ FileHandler::~FileHandler()
 	Release();
 }
 
-string FileHandler::GetFileName()
+string FileHandler::GetFileName() const
 {
 	return m_sFileName;
 }
@@ -26,12 +26,12 @@ bool FileHandler::Rename(const string &sNewName)
 {
 }
 
-int FileHandler::GetSize()
+size_t FileHandler::GetSize() const
 {
 	return m_vFileLines.size();
 }
 
-string FileHandler::GetLine(int lineNumber)
+string FileHandler::GetLine(int lineNumber) const
 {
 	if(ValidRange(lineNumber))
 	{
@@ -262,9 +262,31 @@ bool FileHandler::SearchLine(const string &sSrc, vector<int> &v_SearchIndexes, b
 {
 }
 
+void FileHandler::Display() const
+{
+	size_t size = GetSize();
+	cout << "FileName       := " << m_sFileName;
+	cout << "\nNumber of line := " << size;
+	cout << "\n\nFile          :=\n\n******************* START ********************\n\n";
+
+
+	for(size_t i = 0; i < size; i++)
+	{
+		cout << GetLine(i) << "\n";
+	}
+
+	cout << "\n\n******************** END *********************" << endl;
+}
+
+// PROTECTED FRIEND FUNCTION
+ostream& operator<< (ostream &out, const FileHandler &fileHandler)
+{
+	fileHandler.Display();
+	return out;
+}
 
 // PRIVATE MEMBERS
-bool FileHandler::ValidRange(int lineNumber)
+bool FileHandler::ValidRange(int lineNumber) const
 {
 	return (lineNumber >=0 && lineNumber < GetSize());
 }
