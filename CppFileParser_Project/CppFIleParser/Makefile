@@ -16,7 +16,7 @@ TARGET = $(BUILD)/main.exe
 
 all:	$(TARGET)
 
-$(TARGET): $(OBJS)
+$(TARGET): clean $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
 
 $(OBJS):

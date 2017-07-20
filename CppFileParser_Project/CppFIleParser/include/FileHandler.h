@@ -1,16 +1,16 @@
-#ifndef __FILEREADER_H__
-#define __FILEREADER_H__
+#ifndef __FILEHADNLER_H__
+#define __FILEHANDLER_H__
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 
-class FileData
+class FileHandler
 {
 	public:
-		FileData(const std::string &sFilepath);
-		~FileData();
+		FileHandler(const std::string &sFilepath);
+		~FileHandler();
 
 		std::string GetFileName();
 		bool Rename(const std::string &sNewName);
@@ -35,9 +35,9 @@ class FileData
 		std::string ExtractFileName(const std::string &sFilePath);
 
 		void Release();
-		bool ReadFileData();
-		int SearchLine(const std::string &sSrc);
-		bool SearchLine(const std::string &sSrc, std::vector<int> &v_SearchIndexes);
+		bool ReadFileHandler(const std::string &sFilepath);
+		int SearchLine(const std::string &sSrc, bool bCaseSensitiveSearch = true);
+		bool SearchLine(const std::string &sSrc, std::vector<int> &v_SearchIndexes, bool bCaseSensitiveSearch = true);
 
 	private:
 		bool ValidRange(int lineNumber);

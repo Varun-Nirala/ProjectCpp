@@ -1,17 +1,17 @@
 #include <iostream>
 #include <string>
-#include "FileReader.h"
+#include "FileHandler.h"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	FileData fileData("test.cpp");
+	FileHandler FileHandler(R"(..\test.cpp)");
 
-	cout << "Filename 		= " << fileData.GetFileName() << endl;
-	cout << "Number of Line = " << fileData.GetSize() << endl;
+	cout << "FileName       = " << FileHandler.GetFileName() << endl;
+	cout << "Number of Line = " << FileHandler.GetSize() << endl;
 
-	cout << "Hello"<< endl;
-
+	cout << "Press any key to exit.\n";
+	cin.get();
 	return 0;
 }
