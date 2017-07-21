@@ -13,6 +13,7 @@ class FileHandler
 		~FileHandler();
 
 		std::string GetFileName() const;
+		std::string GetFilePath() const;
 		bool Rename(const std::string &sNewName);
 
 		size_t GetSize() const;
@@ -35,7 +36,7 @@ class FileHandler
 		std::string ExtractFileName(const std::string &sFilePath);
 
 		void Release();
-		bool ReadFileHandler(const std::string &sFilepath);
+		bool ReadFileData(const std::string &sFilepath);
 		int SearchLine(const std::string &sSrc, bool bCaseSensitiveSearch = true);
 		bool SearchLine(const std::string &sSrc, std::vector<int> &v_SearchIndexes, bool bCaseSensitiveSearch = true);
 
@@ -46,11 +47,13 @@ class FileHandler
 
 	private:
 		bool ValidRange(int lineNumber) const;
+		std::string GetFileNameFormRoot();
 
 	private:
 		std::vector<std::string>		m_vFileLines;
 		std::fstream 					m_fstream;	// TODO : use unique pointer
 		std::string 					m_sFileName;
+		std::string 					m_sFilePath;
 };
 
 #endif

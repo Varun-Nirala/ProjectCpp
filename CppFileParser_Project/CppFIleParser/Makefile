@@ -1,26 +1,36 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -g
-INCLUDES = -I./include
+CXXFLAGS = -std=c++11
 
-BUILD = ../build
-SRC = ./src
+INC_DIR = ./include
+SRC_DIR = ./src
+OUT_DIR = ../build
 
-SOURCES = $(wildcard $(SRC)/*.cpp)
+INCFLAGS = $(addprefix -I,$(INC_DIR))
+CPPFLAGS ?= $(INCFLAGS) -MMD -MP
 
-CPP_FILES = $(notdir $(SOURCES))
-OBJS = $(patsubst %.cpp, $(BUILD)/%.o, $(CPP_FILES))
+SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 
-TARGET = $(BUILD)/main.exe
+CPP_FILES = $(notdir $(SRC_FILES))
+OBJ_FILES = $(patsubst %.cpp, $(OUT_DIR)/%.o, $(CPP_FILES))
+
+TARGET = $(OUT_DIR)/main.exe
 
 .PHONY: all clean
 
+MKDIR = mkdir
+
 all:	$(TARGET)
 
-$(TARGET): clean $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
+$(TARGET):	$(OBJ_FILES)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJ_FILES)
 
-$(OBJS):
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(patsubst %.o, %.cpp, $(SRC)/$(notdir $@)) -o $@
+$(OBJ_FILES):
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(patsubst %.o, %.cpp, $(SRC_DIR)/$(notdir $@)) -o $@
 
 clean:
-	$(RM) $(BUILD)/*.*
+	del /Q ..\$(notdir $(OUT_DIR))\*.*
+#del /Q ..\$(notdir $(OUT_DIR))\*.*					# TO DELETE ONLY FILES , /Q quitely
+#USE THIS FOR OTHER THAN WINDOW $(RM) $(OUT_DIR)\*.*
+#all:	makeOutDir $(TARGET)
+#makeOutDir:
+#	$(MKDIR) ..\$(notdir $(OUT_DIR))

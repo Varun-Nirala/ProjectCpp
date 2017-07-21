@@ -1,6 +1,7 @@
 #include <iostream>
 #include <dirent.h>
 #include <algorithm>
+#include <cstdio>
 #include "FileHandler.h"
 #include "helper.h"
 
@@ -22,8 +23,34 @@ string FileHandler::GetFileName() const
 	return m_sFileName;
 }
 
+string FileHandler::GetFilePath() const
+{
+	return m_sFilePath;
+}
+
 bool FileHandler::Rename(const string &sNewName)
 {
+	if(SaveEditedData())
+	{
+		if(m_fstream.is_open())
+		{
+			m_fstream.close();
+			if(rename(GetFileNameFormRoot().c_str(), sNewName.c_str()))
+			{
+				LOG_INFO("File renamed");
+				m_fstream.open(GetFileNameFormRoot());
+				return true;
+			}
+		}
+		else
+		{
+			LOG_ERROR("No file is currently open.");
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 size_t FileHandler::GetSize() const
@@ -171,13 +198,37 @@ bool FileHandler::Remove(const string &sSearchLine)
 
 bool FileHandler::SaveEditedData()
 {
+	if(m_fstream.is_open())
+	{
+		m_fstream.close();
+		
+		// Empty files current content
+		ofstream fileStream;
+		fileStream.open(GetFileNameFormRoot(), ofstream::out | ofstream::trunc);
+
+		if(fileStream.is_open())
+		{
+			for(const string &sFileLines : m_vFileLines)
+			{
+				fileStream << sFileLines;
+			}
+			fileStream.close();
+		}
+		m_fstream.open(GetFileNameFormRoot());
+		return true;
+	}
+	else
+	{
+		LOG_ERROR("No file is currently open.");
+		return false;
+	}
 }
 
 
 // PROTECTED MEMBERS
 void FileHandler::Initialize(const string &sFilepath)
 {
-	if(ReadFileHandler(sFilepath))
+	if(ReadFileData(sFilepath))
 	{
 		m_sFileName = ExtractFileName(sFilepath);
 	}
@@ -202,6 +253,11 @@ string FileHandler::ExtractFileName(const string &sFilePath)
 		if(matchIndex != string::npos)
 		{
 			// USE ALGORITHM's COPY FUNCTIONALITY
+			for(int i = 0; i < matchIndex; i++)
+			{
+				m_sFilePath.push_back((sFilePath[i]));
+			}
+
 			for(matchIndex; matchIndex < sFilePath.size(); matchIndex++)
 			{
 				sFileName.push_back(sFilePath[matchIndex]);
@@ -221,7 +277,7 @@ void FileHandler::Release()
 	m_fstream.close();
 }
 
-bool FileHandler::ReadFileHandler(const string &sFilepath)
+bool FileHandler::ReadFileData(const string &sFilepath)
 {
 	// TODO:: Do Error Checking
 	m_fstream.open(sFilepath);
@@ -231,7 +287,7 @@ bool FileHandler::ReadFileHandler(const string &sFilepath)
 		string sFileLine;
 		while(getline(m_fstream, sFileLine))
 		{
-			m_vFileLines.push_back(sFileLine);
+			m_vFileLines.push_back(sFileLine + "\n");
 		}
 		return true;
 	}
@@ -266,16 +322,17 @@ void FileHandler::Display() const
 {
 	size_t size = GetSize();
 	cout << "FileName       := " << m_sFileName;
+	cout << "\nFilPath        := " << m_sFilePath;
 	cout << "\nNumber of line := " << size;
-	cout << "\n\nFile          :=\n\n******************* START ********************\n\n";
+	cout << "\n\nFile           :=\n\n******************* START ********************\n";
 
 
 	for(size_t i = 0; i < size; i++)
 	{
-		cout << GetLine(i) << "\n";
+		cout << GetLine(i);
 	}
 
-	cout << "\n\n******************** END *********************" << endl;
+	cout << "******************** END *********************" << endl;
 }
 
 // PROTECTED FRIEND FUNCTION
@@ -289,4 +346,9 @@ ostream& operator<< (ostream &out, const FileHandler &fileHandler)
 bool FileHandler::ValidRange(int lineNumber) const
 {
 	return (lineNumber >=0 && lineNumber < GetSize());
+}
+
+string FileHandler::GetFileNameFormRoot()
+{
+	return m_sFilePath + "\\" + m_sFileName;
 }
