@@ -49,6 +49,7 @@ bool FileHandler::Rename(const string &sNewName)
 	}
 	else
 	{
+		LOG_ERROR("File can't be saved.");
 		return false;
 	}
 }
@@ -84,7 +85,7 @@ bool FileHandler::Replace(const string &sSrc, const string &sDst, bool bAllMatch
 		}
 		else
 		{
-			LOG_INFO("Match not found");
+			LOG_ERROR("Target string not found.");
 			bRc = false;
 		}
 	}
@@ -98,7 +99,7 @@ bool FileHandler::Replace(const string &sSrc, const string &sDst, bool bAllMatch
 		}
 		else
 		{
-			LOG_INFO("Match not found");
+			LOG_ERROR("Target string not found.");
 			bRc = false;
 		}
 	}
@@ -116,6 +117,7 @@ bool FileHandler::AddAfter(int lineNumber, const string &sStatement)
 	}
 	else
 	{
+		LOG_ERROR("Target string not found.");
 		return false;
 	}
 }
@@ -131,6 +133,7 @@ bool FileHandler::AddAfter(const string &sSearchLine, const string &sStatement)
 	}
 	else
 	{
+		LOG_ERROR("Target string not found.");
 		return false;
 	}
 }
@@ -149,6 +152,7 @@ bool FileHandler::AddBefore(int lineNumber, const string &sStatement)
 	}
 	else
 	{
+		LOG_ERROR("Target string not found.");
 		return false;
 	}
 }
@@ -164,6 +168,7 @@ bool FileHandler::AddBefore(const string &sSearchLine, const string &sStatement)
 	}
 	else
 	{
+		LOG_ERROR("Target string not found.");
 		return false;
 	}
 }
@@ -177,6 +182,7 @@ bool FileHandler::Remove(int lineNumber)
 	}
 	else
 	{
+		LOG_ERROR("Target string not found.");
 		return false;
 	}
 }
@@ -192,6 +198,7 @@ bool FileHandler::Remove(const string &sSearchLine)
 	}
 	else
 	{
+		LOG_ERROR("Target string not found.");
 		return false;
 	}
 }
@@ -245,23 +252,14 @@ string FileHandler::ExtractFileName(const string &sFilePath)
 	{
 		LOG_ERROR("Provided filepath is empty.");
 		//TODO::Throw exception
-		return "";
 	}
 	else
 	{
 		int matchIndex = sFilePath.rfind('\\') + 1;
 		if(matchIndex != string::npos)
 		{
-			// USE ALGORITHM's COPY FUNCTIONALITY
-			for(int i = 0; i < matchIndex; i++)
-			{
-				m_sFilePath.push_back((sFilePath[i]));
-			}
-
-			for(matchIndex; matchIndex < sFilePath.size(); matchIndex++)
-			{
-				sFileName.push_back(sFilePath[matchIndex]);
-			}
+			m_sFilePath = sFilePath.substr(0, matchIndex);
+			sFileName = sFilePath.substr(matchIndex);
 		}
 		else
 		{
@@ -307,7 +305,7 @@ int FileHandler::SearchLine(const string &sSrc, bool bCaseSensitiveSearch)
 	}
 	else
 	{
-		// TODO:: to conversion
+		transform(sSrc.begin(), sSrc.end(), sTarget.begin(), ::tolower);
 	}
 
 	// MainCode for searching
@@ -316,6 +314,19 @@ int FileHandler::SearchLine(const string &sSrc, bool bCaseSensitiveSearch)
 
 bool FileHandler::SearchLine(const string &sSrc, vector<int> &v_SearchIndexes, bool bCaseSensitiveSearch)
 {
+	bool bRc = true;
+	string sTarget;
+	if(bCaseSensitiveSearch)
+	{
+		sTarget = sSrc;
+	}
+	else
+	{
+		transform(sSrc.begin(), sSrc.end(), sTarget.begin(), ::tolower);
+	}
+
+	// MainCode for searching
+	return bRc;
 }
 
 void FileHandler::Display() const
