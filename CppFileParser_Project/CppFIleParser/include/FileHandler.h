@@ -48,6 +48,7 @@ class FileHandler
 	private:
 		bool ValidRange(int lineNumber) const;
 		std::string GetFileNameFormRoot();
+		bool CompareCaseInSensitive(std::string sFirst, std::string sSecond);
 
 	private:
 		std::vector<std::string>		m_vFileLines;

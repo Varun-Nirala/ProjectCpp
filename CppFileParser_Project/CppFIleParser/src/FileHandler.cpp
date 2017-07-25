@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <algorithm>
 #include <cstdio>
+#include <functional>
 #include "FileHandler.h"
 #include "helper.h"
 
@@ -298,17 +299,22 @@ bool FileHandler::ReadFileData(const string &sFilepath)
 
 int FileHandler::SearchLine(const string &sSrc, bool bCaseSensitiveSearch)
 {
-	string sTarget;
 	if(bCaseSensitiveSearch)
 	{
-		sTarget = sSrc;
+		vector<string>::iterator it = find(m_vFileLines.begin(), m_vFileLines.end(), sSrc);
+		return (it - m_vFileLines.begin());
 	}
 	else
 	{
-		transform(sSrc.begin(), sSrc.end(), sTarget.begin(), ::tolower);
-	}
+		string sSource;
+		transform(sSrc.begin(), sSrc.end(), sSource.begin(), ::tolower);
 
-	// MainCode for searching
+		bool (*Compare)(string, string) = bind(CompareCaseInSensitive, sSource);
+
+		vector<string>::iterator it;
+		find_if(m_vFileLines.begin(), m_vFileLines.end(), Compare);
+		return (it - m_vFileLines.begin());
+	}
 	return 0;
 }
 
@@ -362,4 +368,12 @@ bool FileHandler::ValidRange(int lineNumber) const
 string FileHandler::GetFileNameFormRoot()
 {
 	return m_sFilePath + "\\" + m_sFileName;
+}
+
+bool FileHandler::CompareCaseInSensitive(std::string sFirst, std::string sSecond)
+{
+	string sTarget;
+	transform(sSecond.begin(), sSecond.end(), sTarget.begin(), ::tolower);
+
+	return (sFirst == sSecond);
 }
