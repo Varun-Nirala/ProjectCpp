@@ -1,13 +1,22 @@
 #include <iostream>
 #include <dirent.h>
 #include <algorithm>
-//#include <cstdio>
 #include <functional>
 #include "FileHandler.h"
 #include "helper.h"
 
+namespace ALL_USING
+{
+	using std::string;
+	using std::cout;
+	using std::endl;
+	using std::vector;
+}
+
+using namespace ALL_USING;
+
 // PUBLIC MEMBERS
-FileHandler::FileHandler(const std::string &sFilepath)
+FileHandler::FileHandler(const string &sFilepath)
 {
 	Initialize(sFilepath);
 }
@@ -17,17 +26,17 @@ FileHandler::~FileHandler()
 	Release();
 }
 
-std::string FileHandler::GetFileName() const
+string FileHandler::GetFileName() const
 {
 	return m_sFileName;
 }
 
-std::string FileHandler::GetFilePath() const
+string FileHandler::GetFilePath() const
 {
 	return m_sFilePath;
 }
 
-bool FileHandler::Rename(const std::string &sNewName)
+bool FileHandler::Rename(const string &sNewName)
 {
 	bool bRc = true;
 	if(SaveEditedData())
@@ -60,7 +69,7 @@ size_t FileHandler::GetSize() const
 	return m_vFileLines.size();
 }
 
-std::string FileHandler::GetLine(int lineNumber) const
+string FileHandler::GetLine(int lineNumber) const
 {
 	if(ValidRange(lineNumber))
 	{
@@ -74,15 +83,21 @@ std::string FileHandler::GetLine(int lineNumber) const
 	return "";
 }
 
-bool FileHandler::Replace(const std::string &sSrc, const std::string &sDst, bool bAllMatch, bool bCaseSensitiveSearch)
+bool FileHandler::Replace(const string &sSrc, const string &sDst, bool bAllMatch, bool bCaseSensitiveSearch)
 {
 	bool bRc = true;
 	if(bAllMatch)
 	{
-		std::vector<int> v_SearchIndexes;
+		vector<int> v_SearchIndexes;
 		if(SearchLine(sSrc, v_SearchIndexes, bCaseSensitiveSearch))
 		{
-			// TODO
+			size_t i = 0;
+			size_t max = v_SearchIndexes.size();
+
+			for(i = 0; i < max; i++)
+			{
+				m_vFileLines[v_SearchIndexes[i]] = sDst;
+			}
 		}
 		else
 		{
@@ -107,7 +122,7 @@ bool FileHandler::Replace(const std::string &sSrc, const std::string &sDst, bool
 	return bRc;
 }
 
-bool FileHandler::AddAfter(int lineNumber, const std::string &sStatement)
+bool FileHandler::AddAfter(int lineNumber, const string &sStatement)
 {
 	if(ValidRange(lineNumber))
 	{
@@ -123,7 +138,7 @@ bool FileHandler::AddAfter(int lineNumber, const std::string &sStatement)
 	}
 }
 
-bool FileHandler::AddAfter(const std::string &sSearchLine, const std::string &sStatement)
+bool FileHandler::AddAfter(const string &sSearchLine, const string &sStatement)
 {
 	int index = SearchLine(sSearchLine);
 
@@ -139,7 +154,7 @@ bool FileHandler::AddAfter(const std::string &sSearchLine, const std::string &sS
 	}
 }
 
-bool FileHandler::AddBefore(int lineNumber, const std::string &sStatement)
+bool FileHandler::AddBefore(int lineNumber, const string &sStatement)
 {
 	if(ValidRange(lineNumber))
 	{
@@ -158,7 +173,7 @@ bool FileHandler::AddBefore(int lineNumber, const std::string &sStatement)
 	}
 }
 
-bool FileHandler::AddBefore(const std::string &sSearchLine, const std::string &sStatement)
+bool FileHandler::AddBefore(const string &sSearchLine, const string &sStatement)
 {
 	int index = SearchLine(sSearchLine);
 
@@ -188,7 +203,7 @@ bool FileHandler::Remove(int lineNumber)
 	}
 }
 
-bool FileHandler::Remove(const std::string &sSearchLine)
+bool FileHandler::Remove(const string &sSearchLine)
 {
 	int lineNumber = SearchLine(sSearchLine);
 
@@ -234,7 +249,7 @@ bool FileHandler::SaveEditedData()
 
 
 // PROTECTED MEMBERS
-void FileHandler::Initialize(const std::string &sFilepath)
+void FileHandler::Initialize(const string &sFilepath)
 {
 	if(ReadFileData(sFilepath))
 	{
@@ -246,9 +261,9 @@ void FileHandler::Initialize(const std::string &sFilepath)
 	}
 }
 
-std::string FileHandler::ExtractFileName(const std::string &sFilePath)
+string FileHandler::ExtractFileName(const string &sFilePath)
 {
-	std::string sFileName;
+	string sFileName;
 	if(sFilePath.empty())
 	{
 		LOG_ERROR("Provided filepath is empty.");
@@ -257,7 +272,7 @@ std::string FileHandler::ExtractFileName(const std::string &sFilePath)
 	else
 	{
 		unsigned int matchIndex = sFilePath.rfind('\\') + 1;
-		if(matchIndex != std::string::npos)
+		if(matchIndex != string::npos)
 		{
 			m_sFilePath = sFilePath.substr(0, matchIndex);
 			sFileName = sFilePath.substr(matchIndex);
@@ -276,14 +291,14 @@ void FileHandler::Release()
 	m_fstream.close();
 }
 
-bool FileHandler::ReadFileData(const std::string &sFilepath)
+bool FileHandler::ReadFileData(const string &sFilepath)
 {
 	// TODO:: Do Error Checking
 	m_fstream.open(sFilepath);
 
 	if(m_fstream.is_open())
 	{
-		std::string sFileLine;
+		string sFileLine;
 		while(getline(m_fstream, sFileLine))
 		{
 			m_vFileLines.push_back(sFileLine + "\n");
@@ -297,33 +312,33 @@ bool FileHandler::ReadFileData(const std::string &sFilepath)
 	}
 }
 
-int FileHandler::SearchLine(const std::string &sSrc, bool bCaseSensitiveSearch)
+int FileHandler::SearchLine(const string &sSrc, bool bCaseSensitiveSearch)
 {
 	if(bCaseSensitiveSearch)
 	{
-		std::vector<std::string>::iterator it = find(m_vFileLines.begin(), m_vFileLines.end(), sSrc);
+		vector<string>::iterator it = find(m_vFileLines.begin(), m_vFileLines.end(), sSrc);
 		return (it - m_vFileLines.begin());
 	}
 	else
 	{
-		std::string sSource;
+		string sSource;
 		transform(sSrc.begin(), sSrc.end(), sSource.begin(), ::tolower);
 
 		struct CompareIt compareIt;
 
-		std::function<bool (std::string)> compareFunc = std::bind(&CompareIt::CompareCaseInSensitive, &compareIt, sSource, std::placeholders::_1);
+		std::function<bool (string)> compareFunc = std::bind(&CompareIt::CompareCaseInSensitive, &compareIt, sSource, std::placeholders::_1);
 
-		std::vector<std::string>::iterator it;
+		vector<string>::iterator it;
 		find_if(m_vFileLines.begin(), m_vFileLines.end(), compareFunc);
 		return (it - m_vFileLines.begin());
 	}
 	return 0;
 }
 
-bool FileHandler::SearchLine(const std::string &sSrc, std::vector<int> &v_SearchIndexes, bool bCaseSensitiveSearch)
+bool FileHandler::SearchLine(const string &sSrc, vector<int> &v_SearchIndexes, bool bCaseSensitiveSearch)
 {
-	std::string sSource;
-	bool bRc = true;
+	string sSource;
+	bool bRc = false;
 
 	if(bCaseSensitiveSearch)
 	{
@@ -334,29 +349,37 @@ bool FileHandler::SearchLine(const std::string &sSrc, std::vector<int> &v_Search
 		std::transform(sSrc.begin(), sSrc.end(), sSource.begin(), ::tolower);
 	}
 
-	// MainCode for searching
-	struct CompareIt compareIt;
-	std::function<bool (std::string)> compareFunc = std::bind(&CompareIt::CompareCaseInSensitive, &compareIt, sSource, std::placeholders::_1);
-
-	// use generate or foreach
+	CompareIt compareIt;
+	vector<string>::iterator it;
+	
+	for(it = m_vFileLines.begin(); it != m_vFileLines.end(); ++it)
+	{
+		if(compareIt.CompareCaseInSensitive(sSource, *it))
+		{
+			v_SearchIndexes.push_back(it - m_vFileLines.begin());
+			if(!bRc)
+			{
+				bRc = true;	// Return true if even one match is found
+			}
+		}
+	}
 	return bRc;
 }
 
 void FileHandler::Display() const
 {
 	size_t size = GetSize();
-	std::cout << "FileName       := " << m_sFileName;
-	std::cout << "\nFilPath        := " << m_sFilePath;
-	std::cout << "\nNumber of line := " << size;
-	std::cout << "\n\nFile           :=\n\n******************* START ********************\n";
-
+	cout << "FileName       := " << m_sFileName;
+	cout << "\nFilPath        := " << m_sFilePath;
+	cout << "\nNumber of line := " << size;
+	cout << "\n\nFile           :=\n\n******************* START ********************\n";
 
 	for(size_t i = 0; i < size; i++)
 	{
-		std::cout << GetLine(i);
+		cout << GetLine(i);
 	}
 
-	std::cout << "******************** END *********************" << std::endl;
+	cout << "******************** END *********************" << endl;
 }
 
 // PROTECTED FRIEND FUNCTION
@@ -372,14 +395,14 @@ bool FileHandler::ValidRange(int lineNumber) const
 	return (lineNumber >=0 && static_cast<unsigned int>(lineNumber) < GetSize());
 }
 
-std::string FileHandler::GetFileNameFormRoot()
+string FileHandler::GetFileNameFormRoot()
 {
 	return m_sFilePath + "\\" + m_sFileName;
 }
 
-bool FileHandler::CompareIt::CompareCaseInSensitive(std::string sFirst, std::string sSecond)
+bool FileHandler::CompareIt::CompareCaseInSensitive(string sFirst, string sSecond)
 {
-	std::string sTarget;
+	string sTarget;
 	std::transform(sSecond.begin(), sSecond.end(), sTarget.begin(), ::tolower);
 	return (sFirst == sSecond);
 }
