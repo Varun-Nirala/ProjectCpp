@@ -62,4 +62,4 @@ class FileHandler
 		std::string 					m_sFilePath;
 };
 
-#endif
+#endif		//#define __FILEHANDLER_H__
