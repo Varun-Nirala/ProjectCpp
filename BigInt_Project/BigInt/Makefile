@@ -15,7 +15,9 @@ OBJ_FILES = $(patsubst %.cpp, $(OUT_DIR)/%.o, $(CPP_FILES))
 
 TARGET = $(OUT_DIR)/main.exe
 
-.PHONY: all clean
+.PHONY: all	Clean Run
+
+run:= $(CMD) $(TARGET)
 
 MKDIR = mkdir
 
@@ -28,6 +30,9 @@ $(OBJ_FILES):
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(patsubst %.o, %.cpp, $(SRC_DIR)/$(notdir $@)) -o $@
 
 clean:
+	del /Q ..\$(notdir $(OUT_DIR))\*.o ..\$(notdir $(OUT_DIR))\*.d
+
+cleanAll:
 	del /Q ..\$(notdir $(OUT_DIR))\*.*
 #del /Q ..\$(notdir $(OUT_DIR))\*.*					# TO DELETE ONLY FILES , /Q quitely
 #USE THIS FOR OTHER THAN WINDOW $(RM) $(OUT_DIR)\*.*
