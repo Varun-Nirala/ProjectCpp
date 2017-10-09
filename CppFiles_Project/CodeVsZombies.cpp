@@ -55,7 +55,7 @@ int moveTowardHuman(int x, int y)
         for(int j = 0; j < sizeH; ++j)
         {
             ashDistanceToHuman = findDistance(x, y, hVector[j].x, hVector[j].y);
-            numberOfStepAsh = ashDistanceToHuman / 1500;
+            numberOfStepAsh = ashDistanceToHuman / 2000;
             int distance = findDistance(zVector[i].nextX, zVector[i].nextY, hVector[j].x, hVector[j].y);
             
             if(distance < zombieToHuman)
@@ -129,7 +129,7 @@ int moveTowardZombie()
     return id;
 }
 
-int NumberOfHumanWeCanSave(int ashX, int ashY, int &specialId)
+int NumberOfHumanWeCanSave(int ashX, int ashY, vector<int> &vHumanId, vector<int> &vStepDiff)
 {
     int weCanSave = 0;
     int zombieToHuman = INT_MAX;
@@ -162,19 +162,23 @@ int NumberOfHumanWeCanSave(int ashX, int ashY, int &specialId)
     {
         x = hVector[i].x;
         y = hVector[i].y;
-        stepsFromAsh[i] = findDistance(x, y, ashX, ashY)/1500;
+        stepsFromAsh[i] = findDistance(x, y, ashX, ashY)/1200;
     }
     
+    vHumanId.clear();
+    vStepDiff.clear();
     for(int i = 0; i < sizeH; i++)
     {
         if(stepsFromAsh[i] <= stepsFromZombie[i])
         {
             weCanSave++;
-            specialId = i;
+            vHumanId.push_back(i);
+            vStepDiff.push_back(stepsFromZombie[i] - stepsFromAsh[i]);
         }
+        cerr << "SFromAsh = " << stepsFromAsh[i] << ", SFromZ = " << stepsFromZombie[i] << endl;
     }
     
-    cerr << "WeCanSave = " << weCanSave << ", id = " << specialId << endl;
+    cerr << "WeCanSave = " << weCanSave << endl;
     return weCanSave;
 }
  
@@ -224,65 +228,55 @@ int main()
         // To debug: cerr << "Debug messages..." << endl;
         int moveX, moveY;
         int humanWeCanSave;
-        int tempId;
         
+        vector<int> vHumanId;
+        vector<int> vStepDiff;
+        humanWeCanSave = NumberOfHumanWeCanSave(x, y, vHumanId, vStepDiff);
         
-        int id = moveTowardHuman(x, y);
-
-        static bool once = false;
-        
-        if(NumberOfHumanWeCanSave(x, y, tempId) <= 1)
+        for(int i = 0; i < vStepDiff.size(); i++)
         {
-           if(!once)
+            for(int j = i+1; j < vStepDiff.size(); j++)
             {
-                once = true;
-                if(tempId >= humanCount)
+                int temp;
+                if(vStepDiff[i] > vStepDiff[j])
                 {
-                    specialId = 0;
-                }
-                else
-                {
-                    specialId = tempId;
+                    temp = vStepDiff[i];
+                    vStepDiff[i] = vStepDiff[j];
+                    vStepDiff[j] = temp;
+                
+                    temp = vHumanId[i];
+                    vHumanId[i] = vHumanId[j];
+                    vHumanId[j] = temp; 
                 }
             }
         }
-
-        /*if(humanCount == 1 && id == humanCount)
-        {
-            moveX = hVector[0].x;
-            moveY = hVector[0].y;
-        }
-        else */
-        if(once)
-        {
-            //Find which one we can save
-            cerr << "WeCanSave : id = " << specialId << endl;
-            moveX = hVector[specialId].x;
-            moveY = hVector[specialId].y;
-        }
-        else if(id < humanCount)
-        {
-            cerr << "Toward human" << endl;
-            moveX = hVector[id].x;
-            moveY = hVector[id].y;
-        }
-        else
-        {
-            cerr << "Toward zombie" << endl;
-            id = moveTowardZombie();
-            cerr << "id = " << id << endl;
-            if(id < zombieCount)
+        
+        
+        if(humanWeCanSave <= 2)
+        {   
+            if(vHumanId.size())
             {
-                moveX = zVector[id].nextX;
-                moveY = zVector[id].nextY;
+                moveX = hVector[vHumanId[0]].x;
+                moveY = hVector[vHumanId[0]].y;
             }
             else
             {
-                moveX = zVector[0].nextX;
-                moveY = zVector[0].nextY;
+                moveX = hVector[0].x;
+                moveY = hVector[0].y;
             }
         }
-        
+        else
+        {   
+            /*for(int i = 0; i < vStepDiff.size(); i++)
+            {
+                cerr<< "vStedDiff[" << i << "] = " << vStepDiff[i] << "vHumanId[" << i << "] = " << vHumanId[i] << endl;
+            }*/
+
+            specialId = moveTowardZombie();
+            cerr << "Move toward zombie" << endl;
+            moveX = zVector[specialId].nextX;
+            moveY = zVector[specialId].nextY;
+        }
         cout << moveX << " " << moveY << endl; // Your destination coordinates
     }
 }
