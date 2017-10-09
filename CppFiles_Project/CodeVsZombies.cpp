@@ -36,57 +36,6 @@ int findDistance(int x1, int y1, int x2, int y2)
     return ans;
 }
 
-int moveTowardHuman(int x, int y)
-{
-    int zombieToHuman = INT_MAX;
-    
-    int sizeZ = zVector.size();
-    int sizeH = hVector.size();
-    
-    int id = sizeH;
-    
-    int ashDistanceToHuman;
-    int numberOfStepAsh;
-    int numberOfStepZombie = INT_MAX;
-    int tempStep;
-    
-    for(int i = 0; i < sizeZ; ++i)
-    {
-        for(int j = 0; j < sizeH; ++j)
-        {
-            ashDistanceToHuman = findDistance(x, y, hVector[j].x, hVector[j].y);
-            numberOfStepAsh = ashDistanceToHuman / 2000;
-            int distance = findDistance(zVector[i].nextX, zVector[i].nextY, hVector[j].x, hVector[j].y);
-            
-            if(distance < zombieToHuman)
-            {
-                tempStep = distance / 400;
-                if(tempStep < numberOfStepAsh)
-                {
-                    //Don't chnage as we can't save him
-                    ;
-                }
-                else
-                {
-                    zombieToHuman = distance;
-                    numberOfStepZombie = zombieToHuman / 400;
-                    id = j;
-                }
-            }
-        }
-    }
-    
-    {
-        cerr << "id = " << id << endl;
-        cerr << "ZombieStep = " << numberOfStepZombie << ", ashStep = " << numberOfStepAsh << endl;
-        if(numberOfStepZombie < numberOfStepAsh)
-        {
-           id = sizeH;
-        }
-    }
-    return id;
-}
-
 int moveTowardZombie()
 {
     int size = zVector.size();
@@ -138,6 +87,7 @@ int NumberOfHumanWeCanSave(int ashX, int ashY, vector<int> &vHumanId, vector<int
     int sizeH = hVector.size();
     
     vector<int> stepsFromZombie(sizeH, INT_MAX);
+    vector<int> stepsFromAsh(sizeH, INT_MAX);
     int x, y;
     
     int numberOfSteps;
@@ -147,6 +97,8 @@ int NumberOfHumanWeCanSave(int ashX, int ashY, vector<int> &vHumanId, vector<int
         x = hVector[i].x;
         y = hVector[i].y;
         
+        stepsFromAsh[i] = findDistance(x, y, ashX, ashY)/1400;
+        
         for(int j = 0; j < sizeZ; j++)
         {
             numberOfSteps = findDistance(x, y, zVector[j].x, zVector[j].y)/400;
@@ -155,14 +107,6 @@ int NumberOfHumanWeCanSave(int ashX, int ashY, vector<int> &vHumanId, vector<int
                 stepsFromZombie[i] = numberOfSteps;
             }
         }
-    }
-    
-    vector<int> stepsFromAsh(sizeH, INT_MAX);
-    for(int i = 0; i < sizeH; i++)
-    {
-        x = hVector[i].x;
-        y = hVector[i].y;
-        stepsFromAsh[i] = findDistance(x, y, ashX, ashY)/1200;
     }
     
     vHumanId.clear();
@@ -184,7 +128,6 @@ int NumberOfHumanWeCanSave(int ashX, int ashY, vector<int> &vHumanId, vector<int
  
 int main()
 {
-    int specialId = -1;
     // game loop
     while (1) {
         int x;
@@ -252,8 +195,21 @@ int main()
         }
         
         
-        if(humanWeCanSave <= 2)
+        if(humanWeCanSave <= 2 && vStepDiff.size() && vStepDiff[0] < 2)
         {   
+            if(vHumanId.size())
+            {
+                moveX = hVector[vHumanId[0]].x;
+                moveY = hVector[vHumanId[0]].y;
+            }
+            else
+            {
+                moveX = hVector[0].x;
+                moveY = hVector[0].y;
+            }
+        }
+        else if(humanWeCanSave <= 1)
+        {
             if(vHumanId.size())
             {
                 moveX = hVector[vHumanId[0]].x;
@@ -272,10 +228,10 @@ int main()
                 cerr<< "vStedDiff[" << i << "] = " << vStepDiff[i] << "vHumanId[" << i << "] = " << vHumanId[i] << endl;
             }*/
 
-            specialId = moveTowardZombie();
+            int tempid = moveTowardZombie();
             cerr << "Move toward zombie" << endl;
-            moveX = zVector[specialId].nextX;
-            moveY = zVector[specialId].nextY;
+            moveX = zVector[tempid].nextX;
+            moveY = zVector[tempid].nextY;
         }
         cout << moveX << " " << moveY << endl; // Your destination coordinates
     }
