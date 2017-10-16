@@ -1,9 +1,12 @@
 CXX = g++
 CXXFLAGS = -std=c++11
 
+BUILD_DIR = ../build
+CURR_DIR_NAME = $(lastword $(subst /, ,$(CURDIR)))
+
 INC_DIR = ./include
 SRC_DIR = ./src
-OUT_DIR = ../build
+OUT_DIR = $(BUILD_DIR)/$(CURR_DIR_NAME)
 
 INCFLAGS = $(addprefix -I,$(INC_DIR))
 CPPFLAGS ?= $(INCFLAGS) -MMD -MP
@@ -13,11 +16,11 @@ SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 CPP_FILES = $(notdir $(SRC_FILES))
 OBJ_FILES = $(patsubst %.cpp, $(OUT_DIR)/%.o, $(CPP_FILES))
 
+CREATE_FOLDER:=$(shell mkdir -p $(OUT_DIR))
+
 TARGET = $(OUT_DIR)/main.exe
 
 .PHONY: all clean
-
-MKDIR = mkdir
 
 all:	$(TARGET)
 

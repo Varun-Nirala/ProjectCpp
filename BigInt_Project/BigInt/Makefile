@@ -1,9 +1,12 @@
 CXX = g++
 CXXFLAGS = -std=c++11
 
+BUILD_DIR = ../build
+CURR_DIR_NAME = $(lastword $(subst /, ,$(CURDIR)))
+
 INC_DIR = ./include
 SRC_DIR = ./src
-OUT_DIR = ../build
+OUT_DIR = $(BUILD_DIR)/$(CURR_DIR_NAME)
 
 INCFLAGS = $(addprefix -I,$(INC_DIR))
 CPPFLAGS ?= $(INCFLAGS) -MMD -MP
@@ -13,13 +16,11 @@ SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 CPP_FILES = $(notdir $(SRC_FILES))
 OBJ_FILES = $(patsubst %.cpp, $(OUT_DIR)/%.o, $(CPP_FILES))
 
+CREATE_FOLDER:=$(shell mkdir -p $(OUT_DIR))
+
 TARGET = $(OUT_DIR)/main.exe
 
-.PHONY: all	Clean Run
-
-run:= $(CMD) $(TARGET)
-
-MKDIR = mkdir
+.PHONY: all clean
 
 all:	$(TARGET)
 
@@ -30,9 +31,6 @@ $(OBJ_FILES):
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(patsubst %.o, %.cpp, $(SRC_DIR)/$(notdir $@)) -o $@
 
 clean:
-	del /Q ..\$(notdir $(OUT_DIR))\*.o ..\$(notdir $(OUT_DIR))\*.d
-
-cleanAll:
 	del /Q ..\$(notdir $(OUT_DIR))\*.*
 #del /Q ..\$(notdir $(OUT_DIR))\*.*					# TO DELETE ONLY FILES , /Q quitely
 #USE THIS FOR OTHER THAN WINDOW $(RM) $(OUT_DIR)\*.*
