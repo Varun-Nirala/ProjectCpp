@@ -37,16 +37,20 @@ class Trie
 
 		~Trie();
 
-		void Display();
-		bool AddWord(const std::string &word);
+		void display() const;
+		bool addWord(const std::string &word);
+
+		int getWordCount() const;
+
+		int findPartial(const std::string &prefix) const;
+
+	private:
 		Node* findInsertionPoint(Node *node, const std::string &word, int startIndex, int &prefixMatchIndex);
 
 		void clearAll();
 
 		bool incrementWordCount();
 		bool decrementWordCount();
-
-		int getWordCount() const;
 
 	private:
 		Node	*m_pRoot;

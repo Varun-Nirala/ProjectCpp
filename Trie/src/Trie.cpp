@@ -16,7 +16,7 @@ Trie::Trie()
 Trie::Trie(const string &word)
 	:Trie()
 {
-	if (!AddWord(word))
+	if (!addWord(word))
 	{
 		LOG_ERROR(__FUNCTION__, __LINE__, "Failed to add word");
 	}
@@ -28,7 +28,7 @@ Trie::~Trie()
 }
 
 // DFS display
-void Trie::Display()
+void Trie::display() const
 {
 	if (!getWordCount())
 	{
@@ -78,7 +78,7 @@ void Trie::Display()
 	}
 }
 
-bool Trie::AddWord(const string &word)
+bool Trie::addWord(const string &word)
 {
 	bool rc = true;
 	Node *node = m_pRoot;
@@ -124,6 +124,58 @@ bool Trie::AddWord(const string &word)
 	}
 	return rc;
 }
+
+int Trie::getWordCount() const
+{
+	return m_nWordCount;
+}
+
+int Trie::findPartial(const string &prefix) const
+{
+	int numberOfWordWithThatPrefix = 0;
+
+	Node *node = m_pRoot;
+	char ch;
+	int size = prefix.size();
+	bool found = false;
+
+	if (getWordCount())
+	{
+		node = node->m_pChild;	// Descend to the first child of root
+		int startIndex = 0;
+		for (startIndex = 0; startIndex < size; ++startIndex)
+		{
+			ch = prefix[startIndex];
+			while (!found && node->m_pNext)
+			{
+				if (node->m_cData == ch)
+				{
+					found = true;
+				}
+				node = node->m_pNext;
+			}
+
+			if (found)
+			{
+				if (node->m_pChild)
+				{
+					node = node->m_pChild;
+				}
+				found = false;
+			}
+		}
+
+		if (startIndex == size)	// if prefix is found
+		{
+			// Now find the words with this prefix
+			
+		}
+	}
+
+	return numberOfWordWithThatPrefix;
+}
+
+// PRIVATE METHODS
 
 /*
 Prequisite	:: Root node shouldn't be passed as first argument.
@@ -207,11 +259,6 @@ bool Trie::decrementWordCount()
 		LOG_ERROR(__FUNCTION__, __LINE__, "Reached max int limit.");
 		return false;
 	}
-}
-
-int Trie::getWordCount() const
-{
-	return m_nWordCount;
 }
 
 void Trie::clearAll()
