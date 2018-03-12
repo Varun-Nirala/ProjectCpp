@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.0)
+
+SET(PROJECT "ThreadPool")
+project( ${PROJECT} )
+
+SET(VERSION_MAJOR "1")
+SET(VERSION_MINOR "0")
+SET(VERSION "$VERSION_MAJOR $VERSION_MINOR")
+
+set(CMAKE_CXX_STANDARD 11)
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
+file(GLOB SOURCES "src/*.cpp")
+
+add_executable( ${PROJECT} ${SOURCES} )

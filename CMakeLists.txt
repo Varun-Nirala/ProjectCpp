@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.0)
+
+add_subdirectory(BigInt)
+add_subdirectory(C_Threads)
+add_subdirectory(CppFileParser)
+add_subdirectory(CppTestProject)
+add_subdirectory(FSM)
+add_subdirectory(Graph)
+add_subdirectory(ThreadPool)
+add_subdirectory(Threads)
+add_subdirectory(Trie)
