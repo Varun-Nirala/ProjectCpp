@@ -10,6 +10,6 @@ SET(VERSION "$VERSION_MAJOR $VERSION_MINOR")
 set(CMAKE_CXX_STANDARD 11)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp" "src/*.h")
 
 add_executable( ${PROJECT} ${SOURCES} )
