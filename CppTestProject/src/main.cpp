@@ -15,9 +15,24 @@ int* allocArray(int size)
 	return p;
 }
 
+class Base
+{
+	public:
+		void fun(){ cout << "Base::fun()" << endl; };
+};
+
+class Derived : public Base
+{
+	public:
+		void fun(){ cout << "Derived::fun()" << endl; };
+};
+
 int main()
 {
-#define __USE_FIXEDARRAY__
+
+	Derived d;
+	d.fun();
+//#define __USE_FIXEDARRAY__
 
 #ifdef __USE_FINAL__
 	/* Start - FinalClass Usage Example */
