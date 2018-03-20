@@ -41,7 +41,7 @@ bool FilesManager::ParseAllFile(const string &sFolderPath)
 		vector<string>::iterator it;
 		for(it = vAllFileName.begin(); it != vAllFileName.end(); ++it)
 		{
-			if(!AddFile(*it))
+			if (!AddFile(*it))
 			{
 				string sMsg = "Error adding file :: %s." + (*it);
 				LOG_ERROR(sMsg);
@@ -58,12 +58,11 @@ bool FilesManager::ParseAllFile(const string &sFolderPath)
 
 bool FilesManager::AddFile(const string &sFileName)
 {
-	string temp = "Hello";
-	//FileHandler &fileHandler(GetFileNameFormRoot(sFileName));
-	FileHandler fileHandler(sFileName);
 
-	std::pair<std::map<string ,FileHandler &>, bool> ret;
-	m_mFiles.insert(std::make_pair(sFileName, std::ref(fileHandler)));
+	FileHandler fileHandler(m_sFolderPath + R"(\)" + sFileName);
+
+	std::pair<std::map<string ,FileHandler &>::iterator, bool> ret;
+	ret = m_mFiles.insert(std::make_pair(sFileName, std::ref(fileHandler)));
 
 	if(!ret.second)
 	{
@@ -114,9 +113,17 @@ bool FilesManager::GetAllFilesInDir(const string &sFolderPath, vector<string> &v
 
 	if ((dir = opendir(sFolderPath.c_str())) != NULL)
 	{
-  		while ((ent = readdir(dir)) != NULL)
+		while ((ent = readdir(dir)) != NULL)
   		{
-  			vAllFileName.push_back(static_cast<string>(ent->d_name));
+			if (ent->d_type != DT_DIR)
+			{
+				string fileName = ent->d_name;
+				// Basic checking for onlu .cpp and .c files
+				if (fileName.find_last_of(".cpp") != string::npos || fileName.find_last_of(".c") != string::npos)
+				{
+					vAllFileName.push_back(fileName);
+				}
+			}
 		}
   		closedir(dir);
 	}
@@ -147,7 +154,9 @@ void FilesManager::Display() const
 		cout << "\n\nFile " << i << "            :=\n";
 		cout << "******************* START ********************\n";
 
-		cout << mPair.second << endl;
+		FileHandler &ref = mPair.second;
+		ref.Display();
+		//cout << mPair.second// << endl;
 	}
 
 	cout << "******************** END *********************" << endl;

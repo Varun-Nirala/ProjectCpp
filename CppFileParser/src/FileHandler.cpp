@@ -41,6 +41,7 @@ bool FileHandler::Rename(const string &sNewName)
 	bool bRc = true;
 	if(SaveEditedData())
 	{
+		std::fstream m_fstream;
 		if(m_fstream.is_open())
 		{
 			m_fstream.close();
@@ -221,30 +222,18 @@ bool FileHandler::Remove(const string &sSearchLine)
 
 bool FileHandler::SaveEditedData()
 {
-	if(m_fstream.is_open())
+	// Empty files current content
+	std::ofstream fileStream;
+	fileStream.open(GetFileNameFormRoot(), std::ofstream::out | std::ofstream::trunc);
+	if(fileStream.is_open())
 	{
-		m_fstream.close();
-		
-		// Empty files current content
-		std::ofstream fileStream;
-		fileStream.open(GetFileNameFormRoot(), std::ofstream::out | std::ofstream::trunc);
-
-		if(fileStream.is_open())
+		for(const std::string &sFileLines : m_vFileLines)
 		{
-			for(const std::string &sFileLines : m_vFileLines)
-			{
-				fileStream << sFileLines;
-			}
-			fileStream.close();
+			fileStream << sFileLines;
 		}
-		m_fstream.open(GetFileNameFormRoot());
-		return true;
+		fileStream.close();
 	}
-	else
-	{
-		LOG_ERROR("No file is currently open.");
-		return false;
-	}
+	return true;
 }
 
 
@@ -288,12 +277,12 @@ string FileHandler::ExtractFileName(const string &sFilePath)
 void FileHandler::Release()
 {
 	SaveEditedData();
-	m_fstream.close();
 }
 
 bool FileHandler::ReadFileData(const string &sFilepath)
 {
 	// TODO:: Do Error Checking
+	std::fstream m_fstream;
 	m_fstream.open(sFilepath);
 
 	if(m_fstream.is_open())
@@ -303,11 +292,13 @@ bool FileHandler::ReadFileData(const string &sFilepath)
 		{
 			m_vFileLines.push_back(sFileLine + "\n");
 		}
+		m_fstream.close();
 		return true;
 	}
 	else
 	{
 		LOG_ERROR("Error in opening file." + sFilepath);
+		m_fstream.close();
 		return false;
 	}
 }

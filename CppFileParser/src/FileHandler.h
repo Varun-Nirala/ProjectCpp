@@ -31,7 +31,7 @@ class FileHandler
 		bool Remove(int lineNumber);
 		bool Remove(const std::string &sSearchLine);
 		bool SaveEditedData();
-
+		virtual void Display() const;
 	protected:
 		void Initialize(const std::string &sFilepath);
 		std::string ExtractFileName(const std::string &sFilePath);
@@ -41,7 +41,7 @@ class FileHandler
 		int SearchLine(const std::string &sSrc, bool bCaseSensitiveSearch = true);
 		bool SearchLine(const std::string &sSrc, std::vector<int> &v_SearchIndexes, bool bCaseSensitiveSearch = true);
 
-		virtual void Display() const;
+		
 
 		// FRIEND FUNCTIONS
 		friend std::ostream& operator<< (std::ostream &out, const FileHandler &fileHandler);
@@ -57,7 +57,6 @@ class FileHandler
 
 	private:
 		std::vector<std::string>		m_vFileLines;
-		std::fstream 					m_fstream;	// TODO : use unique pointer
 		std::string 					m_sFileName;
 		std::string 					m_sFilePath;
 };

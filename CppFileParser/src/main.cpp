@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
 
 	fileHandler.Rename("test_renamed.cpp");*/
 
-	FilesManager filesManager(R"(C:\Varun\GitHubRepo\ProjectCpp\trunk\CppFileParser_Project\Test\)");
+	FilesManager filesManager(R"(D:\Varun\Varun_Work\GitHubRepos\NiralaVarun\ProjectCpp\CppSolution\C_Threads\src)");
 
 	cout << filesManager.GetSize();
 
