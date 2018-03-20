@@ -83,6 +83,7 @@ namespace nsThreadPool
 		std::lock_guard<std::mutex> lg(m_mutex);
 		m_queue.push(value);
 		m_cv.notify_one();
+		return true;
 	}
 
 	template<typename T>
@@ -97,8 +98,8 @@ namespace nsThreadPool
 	template<typename T>
 	std::shared_ptr<T> TS_Queue<T>::wait_and_pop()
 	{
-		std::lock_guard<std::mutex>	lg(m_mutex);
-		m_cv.wait(lg, [](){ return !m_queue.empty(); });
+		std::unique_lock<std::mutex> ug(m_mutex);
+		m_cv.wait(ug, [this](){ return !m_queue.empty(); });
 		std::shared_ptr<T> res(std::make_shared<T>(m_queue.front()));
 		m_queue.pop();
 		return res;
