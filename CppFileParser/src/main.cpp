@@ -13,7 +13,9 @@ int main(int argc, char const *argv[])
 
 	fileHandler.Rename("test_renamed.cpp");*/
 
-	FilesManager filesManager(R"(D:\Varun\Varun_Work\GitHubRepos\NiralaVarun\ProjectCpp\CppSolution\C_Threads\src)");
+	// Path home D:\Varun\Varun_Work\GitHubRepos\NiralaVarun\ProjectCpp\CppSolution\C_Threads\src
+	// Path Office C:\Varun\GitHubRepo\ProjectCpp\CppSolution\C_Threads\src
+	FilesManager filesManager(R"()");
 
 	cout << filesManager.GetSize();
 
