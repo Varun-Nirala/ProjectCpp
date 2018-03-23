@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 
 	// Path home D:\Varun\Varun_Work\GitHubRepos\NiralaVarun\ProjectCpp\CppSolution\C_Threads\src
 	// Path Office C:\Varun\GitHubRepo\ProjectCpp\CppSolution\C_Threads\src
-	FilesManager filesManager(R"()");
+	FilesManager filesManager(R"(C:\Varun\GitHubRepo\ProjectCpp\CppSolution\C_Threads\src)");
 
 	cout << filesManager.GetSize();
 
