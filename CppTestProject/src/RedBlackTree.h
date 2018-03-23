@@ -41,6 +41,14 @@ class RedBlacktree
 		void	rotateRight(Node *node);
 		void	rotateLeft(Node *node);
 
+		bool	addLikeBinary(Node *node);
+		
+		bool	rebalanceAfterAdd(Node *node);
+		void	rebalanceAdd_Case1(Node *node);
+		void	rebalanceAdd_Case2(Node *node);
+		void	rebalanceAdd_Case3(Node *node);
+		void	rebalanceAdd_Case4(Node *node);
+
 		//Functionality used by other methods
 		Node*	getParent(const Node *node);
 		Node*	getGrandParent(const Node *node);
@@ -48,12 +56,14 @@ class RedBlacktree
 		Node*	getUncle(const Node *node);
 		bool	isBlack(const Node *node);
 		bool	isRed(const Node *node);
-		bool	isLeaf(const Node *node);
+		bool	isLeaf(const Node *node) const;
 
 		Node*	createNewNode(const dataType &data = 0, const char &color = COLOR_RED);
 
 	private:
-		Node		*m_pRoot;
-		const Node	*m_pcLEAF;
+		Node				*m_pRoot;
+		static Node			*m_pcLEAF;
 };
+
+Node *RedBlacktree::m_pcLEAF = new Node(0, COLOR_RED);
 #endif //#ifndef __REDBLACK_TREE_H__
