@@ -12,12 +12,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="Graphics\Sprite.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Graphics\Sprite.h" />
     <ClInclude Include="Graphics\Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\cloud.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F2259CCA-23A6-44AC-979C-384804250787}</ProjectGuid>

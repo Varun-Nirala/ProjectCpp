@@ -16,7 +16,8 @@ namespace nsEngine
 			bool Initialize(char *windowTitle);
 
 			void Update();
-			void Render();
+			void BeginRender();
+			void EndRender();
 		private:
 			GLFWwindow		*m_pWindow;
 			const int		m_iWIDTH;
