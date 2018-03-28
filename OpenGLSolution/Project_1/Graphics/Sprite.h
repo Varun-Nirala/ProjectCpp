@@ -16,6 +16,9 @@ namespace nsGraphics
 			void Update();
 			void Render();
 
+			void SetPosX(float x);
+			void SetPosY(float y);
+
 		private:
 			Texture		m_texture;
 			float		m_fxPos;

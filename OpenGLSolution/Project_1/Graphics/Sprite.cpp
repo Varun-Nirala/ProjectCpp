@@ -23,6 +23,16 @@ Sprite::Sprite(string &path, float _x, float _y)
 	m_fyPos = _y;
 }
 
+void Sprite::SetPosX(float x)
+{
+	m_fxPos = x;
+}
+
+void Sprite::SetPosY(float y)
+{
+	m_fyPos = y;
+}
+
 void Sprite::Update()
 {}
 
