@@ -16,7 +16,7 @@ Texture::Texture(int _id)
 {
 	if (!LoadTextureParams())
 	{
-		cout << __LINE__ << " :: Error Loading texture with ID = " << m_iID << endl;
+		cout << __LINE__ << " ::Error: Loading texture with ID = " << m_iID << endl;
 	}
 }
 
@@ -26,7 +26,7 @@ Texture::Texture(string &path)
 
 	if (!LoadTextureParams())
 	{
-		cout << __LINE__ << " :: Error Loading texture with ID = " << m_iID << endl;
+		cout << __LINE__ << " ::Error: Loading texture with ID = " << m_iID << endl;
 	}
 }
 

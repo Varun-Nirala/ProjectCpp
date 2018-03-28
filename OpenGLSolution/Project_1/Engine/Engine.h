@@ -13,6 +13,10 @@ namespace nsEngine
 			Engine(int w = 1024, int h = 768);
 			~Engine();
 
+			//Mouse Controller
+			bool SetMousePositionCB(void *funPtr);
+			bool SetMouseButtonCB(void *funPtr);
+
 			bool Initialize(char *windowTitle);
 
 			void Update();

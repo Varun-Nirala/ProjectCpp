@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "IO\Mouse.h"
 #include <iostream>
 
 using namespace std;
@@ -19,13 +20,13 @@ bool Engine::Initialize(char *windowTitle)
 {
 	if (!glfwInit())
 	{
-		cout << __LINE__ << " :: Error Initializing glfw." << endl;
+		cout << __LINE__ << " ::Error: Initializing glfw." << endl;
 		return false;
 	}
 
 	if (!(m_pWindow = glfwCreateWindow(m_iWIDTH, m_iHEIGHT, windowTitle, NULL, NULL)))
 	{
-		cout << __LINE__ << " :: Error creating window." << endl;
+		cout << __LINE__ << " ::Error: creating window." << endl;
 		glfwTerminate();
 		return false;
 	}
@@ -44,6 +45,9 @@ bool Engine::Initialize(char *windowTitle)
 	glfwSetWindowPos(m_pWindow, xPos, yPos);
 	// GLFW initial Setup END
 
+	// Mouse CallBack register
+	glfwSetCursorPosCallback(m_pWindow, Mouse::MousePositionCB);
+	glfwSetMouseButtonCallback(m_pWindow, Mouse::MouseButtonCB);
 
 	// OpenGL Setup Start
 	glViewport(0, 0, width, height);
@@ -59,6 +63,16 @@ bool Engine::Initialize(char *windowTitle)
 	// OpenGL Setup End
 
 	return true;
+}
+
+bool Engine::SetMousePositionCB(void *funPtr)
+{
+	return Mouse::getInstance()->SetCustomMousePositionCB(funPtr);
+}
+
+bool Engine::SetMouseButtonCB(void *funPtr)
+{
+	return Mouse::getInstance()->SetCustomMouseButtonCB(funPtr);
 }
 
 void Engine::Update()

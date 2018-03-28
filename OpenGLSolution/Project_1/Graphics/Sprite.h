@@ -19,10 +19,19 @@ namespace nsGraphics
 			void SetPosX(float x);
 			void SetPosY(float y);
 
+			void SetRotation(float angle);
+
+			void SetScale(float x);
+			void SetScale(float x, float y);
+
 		private:
 			Texture		m_texture;
 			float		m_fxPos;
 			float		m_fyPos;
+
+			float		m_fRotDegree;
+			float		m_fxScale;
+			float		m_fyScale;
 	};
 }
 #endif
