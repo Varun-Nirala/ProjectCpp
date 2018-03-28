@@ -39,18 +39,19 @@ void Sprite::Render()
 	glColor4f(1, 1, 1, 1);
 
 	glBegin(GL_QUADS);
+	{
+		glTexCoord2f(0, 0);
+		glVertex2f(-1, -1);
 
-	glTexCoord2f(0, 0);
-	glVertex2f(0, 0);
+		glTexCoord2f(1, 0);
+		glVertex2f(m_texture.GetWidth()/2, -1);
 
-	glTexCoord2f(1, 0);
-	glVertex2f(m_texture.GetWidth(), 0);
+		glTexCoord2f(1, 1);
+		glVertex2f(m_texture.GetWidth()/2, m_texture.GetHeight()/2);
 
-	glTexCoord2f(0, 1);
-	glVertex2f(0, m_texture.GetHeight());
-
-	glTexCoord2f(1, 1);
-	glVertex2f(m_texture.GetWidth(), m_texture.GetHeight());
-
+		glTexCoord2f(0, 1);
+		glVertex2f(-1, m_texture.GetHeight()/2);
+	}
 	glEnd();
+	glDisable(GL_TEXTURE_2D);
 }

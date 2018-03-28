@@ -18,6 +18,12 @@ namespace nsEngine
 			void Update();
 			void BeginRender();
 			void EndRender();
+
+			int GetWidth() const;
+			int GetHeight() const;
+
+			bool IsWindowClosed();
+
 		private:
 			GLFWwindow		*m_pWindow;
 			const int		m_iWIDTH;

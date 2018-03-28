@@ -27,6 +27,7 @@ bool Engine::Initialize(char *windowTitle)
 	{
 		cout << __LINE__ << " :: Error creating window." << endl;
 		glfwTerminate();
+		return false;
 	}
 
 	// GLFW initial Setup Start
@@ -52,7 +53,7 @@ bool Engine::Initialize(char *windowTitle)
 	glDepthRange(-10, 10);
 	glMatrixMode(GL_MODELVIEW);
 
-	glEnable(GL_ALPHA);
+	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// OpenGL Setup End
@@ -74,4 +75,19 @@ void Engine::BeginRender()
 void Engine::EndRender()
 {
 	glfwSwapBuffers(m_pWindow);
+}
+
+bool Engine::IsWindowClosed()
+{
+	return glfwWindowShouldClose(m_pWindow);
+}
+
+int Engine::GetWidth() const
+{
+	return m_iWIDTH;
+}
+
+int Engine::GetHeight() const
+{
+	return m_iHEIGHT;
 }
