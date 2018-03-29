@@ -2,7 +2,7 @@
 
 using namespace nsEngine::nsMaths;
 
-Vector3::Vector3(float x, float y, float z)
+Vector3::Vector3(double x, double y, double z)
 	: m_x(x)
 	, m_y(y)
 	, m_z(z)
@@ -33,7 +33,7 @@ Vector3 Vector3::operator=(const Vector3 &vec)
 	m_z = vec.m_z;
 }
 
-Vector3 Vector3::operator+(const Vector3 &vec)
+Vector3 Vector3::operator+(const Vector3 &vec) const
 {
 	Vector3 ret(*this);
 	ret.m_x += vec.m_x;
@@ -43,7 +43,7 @@ Vector3 Vector3::operator+(const Vector3 &vec)
 	return ret;
 }
 
-Vector3 Vector3::operator+(const float val)
+Vector3 Vector3::operator+(const double val) const
 {
 	Vector3 ret(*this);
 	ret.m_x += val;
@@ -53,7 +53,7 @@ Vector3 Vector3::operator+(const float val)
 	return ret;
 }
 
-Vector3 Vector3::operator-(const Vector3 &vec)
+Vector3 Vector3::operator-(const Vector3 &vec) const
 {
 	Vector3 ret(*this);
 	ret.m_x -= vec.m_x;
@@ -63,7 +63,7 @@ Vector3 Vector3::operator-(const Vector3 &vec)
 	return ret;
 }
 
-Vector3 Vector3::operator-(const float val)
+Vector3 Vector3::operator-(const double val) const
 {
 	Vector3 ret(*this);
 	ret.m_x -= val;
@@ -73,7 +73,7 @@ Vector3 Vector3::operator-(const float val)
 	return ret;
 }
 
-Vector3 Vector3::operator*(const Vector3 &vec)
+Vector3 Vector3::operator*(const Vector3 &vec) const
 {
 	Vector3 ret(*this);
 	ret.m_x *= vec.m_x;
@@ -83,7 +83,7 @@ Vector3 Vector3::operator*(const Vector3 &vec)
 	return ret;
 }
 
-Vector3 Vector3::operator*(const float val)
+Vector3 Vector3::operator*(const double val) const
 {
 	Vector3 ret(*this);
 	ret.m_x *= val;
@@ -93,7 +93,7 @@ Vector3 Vector3::operator*(const float val)
 	return ret;
 }
 
-Vector3 Vector3::operator/(const Vector3 &vec)
+Vector3 Vector3::operator/(const Vector3 &vec) const
 {
 	Vector3 ret(*this);
 	ret.m_x /= vec.m_x;
@@ -103,7 +103,7 @@ Vector3 Vector3::operator/(const Vector3 &vec)
 	return ret;
 }
 
-Vector3 Vector3::operator/(const float val)
+Vector3 Vector3::operator/(const double val) const
 {
 	Vector3 ret(*this);
 	ret.m_x /= val;
@@ -147,4 +147,99 @@ Vector3 Vector3::operator--(int)
 	m_z--;
 
 	return ret;
+}
+
+Vector3 Vector3::operator+=(const Vector3 &vec)
+{
+	m_x += vec.m_x;
+	m_y += vec.m_y;
+	m_z += vec.m_z;
+	return *this;
+}
+
+Vector3 Vector3::operator+=(const double val)
+{
+	m_x += val;
+	m_y += val;
+	m_z += val;
+	return *this;
+}
+
+Vector3 Vector3::operator-=(const Vector3 &vec)
+{
+	m_x -= vec.m_x;
+	m_y -= vec.m_y;
+	m_z -= vec.m_z;
+	return *this;
+}
+
+Vector3 Vector3::operator-=(const double val)
+{
+	m_x -= val;
+	m_y -= val;
+	m_z -= val;
+	return *this;
+}
+
+Vector3 Vector3::operator*=(const Vector3 &vec)
+{
+	m_x *= vec.m_x;
+	m_y *= vec.m_y;
+	m_z *= vec.m_z;
+	return *this;
+}
+
+Vector3 Vector3::operator*=(const double val)
+{
+	m_x *= val;
+	m_y *= val;
+	m_z *= val;
+	return *this;
+}
+
+
+Vector3 Vector3::operator/=(const Vector3 &vec)
+{
+	m_x /= vec.m_x;
+	m_y /= vec.m_y;
+	m_z /= vec.m_z;
+	return *this;
+}
+
+Vector3 Vector3::operator/=(const double val)
+{
+	m_x /= val;
+	m_y /= val;
+	m_z /= val;
+	return *this;
+}
+
+bool Vector3::operator==(const Vector3 &vec)
+{
+	return (m_x == vec.m_x && m_y == vec.m_y && m_z == vec.m_z);
+}
+
+bool Vector3::operator!=(const Vector3 &vec)
+{
+	return !(*this == vec);
+}
+
+bool Vector3::operator<(const Vector3 &vec)
+{
+	return (m_x < vec.m_x && m_y < vec.m_y && m_z < vec.m_z);
+}
+
+bool Vector3::operator<=(const Vector3 &vec)
+{
+	return ((*this < vec) || (*this == vec));
+}
+
+bool Vector3::operator>(const Vector3 &vec)
+{
+	return (m_x > vec.m_x && m_y > vec.m_y && m_z > vec.m_z);
+}
+
+bool Vector3::operator>=(const Vector3 &vec)
+{
+	return ((*this > vec) || (*this == vec));
 }

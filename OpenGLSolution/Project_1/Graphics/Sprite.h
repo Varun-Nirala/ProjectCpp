@@ -12,26 +12,26 @@ namespace nsGraphics
 		public:
 			Sprite();
 			Sprite(std::string &path);
-			Sprite(std::string &path, float _x, float _y);
+			Sprite(std::string &path, double x, double y, double z = 1);
+			Sprite(std::string &path, const nsEngine::nsMaths::Vector3 &VecPos);
 
 			void Update();
 			void Render();
 
 			// TRANSLATE
-			void MoveTo(float x, float y);
-			void MoveBy(float x, float y);
+			void MoveTo(const nsEngine::nsMaths::Vector3 &);
+			void MoveBy(const nsEngine::nsMaths::Vector3 &);
 
 			// ROTATE
-			void RotateTo(float angle);
-			void RotateBy(float angle);
+			void RotateTo(double angle);
+			void RotateBy(double angle);
 
 			// SCALE
-			void SetScale(float x);
-			void SetScale(float x, float y);
+			void SetScale(const nsEngine::nsMaths::Vector3 &);
 
 			// SPEED
-			void SpeedTo(float x);
-			void SpeedBy(float x);
+			void SpeedTo(double x);
+			void SpeedBy(double x);
 
 			// MOVE left, right, up and down
 			void MoveUp();
@@ -40,21 +40,19 @@ namespace nsGraphics
 			void MoveRight();
 
 		private:
-			Texture		m_texture;
+			Texture						m_Texture;
 
 			// TRANSLATE
-			float		m_PosX;
-			float		m_PosY;
+			nsEngine::nsMaths::Vector3	m_Vec3Pos;
 
 			// ROTATE
-			float		m_RotDegree;
+			double						m_RotDegree;
 
 			// SCALE
-			float		m_ScaleX;
-			float		m_ScaleY;
+			nsEngine::nsMaths::Vector3	m_Vec3Scale;
 
 			// SPEED
-			float		m_Speed;
+			double						m_Speed;
 	};
 }
 #endif

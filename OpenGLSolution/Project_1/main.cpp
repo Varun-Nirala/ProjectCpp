@@ -2,22 +2,25 @@
 #include "Graphics\Sprite.h"
 #include "Engine\IO\Mouse.h"
 #include "Engine\IO\Keyboard.h"
+#include "Engine\Maths\Vector3.h"
 
 using namespace std;
+using namespace nsEngine;
+using namespace nsGraphics;
 
 int main(int argc, char *argv[])
 {
-	nsEngine::Engine gameEngine;
+	Engine gameEngine;
 	gameEngine.Initialize("OpenGlWindow");
 
-	nsGraphics::Sprite spriteCloud = nsGraphics::Sprite(string("Assets\\cloud.png"), gameEngine.GetWidth() - 500, gameEngine.GetHeight() - 200);
-	nsGraphics::Sprite spritePlane = nsGraphics::Sprite(string("Assets\\Biplane.png"), 0, 0);
+	Sprite spriteCloud = Sprite(string("Assets\\cloud.png"), nsMaths::Vector3(gameEngine.GetWidth() - 500, gameEngine.GetHeight() - 200));
+	Sprite spritePlane = Sprite(string("Assets\\Biplane.png"), nsMaths::Vector3());
 
-	spriteCloud.SetScale(0.25f);
-	spritePlane.SetScale(0.25f);
+	spriteCloud.SetScale(nsMaths::Vector3(0.25));
+	spritePlane.SetScale(nsMaths::Vector3(0.25));
 
-	nsEngine::Mouse *pMouse = nsEngine::Mouse::getInstance();
-	nsEngine::Keyboard *pkeyBoard = nsEngine::Keyboard::getInstance();
+	Mouse *pMouse = Mouse::getInstance();
+	Keyboard *pkeyBoard = Keyboard::getInstance();
 
 	if (!pMouse)
 	{

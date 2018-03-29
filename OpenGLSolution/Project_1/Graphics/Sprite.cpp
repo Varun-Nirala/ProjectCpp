@@ -1,93 +1,87 @@
 #include "Sprite.h"
 #include "..\Engine\Common.h"
 
+using namespace nsEngine;
+using namespace nsEngine::nsMaths;
 using namespace nsGraphics;
 using namespace std;
 
 Sprite::Sprite()
-	: m_PosX(0.0f)
-	, m_PosY(0.0f)
-	, m_RotDegree(0.0f)
-	, m_ScaleX(1.0f)
-	, m_ScaleY(1.0f)
-	, m_Speed(nsEngine::FPS)
-{
-}
+	: m_RotDegree(0.0)
+	, m_Speed(nsCommon::gFPS)
+{}
 
 Sprite::Sprite(string &path)
 	:Sprite()
 {
-	m_texture = Texture(path);
+	m_Texture = Texture(path);
 }
 
-Sprite::Sprite(string &path, float _x, float _y)
+Sprite::Sprite(string &path, double x, double y, double z)
 	: Sprite(path)
 {
-	m_PosX = _x;
-	m_PosY = _y;
+	m_Vec3Pos = Vector3(x, y, z);
 }
 
-void Sprite::MoveTo(float x, float y)
+Sprite::Sprite(string &path, const Vector3 &VecPos)
+	: Sprite(path)
 {
-	m_PosX = x;
-	m_PosY = y;
+	m_Vec3Pos = VecPos;
 }
 
-void Sprite::MoveBy(float x, float y)
+void Sprite::MoveTo(const Vector3 &vec)
 {
-	m_PosX += (x * nsEngine::getElapsedTime());
-	m_PosY += (y * nsEngine::getElapsedTime());
+	m_Vec3Pos = vec;
 }
 
-void Sprite::RotateTo(float angle)
+void Sprite::MoveBy(const Vector3 &vec)
+{
+	m_Vec3Pos += (vec * nsCommon::getElapsedTime());
+}
+
+void Sprite::RotateTo(double angle)
 {
 	m_RotDegree = angle;
 }
 
-void Sprite::RotateBy(float angle)
+void Sprite::RotateBy(double angle)
 {
-	m_RotDegree += (angle * nsEngine::getElapsedTime());
+	m_RotDegree += (angle * nsCommon::getElapsedTime());
 }
 
-void Sprite::SetScale(float x)
+void Sprite::SetScale(const Vector3 &vec)
 {
-	m_ScaleX = m_ScaleY = x;
+	m_Vec3Scale = vec;
 }
 
-void Sprite::SetScale(float x, float y)
-{
-	m_ScaleX = x;
-	m_ScaleY = y;
-}
-
-void Sprite::SpeedTo(float x)
+void Sprite::SpeedTo(double x)
 {
 	m_Speed = x;
 }
 
-void Sprite::SpeedBy(float x)
+void Sprite::SpeedBy(double x)
 {
-	m_Speed += (x * nsEngine::getElapsedTime());
+	m_Speed += (x * nsCommon::getElapsedTime());
 }
 
 void Sprite::MoveUp()
 {
-	m_PosY += (m_Speed * nsEngine::getElapsedTime());
+	m_Vec3Pos.m_y += (m_Speed * nsCommon::getElapsedTime());
 }
 
 void Sprite::MoveDown()
 {
-	m_PosY -= (m_Speed * nsEngine::getElapsedTime());
+	m_Vec3Pos.m_y -= (m_Speed * nsCommon::getElapsedTime());
 }
 
 void Sprite::MoveLeft()
 {
-	m_PosX -= (m_Speed * nsEngine::getElapsedTime());
+	m_Vec3Pos.m_x -= (m_Speed * nsEngine::nsCommon::getElapsedTime());
 }
 
 void Sprite::MoveRight()
 {
-	m_PosX += (m_Speed * nsEngine::getElapsedTime());
+	m_Vec3Pos.m_x += (m_Speed * nsEngine::nsCommon::getElapsedTime());
 }
 
 void Sprite::Update()
@@ -96,13 +90,13 @@ void Sprite::Update()
 void Sprite::Render()
 {
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, m_texture.GetID());
+	glBindTexture(GL_TEXTURE_2D, m_Texture.GetID());
 	glLoadIdentity();
 
 	// Transate, Rotate, Scale
-	glTranslatef(m_PosX, m_PosY, 0);
-	glScalef(m_ScaleX, m_ScaleY, 1);
-	glRotatef(m_RotDegree, 0, 0, 1);
+	glTranslatef((GLfloat)m_Vec3Pos.m_x, (GLfloat)m_Vec3Pos.m_y, (GLfloat)m_Vec3Pos.m_z);
+	glScalef((GLfloat)m_Vec3Scale.m_x, (GLfloat)m_Vec3Scale.m_x, (GLfloat)m_Vec3Scale.m_x);
+	glRotatef((GLfloat)m_RotDegree, 0, 0, 1);
 
 	//Rendering
 	glColor4f(1, 1, 1, 1);
@@ -113,13 +107,13 @@ void Sprite::Render()
 		glVertex2f(0, 0);
 
 		glTexCoord2f(1, 0);
-		glVertex2f(m_texture.GetWidth(), 0);
+		glVertex2f((GLfloat)m_Texture.GetWidth(), 0);
 
 		glTexCoord2f(1, 1);
-		glVertex2f(m_texture.GetWidth(), m_texture.GetHeight());
+		glVertex2f((GLfloat)m_Texture.GetWidth(), (GLfloat)m_Texture.GetHeight());
 
 		glTexCoord2f(0, 1);
-		glVertex2f(0, m_texture.GetHeight());
+		glVertex2f(0, (GLfloat)m_Texture.GetHeight());
 	}
 	glEnd();
 	glDisable(GL_TEXTURE_2D);

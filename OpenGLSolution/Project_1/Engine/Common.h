@@ -3,17 +3,21 @@
 
 #include <GLFW\glfw3.h>
 
-namespace nsEngine
-{
-	double const PIXEL_PER_SECOND = 5;
-	double const FPS = 60 * PIXEL_PER_SECOND;
-
-	static double getElapsedTime()
+namespace nsEngine {
+	namespace nsCommon
 	{
-		static double lastTime = 0;
-		double dt = glfwGetTime() - lastTime;
-		lastTime = glfwGetTime();
-		return dt;
+		const double gGRAVITY = 9.8;
+		const double gFRICTION = 1;
+		const double gPIXEL_PER_SECOND = 5;
+		const double gFPS = 60 * gPIXEL_PER_SECOND;
+
+		static double getElapsedTime()
+		{
+			static double lastTime = 0;
+			double dt = glfwGetTime() - lastTime;
+			lastTime = glfwGetTime();
+			return dt;
+		}
 	}
 }
 #endif
