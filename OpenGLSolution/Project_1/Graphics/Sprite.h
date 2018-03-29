@@ -2,6 +2,7 @@
 #define __SPRITE_H__
 
 #include "Texture.h"
+#include "..\Engine\Maths\Vector3.h"
 #include <iostream>
 
 namespace nsGraphics
@@ -16,22 +17,44 @@ namespace nsGraphics
 			void Update();
 			void Render();
 
-			void SetPosX(float x);
-			void SetPosY(float y);
+			// TRANSLATE
+			void MoveTo(float x, float y);
+			void MoveBy(float x, float y);
 
-			void SetRotation(float angle);
+			// ROTATE
+			void RotateTo(float angle);
+			void RotateBy(float angle);
 
+			// SCALE
 			void SetScale(float x);
 			void SetScale(float x, float y);
 
+			// SPEED
+			void SpeedTo(float x);
+			void SpeedBy(float x);
+
+			// MOVE left, right, up and down
+			void MoveUp();
+			void MoveDown();
+			void MoveLeft();
+			void MoveRight();
+
 		private:
 			Texture		m_texture;
-			float		m_fxPos;
-			float		m_fyPos;
 
-			float		m_fRotDegree;
-			float		m_fxScale;
-			float		m_fyScale;
+			// TRANSLATE
+			float		m_PosX;
+			float		m_PosY;
+
+			// ROTATE
+			float		m_RotDegree;
+
+			// SCALE
+			float		m_ScaleX;
+			float		m_ScaleY;
+
+			// SPEED
+			float		m_Speed;
 	};
 }
 #endif

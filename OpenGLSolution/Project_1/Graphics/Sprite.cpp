@@ -1,14 +1,16 @@
 #include "Sprite.h"
+#include "..\Engine\Common.h"
 
 using namespace nsGraphics;
 using namespace std;
 
 Sprite::Sprite()
-	: m_fxPos(0.0f)
-	, m_fyPos(0.0f)
-	, m_fRotDegree(0.0f)
-	, m_fxScale(1.0f)
-	, m_fyScale(1.0f)
+	: m_PosX(0.0f)
+	, m_PosY(0.0f)
+	, m_RotDegree(0.0f)
+	, m_ScaleX(1.0f)
+	, m_ScaleY(1.0f)
+	, m_Speed(nsEngine::FPS)
 {
 }
 
@@ -21,40 +23,75 @@ Sprite::Sprite(string &path)
 Sprite::Sprite(string &path, float _x, float _y)
 	: Sprite(path)
 {
-	m_fxPos = _x;
-	m_fyPos = _y;
+	m_PosX = _x;
+	m_PosY = _y;
 }
 
-void Sprite::SetPosX(float x)
+void Sprite::MoveTo(float x, float y)
 {
-	m_fxPos = x;
+	m_PosX = x;
+	m_PosY = y;
 }
 
-void Sprite::SetPosY(float y)
+void Sprite::MoveBy(float x, float y)
 {
-	m_fyPos = y;
+	m_PosX += (x * nsEngine::getElapsedTime());
+	m_PosY += (y * nsEngine::getElapsedTime());
 }
 
-void Sprite::SetRotation(float angle)
+void Sprite::RotateTo(float angle)
 {
-	m_fRotDegree = angle;
+	m_RotDegree = angle;
+}
+
+void Sprite::RotateBy(float angle)
+{
+	m_RotDegree += (angle * nsEngine::getElapsedTime());
 }
 
 void Sprite::SetScale(float x)
 {
-	m_fxScale = m_fyScale = x;
+	m_ScaleX = m_ScaleY = x;
 }
 
 void Sprite::SetScale(float x, float y)
 {
-	m_fxScale = x;
-	m_fyScale = y;
+	m_ScaleX = x;
+	m_ScaleY = y;
+}
+
+void Sprite::SpeedTo(float x)
+{
+	m_Speed = x;
+}
+
+void Sprite::SpeedBy(float x)
+{
+	m_Speed += (x * nsEngine::getElapsedTime());
+}
+
+void Sprite::MoveUp()
+{
+	m_PosY += (m_Speed * nsEngine::getElapsedTime());
+}
+
+void Sprite::MoveDown()
+{
+	m_PosY -= (m_Speed * nsEngine::getElapsedTime());
+}
+
+void Sprite::MoveLeft()
+{
+	m_PosX -= (m_Speed * nsEngine::getElapsedTime());
+}
+
+void Sprite::MoveRight()
+{
+	m_PosX += (m_Speed * nsEngine::getElapsedTime());
 }
 
 void Sprite::Update()
-{
-	m_fRotDegree++;
-}
+{}
 
 void Sprite::Render()
 {
@@ -63,9 +100,9 @@ void Sprite::Render()
 	glLoadIdentity();
 
 	// Transate, Rotate, Scale
-	glTranslatef(m_fxPos, m_fyPos, 0);
-	glScalef(m_fxScale, m_fyScale, 1);
-	glRotatef(m_fRotDegree, 0, 0, 1);
+	glTranslatef(m_PosX, m_PosY, 0);
+	glScalef(m_ScaleX, m_ScaleY, 1);
+	glRotatef(m_RotDegree, 0, 0, 1);
 
 	//Rendering
 	glColor4f(1, 1, 1, 1);

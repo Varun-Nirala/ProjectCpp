@@ -10,7 +10,8 @@ namespace nsEngine
 	class Engine
 	{
 		public:
-			Engine(int w = 1024, int h = 768);
+			Engine();
+			Engine(int w, int h);
 			~Engine();
 
 			//Mouse Controller
@@ -30,8 +31,8 @@ namespace nsEngine
 
 		private:
 			GLFWwindow		*m_pWindow;
-			const int		m_iWIDTH;
-			const int		m_iHEIGHT;
+			int				m_iWidth;
+			int				m_iHeight;
 	};
 }
 #endif

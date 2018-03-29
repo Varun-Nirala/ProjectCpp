@@ -1,13 +1,20 @@
 #include "Engine.h"
 #include "IO\Mouse.h"
+#include "IO\Keyboard.h"
 #include <iostream>
 
 using namespace std;
 using namespace nsEngine;
 
+Engine::Engine()
+	: m_pWindow(NULL)
+	, m_iWidth(0)
+	, m_iHeight(0)
+{}
+
 Engine::Engine(int w, int h)
-	: m_iWIDTH(w)
-	, m_iHEIGHT(h)
+	: m_iWidth(w)
+	, m_iHeight(h)
 	, m_pWindow(NULL)
 {}
 
@@ -24,7 +31,15 @@ bool Engine::Initialize(char *windowTitle)
 		return false;
 	}
 
-	if (!(m_pWindow = glfwCreateWindow(m_iWIDTH, m_iHEIGHT, windowTitle, NULL, NULL)))
+	if (m_iHeight == 0 && m_iWidth == 0)
+	{
+		const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+		m_iWidth = mode->width - 100;
+		m_iHeight = mode->height - 100;
+	}
+
+	if (!(m_pWindow = glfwCreateWindow(m_iWidth, m_iHeight, windowTitle, NULL, NULL)))
 	{
 		cout << __LINE__ << " ::Error: creating window." << endl;
 		glfwTerminate();
@@ -40,14 +55,17 @@ bool Engine::Initialize(char *windowTitle)
 
 	const GLFWvidmode *pVidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	int xPos, yPos;
-	xPos = (pVidMode->width - m_iWIDTH) / 2;
-	yPos = (pVidMode->height - m_iHEIGHT) / 2;
+	xPos = (pVidMode->width - m_iWidth) / 2;
+	yPos = (pVidMode->height - m_iHeight) / 2;
 	glfwSetWindowPos(m_pWindow, xPos, yPos);
 	// GLFW initial Setup END
 
 	// Mouse CallBack register
 	glfwSetCursorPosCallback(m_pWindow, Mouse::MousePositionCB);
 	glfwSetMouseButtonCallback(m_pWindow, Mouse::MouseButtonCB);
+
+	// Keyboard Callback register
+	glfwSetKeyCallback(m_pWindow, Keyboard::KeyboardCB);
 
 	// OpenGL Setup Start
 	glViewport(0, 0, width, height);
@@ -98,10 +116,10 @@ bool Engine::IsWindowClosed()
 
 int Engine::GetWidth() const
 {
-	return m_iWIDTH;
+	return m_iWidth;
 }
 
 int Engine::GetHeight() const
 {
-	return m_iHEIGHT;
+	return m_iHeight;
 }

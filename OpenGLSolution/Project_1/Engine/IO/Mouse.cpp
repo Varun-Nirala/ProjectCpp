@@ -4,7 +4,7 @@
 using namespace nsEngine;
 using namespace std;
 
-//static Members Start
+//static member Start
 Mouse* Mouse::m_pInstance = NULL;
 void(*Mouse::FP_MousePositionCB)(GLFWwindow *, double, double) = NULL;
 void(*Mouse::FP_MouseButtonCB)(GLFWwindow *, int, int, int) = NULL;
@@ -50,7 +50,12 @@ void Mouse::MouseButtonCB(GLFWwindow *pWindow, int button, int action, int mods)
 	}
 	else
 	{
-		// Default implementation
+		if (button < 0)
+		{
+			cout << __LINE__ << " ::Error: Not a valid button" << endl;
+			return;
+		}
+		// Default implementation, handling only left, right and mid button of mouse
 		if (button <= GLFW_MOUSE_BUTTON_MIDDLE)
 		{
 			if (action != GLFW_RELEASE && m_button[button] == false)
@@ -65,6 +70,10 @@ void Mouse::MouseButtonCB(GLFWwindow *pWindow, int button, int action, int mods)
 			}
 
 			m_button[button] = action != GLFW_RELEASE;
+		}
+		else
+		{
+			cout << __LINE__ << " ::Error: No handling for this key" << endl;
 		}
 	}
 }

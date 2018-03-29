@@ -9,11 +9,12 @@ namespace nsEngine
 
 	class Mouse
 	{
-		public:
-			Mouse(const Mouse &) = delete;
-			Mouse(const Mouse &&) = delete;
-			Mouse& operator=(const Mouse &) = delete;
+		// DELETED Funtion
+		Mouse(const Mouse &) = delete;
+		Mouse(const Mouse &&) = delete;
+		Mouse& operator=(const Mouse &) = delete;
 
+		public:
 			static Mouse* getInstance();
 
 			// To be called whenever mouse position move in the OpenGL window
