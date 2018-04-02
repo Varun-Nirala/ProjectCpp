@@ -18,41 +18,54 @@ namespace nsGraphics
 			void Update();
 			void Render();
 
+			// Getters
+			nsEngine::nsMaths::Vector3& GetPosition();
+			nsEngine::nsMaths::Vector3& GetScale();
+			nsEngine::nsMaths::Vector3& GetRotation();
+			nsEngine::nsMaths::Vector3& GetVelocity();
+
+			const nsEngine::nsMaths::Vector3  GetSize() const;
+
 			// TRANSLATE
-			void MoveTo(const nsEngine::nsMaths::Vector3 &);
-			void MoveBy(const nsEngine::nsMaths::Vector3 &);
+			void SetPosition(const nsEngine::nsMaths::Vector3 &);
+			void IncrementPosition(const nsEngine::nsMaths::Vector3 &);
 
 			// ROTATE
-			void RotateTo(double angle);
-			void RotateBy(double angle);
+			void SetRotation(const nsEngine::nsMaths::Vector3 &);
+			void IncrementRotation(const nsEngine::nsMaths::Vector3 &);
 
 			// SCALE
 			void SetScale(const nsEngine::nsMaths::Vector3 &);
 
 			// SPEED
-			void SpeedTo(double x);
-			void SpeedBy(double x);
+			void SetVelocity(const nsEngine::nsMaths::Vector3 &vec);
+			void IncrementVelocity(const nsEngine::nsMaths::Vector3 &vec);
 
-			// MOVE left, right, up and down
-			void MoveUp();
-			void MoveDown();
-			void MoveLeft();
-			void MoveRight();
+			// Force
 
 		private:
 			Texture						m_Texture;
+
+			// COLOR
+			nsEngine::nsMaths::Vector3	m_Vec3Color;
 
 			// TRANSLATE
 			nsEngine::nsMaths::Vector3	m_Vec3Pos;
 
 			// ROTATE
-			double						m_RotDegree;
+			nsEngine::nsMaths::Vector3	m_Vec3Rotation;
 
 			// SCALE
 			nsEngine::nsMaths::Vector3	m_Vec3Scale;
 
 			// SPEED
-			double						m_Speed;
+			nsEngine::nsMaths::Vector3	m_Vec3Vel;
+
+			// FORCE
+			double						m_Force;
+
+			// SIZE
+			nsEngine::nsMaths::Vector3	m_Vec3Size;
 	};
 }
 #endif

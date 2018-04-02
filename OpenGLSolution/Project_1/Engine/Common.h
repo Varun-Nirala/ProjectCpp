@@ -2,12 +2,15 @@
 #define __COMMON_H__
 
 #include <GLFW\glfw3.h>
+#include "Maths\Vector3.h"
 
 namespace nsEngine {
 	namespace nsCommon
 	{
-		const double gGRAVITY = 9.8;
-		const double gFRICTION = 1;
+		const double gGRAVITY = 2.8;
+
+		const nsMaths::Vector3 gFRICTION(0.2, 0.2, 0.2);
+
 		const double gPIXEL_PER_SECOND = 5;
 		const double gFPS = 60 * gPIXEL_PER_SECOND;
 

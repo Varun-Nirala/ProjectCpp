@@ -7,14 +7,17 @@ using namespace nsGraphics;
 using namespace std;
 
 Sprite::Sprite()
-	: m_RotDegree(0.0)
-	, m_Speed(nsCommon::gFPS)
+	: m_Vec3Color(1, 1, 1)
+	, m_Force(1.0)
 {}
 
 Sprite::Sprite(string &path)
 	:Sprite()
 {
 	m_Texture = Texture(path);
+	m_Vec3Size.m_x = m_Texture.GetWidth();
+	m_Vec3Size.m_y = m_Texture.GetHeight();
+	m_Vec3Size.m_z = 1;
 }
 
 Sprite::Sprite(string &path, double x, double y, double z)
@@ -29,24 +32,49 @@ Sprite::Sprite(string &path, const Vector3 &VecPos)
 	m_Vec3Pos = VecPos;
 }
 
-void Sprite::MoveTo(const Vector3 &vec)
+Vector3& Sprite::GetPosition()
+{
+	return m_Vec3Pos;
+}
+
+Vector3& Sprite::GetScale()
+{
+	return m_Vec3Scale;
+}
+
+Vector3& Sprite::GetRotation()
+{
+	return m_Vec3Rotation;
+}
+
+Vector3& Sprite::GetVelocity()
+{
+	return m_Vec3Vel;
+}
+
+const Vector3 Sprite::GetSize() const
+{
+	return m_Vec3Size;
+}
+
+void Sprite::SetPosition(const Vector3 &vec)
 {
 	m_Vec3Pos = vec;
 }
 
-void Sprite::MoveBy(const Vector3 &vec)
+void Sprite::IncrementPosition(const Vector3 &vec)
 {
 	m_Vec3Pos += (vec * nsCommon::getElapsedTime());
 }
 
-void Sprite::RotateTo(double angle)
+void Sprite::SetRotation(const Vector3 &vec)
 {
-	m_RotDegree = angle;
+	m_Vec3Rotation = vec;
 }
 
-void Sprite::RotateBy(double angle)
+void Sprite::IncrementRotation(const Vector3 &vec)
 {
-	m_RotDegree += (angle * nsCommon::getElapsedTime());
+	m_Vec3Rotation += (vec * nsCommon::getElapsedTime());
 }
 
 void Sprite::SetScale(const Vector3 &vec)
@@ -54,38 +82,26 @@ void Sprite::SetScale(const Vector3 &vec)
 	m_Vec3Scale = vec;
 }
 
-void Sprite::SpeedTo(double x)
+void Sprite::SetVelocity(const Vector3 &vec)
 {
-	m_Speed = x;
+	cout << "Setting Velocity : " << vec << endl;
+	m_Vec3Vel = vec;
 }
 
-void Sprite::SpeedBy(double x)
+void Sprite::IncrementVelocity(const Vector3 &vec)
 {
-	m_Speed += (x * nsCommon::getElapsedTime());
-}
+	cout << "Incrementing Velocity By : " << vec << endl;
+	
+	m_Vec3Vel += (vec * nsCommon::getElapsedTime());
 
-void Sprite::MoveUp()
-{
-	m_Vec3Pos.m_y += (m_Speed * nsCommon::getElapsedTime());
-}
-
-void Sprite::MoveDown()
-{
-	m_Vec3Pos.m_y -= (m_Speed * nsCommon::getElapsedTime());
-}
-
-void Sprite::MoveLeft()
-{
-	m_Vec3Pos.m_x -= (m_Speed * nsEngine::nsCommon::getElapsedTime());
-}
-
-void Sprite::MoveRight()
-{
-	m_Vec3Pos.m_x += (m_Speed * nsEngine::nsCommon::getElapsedTime());
+	cout << "New Velocity By : " << m_Vec3Pos << endl;
 }
 
 void Sprite::Update()
-{}
+{
+	m_Vec3Pos += m_Vec3Vel;
+	cout << "In Update Velocity is : " << m_Vec3Pos << endl;
+}
 
 void Sprite::Render()
 {
@@ -95,11 +111,11 @@ void Sprite::Render()
 
 	// Transate, Rotate, Scale
 	glTranslatef((GLfloat)m_Vec3Pos.m_x, (GLfloat)m_Vec3Pos.m_y, (GLfloat)m_Vec3Pos.m_z);
-	glScalef((GLfloat)m_Vec3Scale.m_x, (GLfloat)m_Vec3Scale.m_x, (GLfloat)m_Vec3Scale.m_x);
-	glRotatef((GLfloat)m_RotDegree, 0, 0, 1);
+	glScalef((GLfloat)m_Vec3Scale.m_x, (GLfloat)m_Vec3Scale.m_y, (GLfloat)m_Vec3Scale.m_z);
+	glRotatef((GLfloat)m_Vec3Rotation.m_x, (GLfloat)m_Vec3Rotation.m_y, (GLfloat)m_Vec3Rotation.m_y, 1);
 
 	//Rendering
-	glColor4f(1, 1, 1, 1);
+	glColor4f((GLfloat)m_Vec3Color.m_x, (GLfloat)m_Vec3Color.m_y, (GLfloat)m_Vec3Color.m_z, 1);
 
 	glBegin(GL_QUADS);
 	{

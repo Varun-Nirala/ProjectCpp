@@ -243,3 +243,20 @@ bool Vector3::operator>=(const Vector3 &vec)
 {
 	return ((*this > vec) || (*this == vec));
 }
+
+std::ostream& Vector3::Display(std::ostream &out) const
+{
+	out << "X = " << m_x << ", Y = " << m_y << ", Z = " << m_z << std::endl;
+	return out;
+}
+
+// Seperate namespace enclosing is required for Friend functions
+namespace nsEngine {
+	namespace nsMaths
+	{
+		std::ostream& operator << (std::ostream &out, const Vector3 &vec)
+		{
+			return vec.Display(out);
+		}
+	}
+}

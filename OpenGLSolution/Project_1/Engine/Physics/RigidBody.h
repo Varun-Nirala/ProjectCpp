@@ -2,6 +2,7 @@
 #define __RIGID_BODY_H__
 
 #include "..\Maths\Vector3.h"
+#include "..\..\Graphics\Sprite.h"
 
 namespace nsEngine { namespace nsPhysics
 {
@@ -9,25 +10,23 @@ namespace nsEngine { namespace nsPhysics
 	{
 		public:
 			RigidBody();
+			~RigidBody();
 
-			void Initialize(const nsEngine::nsMaths::Vector3 &pos, 
-							const nsEngine::nsMaths::Vector3 &scale,
-							const double rotation,
-							const nsEngine::nsMaths::Vector3 &velocity,
-							const double gravity,
-							const double friction);
+			void Initialize(nsGraphics::Sprite *sprite,
+				const double gravity,
+				const nsEngine::nsMaths::Vector3 &friction);
 
 			void Update();
-			void Render();
+			void Render(const nsEngine::nsMaths::Vector3 &color);
+
+			void AddForce(const nsEngine::nsMaths::Vector3 &force);
 
 		private:
-			nsEngine::nsMaths::Vector3	m_Vec3Pos;
-			nsEngine::nsMaths::Vector3	m_Vec3Scale;
-			double						m_RotDegree;
+			nsGraphics::Sprite			*m_pSprite;
 
-			nsEngine::nsMaths::Vector3	m_Vec3Velocity;
 			double						m_Gravity;
-			double						m_Friction;
+			nsEngine::nsMaths::Vector3	m_Vec3Friction;
+			nsEngine::nsMaths::Vector3	m_Vec3Force;
 	};
 }}
 #endif

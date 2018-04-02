@@ -1,6 +1,8 @@
 #ifndef __VECTOR_3_H__
 #define __VECTOR_3_H__
 
+#include "iostream"
+
 namespace nsEngine { namespace nsMaths
 {
 	class Vector3
@@ -51,6 +53,11 @@ namespace nsEngine { namespace nsMaths
 
 			bool operator>=(const Vector3 &);
 			bool operator>(const Vector3 &);
+
+			friend std::ostream& operator<<(std::ostream &out, const Vector3 &vec);
+
+		private:
+			std::ostream& Display(std::ostream &out) const;
 
 		public:
 			double	m_x;
