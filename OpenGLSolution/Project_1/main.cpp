@@ -38,9 +38,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	
-	nsMaths::Vector3 planeForce;
-	rbPlan.AddForce(planeForce);
+	const double cFORCE = 20;
 
 	while (!gameEngine.IsWindowClosed())
 	{
@@ -49,28 +47,24 @@ int main(int argc, char *argv[])
 		spritePlane.Update();
 		rbPlan.Update();
 
-		double speed = 5;
-
 		if (pkeyBoard->Key(GLFW_KEY_W))			// Up
 		{
 			spritePlane.IncrementRotation(1);
-			planeForce.m_y += speed;
+			rbPlan.AddForce(nsMaths::Vector3(0, cFORCE, 0));
 		}
 		else if (pkeyBoard->Key(GLFW_KEY_S))	// Down
 		{
 			spritePlane.IncrementRotation(-1);
-			planeForce.m_y -= speed;
+			rbPlan.AddForce(nsMaths::Vector3(0, -cFORCE, 0));
 		}
 		else if (pkeyBoard->Key(GLFW_KEY_A))	// Left
 		{
-			planeForce.m_x -= speed;
+			rbPlan.AddForce(nsMaths::Vector3(-cFORCE*10, 0, 0));
 		}
 		else if (pkeyBoard->Key(GLFW_KEY_D))	// Right
 		{
-			planeForce.m_x += speed;
+			rbPlan.AddForce(nsMaths::Vector3(cFORCE*10, 0, 0));
 		}
-
-		rbPlan.AddForce(planeForce);
 
 		gameEngine.BeginRender();
 		spriteCloud.Render();

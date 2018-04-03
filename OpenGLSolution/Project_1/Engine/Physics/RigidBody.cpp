@@ -23,21 +23,19 @@ void RigidBody::Initialize(nsGraphics::Sprite *sprite, double gravity, const Vec
 
 void RigidBody::AddForce(const Vector3 &force)
 {
-	m_Vec3Force = force;
+	m_pSprite->IncrementVelocity(force);
 }
 
 void RigidBody::Update()
 {
-	Vector3 &vec = m_pSprite->GetVelocity();
-
-	// First increment it by force
-	vec += m_Vec3Force;
+	Vector3 &vel = m_pSprite->GetVelocity();
 
 	// Apply friction and gravity
-	vec *= m_Vec3Friction;		// friction on All direction
-	vec.m_y -= m_Gravity;	// gravity only in down direction
+	vel *= m_Vec3Friction;		// friction on All direction
+	vel.m_y += m_Gravity;		// gravity only in down direction
 
-	// No need to set it back as it is a ref
+	Vector3 &pos = m_pSprite->GetPosition();
+	pos += vel;
 }
 
 void RigidBody::Render(const Vector3 &vec3Color)
@@ -47,6 +45,7 @@ void RigidBody::Render(const Vector3 &vec3Color)
 	Vector3 &pos = m_pSprite->GetPosition();
 	Vector3 &scale = m_pSprite->GetScale();
 	Vector3 &rot = m_pSprite->GetRotation();
+	const Vector3 &size = m_pSprite->GetSize();
 
 	// Transate, Rotate, Scale
 	glTranslatef((GLfloat)pos.m_x, (GLfloat)pos.m_y, (GLfloat)pos.m_z);
@@ -58,9 +57,16 @@ void RigidBody::Render(const Vector3 &vec3Color)
 	glBegin(GL_LINES);
 	{
 		glVertex2i(0, 0);
-		glVertex2i((int)pos.m_x, 0);
-		glVertex2i((int)pos.m_x, (int)pos.m_y);
-		glVertex2i(0, (int)pos.m_y);
+		glVertex2i((int)size.m_x, 0);
+
+		glVertex2i((int)size.m_x, 0);
+		glVertex2i((int)size.m_x, (int)size.m_y);
+
+		glVertex2i((int)size.m_x, (int)size.m_y);
+		glVertex2i(0, (int)size.m_y);
+
+		glVertex2i(0, (int)size.m_y);
+		glVertex2i(0, 0);
 	}
 	glEnd();
 }

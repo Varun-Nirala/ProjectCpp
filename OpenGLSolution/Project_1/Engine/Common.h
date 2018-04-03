@@ -7,9 +7,9 @@
 namespace nsEngine {
 	namespace nsCommon
 	{
-		const double gGRAVITY = 2.8;
+		const double gGRAVITY = -10;
 
-		const nsMaths::Vector3 gFRICTION(0.2, 0.2, 0.2);
+		const nsMaths::Vector3 gFRICTION(0.8, 1, 1);
 
 		const double gPIXEL_PER_SECOND = 5;
 		const double gFPS = 60 * gPIXEL_PER_SECOND;

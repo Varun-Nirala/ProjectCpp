@@ -26,7 +26,6 @@ namespace nsEngine { namespace nsPhysics
 
 			double						m_Gravity;
 			nsEngine::nsMaths::Vector3	m_Vec3Friction;
-			nsEngine::nsMaths::Vector3	m_Vec3Force;
 	};
 }}
 #endif
