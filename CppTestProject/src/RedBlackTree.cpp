@@ -14,10 +14,12 @@ bool RedBlacktree::add(dataType &data)
 	addLikeBinary(newNode);
 
 	rebalanceAfterAdd(newNode);
+	return true;
 }
 
 bool RedBlacktree::remove(dataType &data)
 {
+	return true;
 }
 
 //Private Members
@@ -39,6 +41,7 @@ bool RedBlacktree::rebalanceAfterAdd(Node *node)
 	// CASE 3 :: P is RED(so it is not root) and U is also RED. 
 
 	// CASE 4 :: P is RED and U is Black.
+	return true;
 }
 
 bool RedBlacktree::addLikeBinary(Node *node)
