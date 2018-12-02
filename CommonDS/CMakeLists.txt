@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-SET(PROJECT "BinarySearchTree")
+SET(PROJECT "CommonDS")
 project( ${PROJECT} )
 
 SET(VERSION_MAJOR "1")
