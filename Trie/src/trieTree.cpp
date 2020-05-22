@@ -7,6 +7,37 @@ namespace DS
 		, mIsEnd(end)
 	{}
 
+	Node::Node(const Node &src)
+	{
+		mChar = src.mChar;
+		mIsEnd = src.mIsEnd;
+		copyFrom(src);
+	}
+
+	Node::Node(Node &&src)
+	{
+		mChar = std::move(src.mChar);
+		mIsEnd = std::move(src.mIsEnd);
+		mNodes = std::move(src.mNodes);
+	}
+
+	Node& Node::operator=(const Node &src)
+	{
+		if (this != &src)
+		{
+			copyFrom(src);
+		}
+		return *this;
+	}
+
+	Node& Node::operator=(Node &&src)
+	{
+		mChar = std::move(src.mChar);
+		mIsEnd = std::move(src.mIsEnd);
+		mNodes = std::move(src.mNodes);
+		return *this;
+	}
+
 	Node::~Node()
 	{
 		for (auto it : mNodes)
@@ -36,6 +67,16 @@ namespace DS
 		return mNodes;
 	}
 
+	void Node::copyFrom(const Node &src)
+	{
+		mNodes.resize(src.mNodes.size());
+
+		for (size_t i = 0; i < src.mNodes.size(); ++i)
+		{
+			mNodes[i] = new Node(*src.mNodes[i]);
+		}
+	}
+
 	std::ostream& operator<<(std::ostream &out, Node &node)	// Node Friend Function
 	{
 		out << node.mChar;
@@ -56,6 +97,15 @@ namespace DS
 	Trie::Trie()
 		: mSize(0)
 	{}
+
+	bool Trie::insert(std::initializer_list<std::string> il)
+	{
+		bool ret = true;
+		std::for_each(il.begin(), il.end(), [&](auto word) {
+			ret &= insert(word);
+		});
+		return ret;
+	}
 
 	bool Trie::insert(std::string word)
 	{
@@ -162,8 +212,7 @@ namespace DS
 		{
 			it = std::find_if(p->mNodes.begin(), p->mNodes.end(),
 				[&i, &prefix](const Node *node)
-			{
-				return node->matchChar(prefix[i]);	}
+				{	return node->matchChar(prefix[i]);	}
 			);
 
 			if (it != p->mNodes.end())

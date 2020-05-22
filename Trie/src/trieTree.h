@@ -12,9 +12,21 @@ namespace DS
 	class Node
 	{
 		public:
-			Node(char alpha = '\0', bool end = false);
+			explicit Node(char alpha = '\0', bool end = false);
 
 			~Node();
+
+			// Copy ctor
+			Node(const Node &src);
+
+			// Move ctor
+			Node(Node &&src);
+
+			// Assignment Copy operator
+			Node& operator=(const Node &src);
+
+			// Assignment Move operator
+			Node& operator=(Node &&src);
 
 			bool isLeaf() const;
 
@@ -28,6 +40,10 @@ namespace DS
 			friend std::ostream& operator<<(std::ostream &out, Node *node);
 
 			friend class Trie;
+
+		private:
+			void copyFrom(const Node &src);
+
 		private:
 			char					mChar;
 			bool					mIsEnd;		// It only represent if it's the last char of the word, even if it is, it doesn't mean its a leaf
@@ -41,6 +57,7 @@ namespace DS
 			Trie();
 
 			// Insert methods
+			bool insert(std::initializer_list<std::string> il);
 			bool insert(std::string word);
 
 			// Size methods

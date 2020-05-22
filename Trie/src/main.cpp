@@ -25,5 +25,9 @@ int main()
 	auto allWords = trie.getAllWordWithPrefix("i");
 	for_each(std::begin(allWords), std::end(allWords), [](auto &word) { cout << word << "\n"; });
 
+
+	DS::Trie tr = std::move(trie);
+	cout << trie << endl;
+
 	return 0;
 }
