@@ -70,6 +70,9 @@ namespace DS
 			size_t size() const;
 
 			size_t count(std::string prefix) const;		// Returns count of word starting with the given prefix
+			
+			// Find methods
+			bool find(std::string word) const;			// return if exact match found
 
 			std::vector<std::string> getAllWordWithPrefix(std::string prefix) const;
 

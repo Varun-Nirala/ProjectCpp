@@ -159,6 +159,11 @@ namespace DS
 		return retCount;
 	}
 
+	size_t Trie::size() const
+	{
+		return mSize;
+	}
+
 	size_t Trie::count(std::string prefix) const
 	{
 		convertToLower(prefix);
@@ -167,9 +172,18 @@ namespace DS
 		return traverse(node).size();
 	}
 
-	size_t Trie::size() const
+	bool Trie::find(std::string word) const
 	{
-		return mSize;
+		convertToLower(word);
+
+		size_t pos = 0;
+		findWord(word, pos);
+
+		if (pos == word.size())
+		{
+			return true;
+		}
+		return false;
 	}
 
 	std::vector<std::string> Trie::getAllWordWithPrefix(std::string prefix) const
