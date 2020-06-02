@@ -36,6 +36,8 @@ namespace DS
 
 			std::vector<Node*>& getNodes();
 
+			bool erase(const char &ch);
+
 			friend std::ostream& operator<<(std::ostream &out, Node &node);
 			friend std::ostream& operator<<(std::ostream &out, Node *node);
 
@@ -60,6 +62,9 @@ namespace DS
 			bool insert(std::initializer_list<std::string> il);
 			bool insert(std::string word);
 
+			// Erase methods
+			size_t erase(std::string word, bool delAllWithPref = false);		// Returns number of words deleted
+
 			// Size methods
 			size_t size() const;
 
@@ -77,7 +82,10 @@ namespace DS
 
 			void recurse(const Node *inNode, std::string pref, std::vector<std::string> &vec, size_t &actualSize) const;
 
-			const Node* findWord(const std::string &prefix, size_t &pos) const;
+			std::vector<const Node*> findWord(const std::string &prefix, size_t &pos) const;
+
+			bool removeExact(std::vector<const Node*> &vec);
+			bool removeExact(std::string word);
 
 			void convertToLower(std::string &word) const;
 			void convertToUpper(std::string &word) const;

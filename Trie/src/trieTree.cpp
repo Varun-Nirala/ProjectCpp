@@ -1,4 +1,5 @@
 #include "trieTree.h"
+#include <cassert>
 
 namespace DS
 {
@@ -67,6 +68,13 @@ namespace DS
 		return mNodes;
 	}
 
+	bool Node::erase(const char &ch)
+	{
+		return std::begin(mNodes) == mNodes.erase(std::find_if(std::begin(mNodes), std::end(mNodes), 
+			[&ch](Node *node) -> bool { return node->matchChar(ch); })
+		);
+	}
+
 	void Node::copyFrom(const Node &src)
 	{
 		mNodes.resize(src.mNodes.size());
@@ -94,6 +102,10 @@ namespace DS
 		return out;
 	}
 
+
+
+
+
 	Trie::Trie()
 		: mSize(0)
 	{}
@@ -113,11 +125,47 @@ namespace DS
 		return addWord(word);
 	}
 
+	size_t Trie::erase(std::string word, bool delAllWithPref/* = false*/)
+	{
+		convertToLower(word);
+		// Count of word's deleted
+		size_t retCount = 0;	
+
+		// If we have to delete the exact word
+		if (!delAllWithPref)
+		{
+			if (removeExact(word))
+			{
+				retCount++;
+			}
+		}
+		// Delete all with prefix
+		else
+		{
+			std::vector<std::string> allWords = getAllWordWithPrefix(word);
+
+			for (auto str : allWords)
+			{
+				if (removeExact(word + str))
+				{
+					retCount++;
+				}
+				else
+				{
+					assert(!"Error removing exact found word");
+				}
+			}
+		}
+		mSize -= retCount;
+		mRoot;
+		return retCount;
+	}
+
 	size_t Trie::count(std::string prefix) const
 	{
 		convertToLower(prefix);
 		size_t pos = 0;
-		const Node *node = findWord(prefix, pos);
+		const Node *node = findWord(prefix, pos).back();
 		return traverse(node).size();
 	}
 
@@ -131,7 +179,7 @@ namespace DS
 		convertToLower(prefix);
 
 		size_t pos = 0;
-		const Node *node = findWord(prefix, pos);
+		const Node *node = findWord(prefix, pos).back();
 		std::vector<std::string> allWords = traverse(node);
 
 		return allWords;
@@ -141,7 +189,7 @@ namespace DS
 	{
 		size_t pos = 0;
 
-		Node *node = const_cast<Node *>(findWord(word, pos));
+		Node *node = const_cast<Node *>(findWord(word, pos).back());
 
 		// No need to check for (node == NULL), findWord should always return a valid node
 		if (pos == word.size())
@@ -198,15 +246,20 @@ namespace DS
 		}
 	}
 
-	const Node* Trie::findWord(const std::string &prefix, size_t &pos) const
+	std::vector<const Node*> Trie::findWord(const std::string &prefix, size_t &pos) const
 	{
+		std::vector<const Node*> vecNode;
 		if (mSize == 0)
 		{
-			return &mRoot;
+			vecNode.push_back(&mRoot);
+			return vecNode;
 		}
 
 		size_t max = prefix.size();
 		const Node *p = &mRoot;
+
+		vecNode.push_back(p);
+
 		std::vector<Node*>::const_iterator it;
 		for (size_t i = 0; i < max; ++i)
 		{
@@ -219,13 +272,72 @@ namespace DS
 			{
 				p = *it;
 				pos++;
+				vecNode.push_back(p);
 			}
 			else
 			{
 				break;
 			}
 		}
-		return p;
+		return vecNode;
+	}
+
+	bool Trie::removeExact(std::vector<const Node*> &vec)
+	{
+		size_t i = vec.size() - 1;
+		Node *child = const_cast<Node *>(vec[i--]);
+		for (; i >= 0; --i)
+		{
+			Node *curr = const_cast<Node *>(vec[i]);
+
+			if (child->isLeaf())
+			{
+				curr->erase(child->mChar);
+				if (curr->getNodes().empty() && !curr->mIsEnd)
+				{
+					curr->mIsEnd = true;
+				}
+				else
+				{
+					return true;
+				}
+			}
+			else if (child->mIsEnd)
+			{
+				child->mIsEnd = false;
+				return true;
+			}
+			child = curr;
+		}
+
+		return false;
+	}
+
+	bool Trie::removeExact(std::string word)
+	{
+		convertToLower(word);
+
+		size_t pos = 0;
+		std::vector<const Node*> vec = findWord(word, pos);
+
+		// vector will always have atleast one element, mRoot node.
+		if (vec.size() == 1)
+		{
+			return false;
+		}
+
+		if (pos == word.size())
+		{
+			if (removeExact(vec))
+			{
+				return true;
+			}
+			else
+			{
+				assert(!"Error removing exact found word");
+			}
+		}
+		return false;
 	}
 
 	void Trie::convertToLower(std::string &word) const
