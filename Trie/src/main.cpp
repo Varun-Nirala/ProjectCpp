@@ -8,18 +8,7 @@ using namespace std;
 
 int main()
 {
-	DS::Trie trie;
-
-	trie.insert("to");
-	//trie.insert("tea");
-	trie.insert("team");
-	trie.insert("ted");
-	trie.insert("teaming");
-	trie.insert("teamiz");
-	trie.insert("ten");
-	trie.insert("in");
-	trie.insert("inn");
-	trie.insert("india");
+	DS::Trie trie{ "to", "tea", "team", "ted", "teaming", "teamiz", "ten", "in", "inn", "india" };
 
 	cout << trie << endl;
 

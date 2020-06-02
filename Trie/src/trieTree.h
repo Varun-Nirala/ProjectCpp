@@ -58,8 +58,9 @@ namespace DS
 		public:
 			Trie();
 
+			Trie(std::initializer_list<std::string> il);
+
 			// Insert methods
-			bool insert(std::initializer_list<std::string> il);
 			bool insert(std::string word);
 
 			// Erase methods

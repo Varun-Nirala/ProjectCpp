@@ -110,13 +110,11 @@ namespace DS
 		: mSize(0)
 	{}
 
-	bool Trie::insert(std::initializer_list<std::string> il)
+	Trie::Trie(std::initializer_list<std::string> il)
 	{
-		bool ret = true;
 		std::for_each(il.begin(), il.end(), [&](auto word) {
-			ret &= insert(word);
+			insert(word);
 		});
-		return ret;
 	}
 
 	bool Trie::insert(std::string word)
