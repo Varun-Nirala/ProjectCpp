@@ -5,6 +5,21 @@
 using namespace std;
 
 template<typename T>
+void testAndPrint(Graph<T> &mGraph, const T &src, const T &dst);
+
+void test_1_NormalWorkingOfGraph();
+
+int main()
+{
+	test_1_NormalWorkingOfGraph();
+	return 0;
+}
+
+
+
+
+// TESTING FUNCTIONS
+template<typename T>
 void testAndPrint(Graph<T> &mGraph, const T &src, const T &dst)
 {
 	int weight = -1;
@@ -19,12 +34,12 @@ void testAndPrint(Graph<T> &mGraph, const T &src, const T &dst)
 	}
 }
 
-int main()
+void test_1_NormalWorkingOfGraph()
 {
 	Graph<string> mGraph;
 
 	mGraph.addEdge("A", "B", 1);
-	
+
 	mGraph.addEdge("B", "A", 0);
 	mGraph.addEdge("B", "D", 2);
 
@@ -46,6 +61,4 @@ int main()
 	testAndPrint<string>(mGraph, "A", "B");
 
 	testAndPrint<string>(mGraph, "A", "E");
-
-	return 0;
 }
