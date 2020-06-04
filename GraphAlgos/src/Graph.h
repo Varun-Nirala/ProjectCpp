@@ -3,6 +3,8 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <list>
+#include <map>
 
 template<typename T>
 class Node
@@ -64,7 +66,7 @@ class Node
 			return search(dst)->second;
 		}
 
-		const T& getData()
+		const T& getData() const
 		{
 			return mData;
 		}
@@ -79,6 +81,11 @@ class Node
 				return true;
 			}
 			return false;
+		}
+
+		vec_type& getAllNode()
+		{
+			return mToNode;
 		}
 
 	private:
@@ -132,8 +139,6 @@ class Graph
 		using iter_type				= typename vec_type::iterator;
 
 	public:
-		Graph() = default;
-
 		// It should always succeed, it will either create new edge or update the existing with new weight
 		bool addEdge(const T &src, const T &dst, int weight = 0)
 		{
@@ -205,9 +210,84 @@ class Graph
 			return !(search(val) == mAllNodes.end());
 		}
 
-		Node<T*> getNode(const T &val) const
+		Node<T>* getNode(const T &val)
 		{
-			return *(search(val));
+			return (*search(val));
+		}
+
+		// Traversal Algorithms
+		void BFS(const T &src)
+		{
+			if (mAllNodes.empty())
+				return;
+
+			std::map<T, bool> mVisited;
+			for (auto p : mAllNodes)
+			{
+				mVisited[p->getData()] = false;
+			}
+
+			mVisited[src] = true;
+
+			std::list<Node<T>*> nodeQeue;
+			nodeQeue.push_back(getNode(src));
+
+			Node<T> *currNode = NULL;
+			while (!nodeQeue.empty())
+			{
+				currNode = nodeQeue.front();
+				nodeQeue.pop_front();
+
+				std::cout << currNode->getData() << " ";
+
+				for (const std::pair<Node<T> *, int> nodePair : currNode->getAllNode())
+				{
+					std::map<T, bool>::iterator it = mVisited.find(nodePair.first->getData());
+
+					if (it != mVisited.end())
+					{
+						if (!it->second)
+						{
+							it->second = true;
+							nodeQeue.push_back(nodePair.first);
+						}
+					}
+				}
+			}
+			cout << endl;
+		}
+
+		void DFS(const T &src)
+		{
+			if (mAllNodes.empty())
+				return;
+
+			std::map<T, bool> mVisited;
+			for (auto p : mAllNodes)
+			{
+				mVisited[p->getData()] = false;
+			}
+
+			std::list<Node<T>*> nodeQeue;
+			nodeQeue.push_front(getNode(src));
+
+			Node<T> *currNode = NULL;
+			while (!nodeQeue.empty())
+			{
+				currNode = nodeQeue.front();
+				nodeQeue.pop_front();
+
+				if (!mVisited[currNode->getData()])
+				{
+					std::cout << currNode->getData() << " ";
+					mVisited[currNode->getData()] = true;
+					for (const std::pair<Node<T> *, int> nodePair : currNode->getAllNode())
+					{
+						nodeQeue.push_front(nodePair.first);
+					}
+				}
+			}
+			cout << endl;
 		}
 
 	private:
