@@ -10,25 +10,24 @@ int getPivot(int start, int end)
 
 int partition(int *arr, int low, int high)
 {
-	int pivot = arr[getPivot(low, high)];
-	int startIndex = low;
-
-	while (low < high)
+	int pivotVal = arr[getPivot(low, high)];
+	while (true)
 	{
-		while (arr[low] < pivot)
+		while (arr[low] < pivotVal)
 		{
 			low++;
 		}
 
-		while (arr[high] > pivot)
+		while (arr[high] > pivotVal)
 		{
 			high--;
 		}
 
-		if (low > high)
-			return high;
-
-		std::swap(arr[low], arr[high]);
+		if (low >= high) 
+		{
+			return high; 
+		}
+		swap(arr[low], arr[high]);
 		low++;
 		high--;
 	}
