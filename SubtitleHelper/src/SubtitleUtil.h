@@ -53,7 +53,7 @@ public:
 			m_File.Write("\n");
 			std::string str = format_duration(currentTime);
 			m_File.Write(str);
-			m_File.Write(" ---> ");
+			m_File.Write(" --> ");
 			m_bIsStart = !m_bIsStart;
 
 			std::cout << "Start Time : " << str << '\n';
