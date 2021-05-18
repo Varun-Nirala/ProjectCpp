@@ -114,10 +114,10 @@ void TGAFile::release()
 	//saveEditedData();
 }
 
-bool TGAFile::parse(const string &sFilepath)
+bool TGAFile::parse(const string& sFilepath)
 {
 	std::ifstream file(sFilepath, std::ios::in | std::ios::binary | std::ios::ate);
-	
+
 	if (!file)
 	{
 		LOG_ERROR("Error: Opening file :: " + sFilepath + "\n");
@@ -139,21 +139,30 @@ bool TGAFile::parse(const string &sFilepath)
 	}
 	file.close();
 
-	Header header;
+	TGAHeader header;
 	header.parse(buffer);
 
 	header.display();
 
-	cout << "";
+	char singature[17]{};
+
+	memcpy(singature, &buffer[length - 18], 16);
+
+	if (strncmp("TRUEVISION-XFILE", singature, 16) == 0)
+	{
+		m_version = 2;
+	}
+
+	return true;
 }
 
 void TGAFile::display() const
 {
 	size_t size = getSize();
-	cout << "FileName       := " << m_sFileName;
-	cout << "\nFilPath        := " << m_sFilePath;
-	cout << "\nNumber of line := " << size;
-	cout << "\n\nFile           :=\n\n******************* START ********************\n";
+	cout << "FileName         := " << m_sFileName << '\n';
+	cout << "FilPath          := " << m_sFilePath << '\n';
+	cout << "Number of line   := " << size << "\n\n";
+	cout << "File             :=\n\n******************* START ********************\n";
 
 	for(size_t i = 0; i < size; i++)
 	{
