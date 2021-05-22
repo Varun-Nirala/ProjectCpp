@@ -14,9 +14,8 @@ int main()
 
 	string path = R"(D:\Varun\Aristocrat_LapTop_BackUp_Jan_2021\Interviews_2021\StarStable\StarStableRounds\ScalingAlgorithm\src\)";
 
-	TGAFile file(path + fileName);
+	TGA::TGAFile file(path + fileName);
 
-	cout << file;
 
 	return 0;
 }

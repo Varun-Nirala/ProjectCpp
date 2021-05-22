@@ -17,25 +17,25 @@ namespace TGA
 		friend TGAFile;
 		friend TGAPixelData;
 	public:
-		void parse(const char const* buffer);
+		void parse(const unsigned char const* buffer);
 
-		bool isUnCompressed() const;
-		bool isRLE() const;
+		//bool isUnCompressed() const;
+		//bool isRLE() const;
 
-		bool isIndexed() const;
-		bool isRGB() const;
-		bool isGrayScale() const;
+		//bool isIndexed() const;
+		//bool isRGB() const;
+		//bool isGrayScale() const;
 
-		int bytesPerPixel() const;
+		//int bytesPerPixel() const;
 
-		bool leftToRightOrder() const;
-		bool topToBottomOrder() const;
+		//bool leftToRightOrder() const;
+		//bool topToBottomOrder() const;
 
-		int getRowStride() const;
-		int getXoffset() const;
-		int getYoffset() const;
+		//int getRowStride() const;
+		//int getXoffset() const;
+		//int getYoffset() const;
 
-		int getImageSize() const;	// returns total number of pixels
+		//int getImageSize() const;	// returns total number of pixels
 		
 		void display() const;
 
@@ -56,7 +56,7 @@ namespace TGA
 		uint16_t	m_yOrigin;						// absolute vertical coordinate
 		uint16_t	m_width;						// width in pixels
 		uint16_t	m_height;						// height in pixels
-		uint8_t		m_bitsPerPixel;					// bits per pixel [24, 32]
+		uint8_t		m_bitsPerPixel;					// bits per pixel [8, 16, 24, 32]
 		uint8_t		m_imageDescriptor;				// bits 0-3 give the alpha channel depth, bits 5-4 give direction
 	};
 
@@ -75,16 +75,25 @@ namespace TGA
 
 		bool parse(const std::string& sFilepath);
 
-		//void parseColorMap(const char const* buffer, int& index);
+		void parseColorMap(const unsigned char const* buffer, int& index);
 
-		void readPixelData(const char const* buffer, int& index);
+		void readPixelData(const unsigned char const* buffer, int& index);
 
-		void readUnCompressedData(const char const* buffer, int& index);
+		int readFileInBuffer(const std::string& sFilepath, unsigned char*& buffer) const;
+		void readVersion(const unsigned char const* buffer, int length);
 
-		void readRleData(const char const* buffer, int& index);
 
-		int readFileInBuffer(const std::string& sFilepath, char*& buffer) const;
-		void readVersion(const char const* buffer, int length);
+		void read_mapped_8(const unsigned char const* buffer, int& index, int channelSize);
+		void read_RGB_16(const unsigned char const* buffer, int& index, int channelSize);
+		void read_RGB_24(const unsigned char const* buffer, int& index, int channelSize);
+		void read_RGB_32(const unsigned char const* buffer, int& index, int channelSize);
+
+		void read_mapped_rle_8(const unsigned char const* buffer, int& index, int channelSize);
+		void read_RGB_rle_16(const unsigned char const* buffer, int& index, int channelSize);
+		void read_RGB_rle_24(const unsigned char const* buffer, int& index, int channelSize);
+		void read_RGB_rle_32(const unsigned char const* buffer, int& index, int channelSize);
+
+		void read_rle_8(const unsigned char const* buffer, int& index, int channelSize);
 
 	private:
 		std::string 					m_sFileName;
@@ -93,7 +102,8 @@ namespace TGA
 		int								m_version{ 1 };
 		std::string						m_imageID;
 		TGAHeader						m_header;
-		std::vector<uint8_t>			m_vPixels;
+		std::pair<uint8_t*, int>		m_pairPixels{};
+		std::pair<uint8_t*, int>		m_pairColorMap{};
 	};
 }
 #endif		//#define __FILEHANDLER_H__
