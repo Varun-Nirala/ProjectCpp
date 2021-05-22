@@ -183,7 +183,6 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 	m_pairPixels.second = m_header.m_width * m_header.m_height * (m_header.m_Bpp / 8);
 	m_pairPixels.first = new uint32_t[m_pairPixels.second];
 
-	uint32_t(TGAFile:: *readAsFuncPtr)(const UChar*, int&);
 	switch (m_header.m_imageType)
 	{
 		case UNCOMPRESSED_INDEX:
@@ -201,19 +200,19 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			{
 				case 15:
 				case 16:
-					readAsFuncPtr = &TGAFile::readColorAs16;
+					read_RGB_uc(buffer, index, &TGAFile::readColorAs16);
 					break;
 				case 24:
-					readAsFuncPtr = &TGAFile::readColorAs24;
+					read_RGB_uc(buffer, index, &TGAFile::readColorAs24);
 					break;
 				case 32:
-					readAsFuncPtr = &TGAFile::readColorAs32;
+					read_RGB_uc(buffer, index, &TGAFile::readColorAs32);
 					break;
 				default:
 					LOG_ERROR("Error: Incorrect Data.");
 					return;
 			}
-			read_RGB_uc(buffer, index, readAsFuncPtr);
+			
 
 			break;
 		case UNCOMPRESSED_GRAY:
@@ -242,19 +241,18 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			{
 			case 15:
 			case 16:
-				readAsFuncPtr = &TGAFile::readColorAs16;
+				read_RGB_rle(buffer, index, &TGAFile::readColorAs16);
 				break;
 			case 24:
-				readAsFuncPtr = &TGAFile::readColorAs24;
+				read_RGB_rle(buffer, index, &TGAFile::readColorAs24);
 				break;
 			case 32:
-				readAsFuncPtr = &TGAFile::readColorAs32;
+				read_RGB_rle(buffer, index, &TGAFile::readColorAs32);
 				break;
 			default:
 				LOG_ERROR("Error: Incorrect Data.");
 				return;
 			}
-			read_RGB_rle(buffer, index, readAsFuncPtr);
 			break;
 		case RLE_GRAY:
 			if (m_header.m_Bpp == 8)
@@ -293,7 +291,7 @@ void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* r
 	{
 		for (int j = 0; j < m_header.m_width; ++j)
 		{
-			m_pairPixels.first[id++] = readAsFuncPtr(buffer,index);
+			m_pairPixels.first[id++] = (this->*readAsFuncPtr)(buffer,index);
 		}
 	}
 }
@@ -359,7 +357,7 @@ void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* 
 				// RLE packet
 				runCount = (rcf & 0x7F) + 1;
 				j += runCount;
-				val = readAsFuncPtr(buffer, index);
+				val = (this->*readAsFuncPtr)(buffer, index);
 				while (runCount--)
 				{
 					m_pairPixels.first[id++] = val;
@@ -372,7 +370,7 @@ void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* 
 				j += runCount;
 				while (runCount--)
 				{
-					val = readAsFuncPtr(buffer, index);
+					val = (this->*readAsFuncPtr)(buffer, index);
 					m_pairPixels.first[id++] = val;
 				}
 			}
