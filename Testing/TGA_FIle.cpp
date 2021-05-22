@@ -58,16 +58,8 @@ TGAFile::TGAFile(const string &sFilepath)
 
 TGAFile::~TGAFile()
 {
-}
-
-string TGAFile::getFileName() const
-{
-	return m_sFileName;
-}
-
-string TGAFile::getFilePath() const
-{
-	return m_sFilePath;
+	delete[] m_pairColorMap.first;
+	delete[] m_pairPixels.first;
 }
 
 // PROTECTED MEMBERS
@@ -131,10 +123,9 @@ bool TGAFile::parse(const string& sFilepath)
 		}
 	}
 
-	// Need to parse color Map
+	// Check if we need to parse color Map
 	if (m_header.m_colorMapType == 1)
 	{
-		// Need to parse color map data
 		parseColorMap(buffer, index);
 	}
 	
@@ -144,37 +135,61 @@ bool TGAFile::parse(const string& sFilepath)
 	return true;
 }
 
-void TGAFile::parseColorMap(const UChar *buffer, int& index)
+void TGAFile::parseColorMap(const UChar* buffer, int& index)
 {
-	m_pairColorMap.second = m_header.m_CMapLength * m_header.m_CMapBpp / 8;
-	m_pairColorMap.first = new UChar[m_pairColorMap.second];
+	m_pairColorMap.second = m_header.m_CMapLength;
 
-	memcpy(m_pairColorMap.first, &buffer[index], m_pairColorMap.second);
+	m_pairColorMap.first = new uint32_t[m_pairColorMap.second];
+
+	if (m_header.m_CMapBpp == 15 || m_header.m_CMapBpp == 16)
+	{
+		//read as 2 byte
+		uint16_t val;
+		for (int i = 0; i < m_pairColorMap.second; ++i)
+		{
+			read2byte(buffer, index, val);
+			m_pairColorMap.first[i] = encodeAsRGBA(val);
+		}
+	}
+	else if (m_header.m_CMapBpp == 24)
+	{
+		uint8_t r, g, b;
+		for (int i = 0; i < m_pairColorMap.second; ++i)
+		{
+			read1byte(buffer, index, b);
+			read1byte(buffer, index, g);
+			read1byte(buffer, index, r);
+			m_pairColorMap.first[i] = encodeAsRGBA(r, g, b);
+		}
+	}
+	else if (m_header.m_CMapBpp == 32)
+	{
+		uint8_t r, g, b, a;
+		for (int i = 0; i < m_pairColorMap.second; ++i)
+		{
+			read1byte(buffer, index, b);
+			read1byte(buffer, index, g);
+			read1byte(buffer, index, r);
+			read1byte(buffer, index, a);
+			m_pairColorMap.first[i] = encodeAsRGBA(r, g, b, a);;
+		}
+	}
 
 	index += m_pairColorMap.second;
 }
 
 void TGAFile::readPixelData(const UChar *buffer, int& index)
 {
-	int channelSize = m_header.m_Bpp / 8;	// 1, 2, 3 or 4
+	m_pairPixels.second = m_header.m_width * m_header.m_height * (m_header.m_Bpp / 8);
+	m_pairPixels.first = new uint32_t[m_pairPixels.second];
 
-	channelSize = (channelSize == 2) ? 3 : channelSize;
-
-	if (m_header.m_colorMapType == UNCOMPRESSED_INDEX || m_header.m_colorMapType == RLE_INDEXED)
-	{
-		channelSize = m_header.m_CMapBpp / 8;
-	}
-
-	m_pairPixels.second = m_header.m_width * m_header.m_height * channelSize;
-
-	m_pairPixels.first = new UChar[m_pairPixels.second];
-
+	uint32_t(TGAFile:: *readAsFuncPtr)(const UChar*, int&);
 	switch (m_header.m_imageType)
 	{
 		case UNCOMPRESSED_INDEX:
 			if (m_header.m_Bpp == 8)
 			{
-				read_mapped_8(buffer, index, channelSize);
+				read_mapped_uc_8(buffer, index);
 			}
 			else
 			{
@@ -184,25 +199,27 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 		case UNCOMPRESSED_RGB:
 			switch (m_header.m_Bpp)
 			{
+				case 15:
 				case 16:
-					read_RGB_16(buffer, index, channelSize);
+					readAsFuncPtr = &TGAFile::readColorAs16;
 					break;
 				case 24:
-					read_RGB_24(buffer, index, channelSize);
+					readAsFuncPtr = &TGAFile::readColorAs24;
 					break;
 				case 32:
-					read_RGB_32(buffer, index, channelSize);
+					readAsFuncPtr = &TGAFile::readColorAs32;
 					break;
 				default:
 					LOG_ERROR("Error: Incorrect Data.");
-					break;
+					return;
 			}
+			read_RGB_uc(buffer, index, readAsFuncPtr);
 
 			break;
 		case UNCOMPRESSED_GRAY:
 			if (m_header.m_Bpp == 8)
 			{
-				memcpy(m_pairPixels.first, &buffer[index], m_pairPixels.second);
+				read_gray_uc_8(buffer, index);
 			}
 			else
 			{
@@ -213,7 +230,7 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 		case RLE_INDEXED:
 			if (m_header.m_Bpp == 8)
 			{
-				read_mapped_rle_8(buffer, index, channelSize);
+				read_mapped_rle_8(buffer, index);
 			}
 			else
 			{
@@ -223,24 +240,26 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 		case RLE_RGB:
 			switch (m_header.m_Bpp)
 			{
+			case 15:
 			case 16:
-				read_RGB_rle_16(buffer, index, channelSize);
+				readAsFuncPtr = &TGAFile::readColorAs16;
 				break;
 			case 24:
-				read_RGB_rle_24(buffer, index, channelSize);
+				readAsFuncPtr = &TGAFile::readColorAs24;
 				break;
 			case 32:
-				read_RGB_rle_32(buffer, index, channelSize);
+				readAsFuncPtr = &TGAFile::readColorAs32;
 				break;
 			default:
 				LOG_ERROR("Error: Incorrect Data.");
-				break;
+				return;
 			}
+			read_RGB_rle(buffer, index, readAsFuncPtr);
 			break;
 		case RLE_GRAY:
 			if (m_header.m_Bpp == 8)
 			{
-				read_rle_8(buffer, index, channelSize);
+				read_gray_rle_8(buffer, index);
 			}
 			else
 			{
@@ -252,216 +271,118 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 	}
 }
 
-void TGAFile::read_mapped_8(const UChar *buffer, int& index, int channelSize)
+// UNCOMPRESSED DATA
+void TGAFile::read_mapped_uc_8(const UChar* buffer, int& index)
 {
-	for (int i = 0; i < m_pairPixels.second; ++i)
+	uint8_t val;
+	int id = 0;
+	for (int i = 0; i < m_header.m_height; ++i)
 	{
-		for (int j = 0; j < channelSize; ++j)
+		for (int j = 0; j < m_header.m_width; ++j)
 		{
-			m_pairPixels.first[i + channelSize - j + 1] = m_pairColorMap.first[buffer[index + i] * channelSize + j];
+			read1byte(buffer, index, val);
+			m_pairPixels.first[id++] = val;
 		}
 	}
 }
 
-void TGAFile::read_RGB_16(const UChar *buffer, int& index, int channelSize)
+void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&))
 {
-	int size = m_header.m_width * m_header.m_height;
-
 	int id = 0;
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < m_header.m_height; ++i)
 	{
-		m_pairPixels.first[id++] = (buffer[index + 1] << 1) & 0xF8;
-		m_pairPixels.first[id++] = (buffer[index + 1] << 6) | (buffer[index] >> 2) &  0xF8;
-		m_pairPixels.first[id++] = (buffer[index] << 3) & 0xF8;
-
-		index += channelSize;
-	}
-}
-
-void TGAFile::read_RGB_24(const UChar *buffer, int& index, int channelSize)
-{
-	int size = m_header.m_width * m_header.m_height;
-
-	int id = 0;
-	for (int i = 0; i < size; ++i)
-	{
-		m_pairPixels.first[id++] = buffer[index + 2];
-		m_pairPixels.first[id++] = buffer[index + 1];
-		m_pairPixels.first[id++] = buffer[index];
-
-		index += channelSize;
-	}
-}
-
-void TGAFile::read_RGB_32(const UChar *buffer, int& index, int channelSize)
-{
-	int size = m_header.m_width * m_header.m_height;
-
-	int id = 0;
-	for (int i = 0; i < size; ++i)
-	{
-		m_pairPixels.first[id++] = buffer[index + 2];
-		m_pairPixels.first[id++] = buffer[index + 1];
-		m_pairPixels.first[id++] = buffer[index];
-
-		m_pairPixels.first[id++] = buffer[index + 3];
-
-		index += channelSize;
-	}
-}
-
-void TGAFile::read_mapped_rle_8(const UChar *buffer, int& index, int channelSize)
-{
-	int max = m_header.m_width * m_header.m_height * channelSize;
-
-	for (int i = 0; i < max; ++i)
-	{
-		uint8_t runLengthByte = buffer[index + i];
-
-		bool isRaw = ((runLengthByte & 0x80) == 0);	// check 7th bit , 0 means RAW packet, 1 means RLE
-		int repitionCount = ((runLengthByte & 0x7f) + 1); // other 7 bit are for => repeat count - 1
-
-		for (int j = 0; j < repitionCount; ++j)
+		for (int j = 0; j < m_header.m_width; ++j)
 		{
-			for (int k = 0; k < channelSize; ++k)
-			{
-				m_pairPixels.first[i + channelSize - k + 1] = m_pairColorMap.first[buffer[index + i] * channelSize + k];
-			}
+			m_pairPixels.first[id++] = readAsFuncPtr(buffer,index);
+		}
+	}
+}
 
-			if (isRaw)
+void TGAFile::read_gray_uc_8(const UChar* buffer, int& index)
+{
+	read_mapped_uc_8(buffer, index);
+}
+
+// COMPRESSED DATA
+void TGAFile::read_mapped_rle_8(const UChar* buffer, int& index)
+{
+	int id = 0;
+	uint8_t rcf;	// repetition count field
+	uint8_t val;	// pixel value field
+	int runCount;
+	for (int i = 0; i < m_header.m_height; ++i)
+	{
+		for (int j = 0; j < m_header.m_width;)
+		{
+			read1byte(buffer, index, rcf);
+
+			if (rcf & 0x80)
 			{
-				index += channelSize;
+				// RLE packet
+				runCount = (rcf & 0x7F) + 1;
+				j += runCount;
+				read1byte(buffer, index, val);
+				while (runCount--)
+				{
+					m_pairPixels.first[id++] = val;
+				}
+			}
+			else
+			{
+				// Raw packet
+				runCount = rcf + 1;
+				j += runCount;
+				while (runCount--)
+				{
+					read1byte(buffer, index, val);
+					m_pairPixels.first[id++] = val;
+				}
 			}
 		}
+	}
+}
 
-		if (!isRaw)
+void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&))
+{
+	int id = 0;
+	uint8_t rcf;	// repetition count field
+	uint32_t val;	// pixel value field
+	int runCount;
+	for (int i = 0; i < m_header.m_height; ++i)
+	{
+		for (int j = 0; j < m_header.m_width;)
 		{
-			index += channelSize;
+			read1byte(buffer, index, rcf);
+
+			if (rcf & 0x80)
+			{
+				// RLE packet
+				runCount = (rcf & 0x7F) + 1;
+				j += runCount;
+				val = readAsFuncPtr(buffer, index);
+				while (runCount--)
+				{
+					m_pairPixels.first[id++] = val;
+				}
+			}
+			else
+			{
+				// Raw packet
+				runCount = rcf + 1;
+				j += runCount;
+				while (runCount--)
+				{
+					val = readAsFuncPtr(buffer, index);
+					m_pairPixels.first[id++] = val;
+				}
+			}
 		}
 	}
 }
 
-void TGAFile::read_RGB_rle_16(const UChar *buffer, int& index, int channelSize)
+void TGAFile::read_gray_rle_8(const UChar* buffer, int& index)
 {
-	int max = m_header.m_width * m_header.m_height * channelSize;
-
-	int id = 0;
-	for (int i = 0; i < max; ++i)
-	{
-		uint8_t runLengthByte = buffer[index + i];
-
-		bool isRaw = ((runLengthByte & 0x80) == 0);	// check 7th bit , 0 means RAW packet, 1 means RLE
-		int repitionCount = ((runLengthByte & 0x7f) + 1); // other 7 bit are for => repeat count - 1
-
-		for (int j = 0; j < repitionCount; ++j)
-		{
-			m_pairPixels.first[id++] = (buffer[index + 1] << 1) & 0xF8;
-			m_pairPixels.first[id++] = (buffer[index + 1] << 6) | (buffer[index] >> 2) & 0xF8;
-			m_pairPixels.first[id++] = (buffer[index] << 3) & 0xF8;
-
-			if (isRaw)
-			{
-				index += channelSize;
-			}
-		}
-
-		if (!isRaw)
-		{
-			index += channelSize;
-		}
-	}
-}
-
-void TGAFile::read_RGB_rle_24(const UChar *buffer, int& index, int channelSize)
-{
-	int max = m_header.m_width * m_header.m_height * channelSize;
-
-	int id = 0;
-	for (int i = 0; i < max; ++i)
-	{
-		uint8_t runLengthByte = buffer[index + i];
-
-		bool isRaw = ((runLengthByte & 0x80) == 0);	// check 7th bit , 0 means RAW packet, 1 means RLE
-		int repitionCount = ((runLengthByte & 0x7f) + 1); // other 7 bit are for => repeat count - 1
-
-		for (int j = 0; j < repitionCount; ++j)
-		{
-			m_pairPixels.first[id++] = buffer[index + 2];
-			m_pairPixels.first[id++] = buffer[index + 1];
-			m_pairPixels.first[id++] = buffer[index];
-
-			if (isRaw)
-			{
-				index += channelSize;
-			}
-		}
-
-		if (!isRaw)
-		{
-			index += channelSize;
-		}
-	}
-}
-
-void TGAFile::read_RGB_rle_32(const UChar *buffer, int& index, int channelSize)
-{
-	int max = m_header.m_width * m_header.m_height * channelSize;
-
-	int id = 0;
-	for (int i = 0; i < max; ++i)
-	{
-		uint8_t runLengthByte = buffer[index + i];
-
-		bool isRaw = ((runLengthByte & 0x80) == 0);	// check 7th bit , 0 means RAW packet, 1 means RLE
-		int repitionCount = ((runLengthByte & 0x7f) + 1); // other 7 bit are for => repeat count - 1
-
-		for (int j = 0; j < repitionCount; ++j)
-		{
-			m_pairPixels.first[id++] = buffer[index + 2];
-			m_pairPixels.first[id++] = buffer[index + 1];
-			m_pairPixels.first[id++] = buffer[index];
-			m_pairPixels.first[id++] = buffer[index + 3];
-
-			if (isRaw)
-			{
-				index += channelSize;
-			}
-		}
-
-		if (!isRaw)
-		{
-			index += channelSize;
-		}
-	}
-}
-
-void TGAFile::read_rle_8(const UChar *buffer, int& index, int channelSize)
-{
-	int max = m_header.m_width * m_header.m_height * channelSize;
-
-	int id = 0;
-	for (int i = 0; i < max; ++i)
-	{
-		uint8_t runLengthByte = buffer[index + i];
-
-		bool isRaw = ((runLengthByte & 0x80) == 0);	// check 7th bit , 0 means RAW packet, 1 means RLE
-		int repitionCount = ((runLengthByte & 0x7f) + 1); // other 7 bit are for => repeat count - 1
-
-		for (int j = 0; j < repitionCount; ++j)
-		{
-			m_pairPixels.first[id++] = buffer[index];
-
-			if (isRaw)
-			{
-				index += channelSize;
-			}
-		}
-
-		if (!isRaw)
-		{
-			index += channelSize;
-		}
-	}
+	read_mapped_rle_8(buffer, index);
 }
 
 int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) const

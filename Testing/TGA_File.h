@@ -21,12 +21,18 @@ namespace TGA
 		RLE_GRAY = 11,
 	};
 
-	void read1byte(const UChar* srcbuffer, int& index, uint8_t& dst)
+	enum ReadType {
+		AS_16_BIT,
+		AS_24_BIT,
+		AS_32_BIT,
+	};
+
+	inline void read1byte(const UChar* srcbuffer, int& index, uint8_t& dst)
 	{
 		memcpy(&dst, &srcbuffer[index++], 1);
 	}
 
-	void read2byte(const UChar* srcbuffer, int& index, uint16_t& dst)
+	inline void read2byte(const UChar* srcbuffer, int& index, uint16_t& dst)
 	{
 		memcpy(&dst, &srcbuffer[index], 2);
 		index += 2;
@@ -61,8 +67,9 @@ namespace TGA
 		TGAFile(const std::string& sFilepath);
 		~TGAFile();
 
-		std::string getFileName() const;
-		std::string getFilePath() const;
+		std::string getFileName() const { return m_sFileName; }
+
+		std::string getFilePath() const { return m_sFilePath; }
 
 		void displayHeader() { m_header.display(); }
 
@@ -72,25 +79,69 @@ namespace TGA
 
 		bool parse(const std::string& sFilepath);
 
-		void parseColorMap(const UChar *buffer, int& index);
+		void parseColorMap(const UChar* buffer, int& index);
 
-		void readPixelData(const UChar *buffer, int& index);
+		void readPixelData(const UChar* buffer, int& index);
+
+		// UNCOMPRESSED DATA
+		void read_mapped_uc_8(const UChar* buffer, int& index);
+
+		void read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::*readAsFuncPtr)(const UChar*, int&));
+
+		void read_gray_uc_8(const UChar* buffer, int& index);
+
+		// COMPRESSED DATA
+		void read_mapped_rle_8(const UChar* buffer, int& index);
+
+		void read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::*readAsFuncPtr)(const UChar*, int&));
+
+		void read_gray_rle_8(const UChar* buffer, int& index);
+
 
 		int readFileInBuffer(const std::string& sFilepath, UChar*& buffer) const;
-		void readVersion(const UChar *buffer, int length);
+		void readVersion(const UChar* buffer, int length);
 
+		uint32_t readColorAs16(const UChar* buffer, int& index)
+		{
+			uint8_t a = 255;
+			uint16_t val;
+			read2byte(buffer, index, val);
+			if (!(val & 0x8000))
+				a = 0;
+			return encodeAsRGBA(val, a);
+		}
 
-		void read_mapped_8(const UChar *buffer, int& index, int channelSize);
-		void read_RGB_16(const UChar *buffer, int& index, int channelSize);
-		void read_RGB_24(const UChar *buffer, int& index, int channelSize);
-		void read_RGB_32(const UChar *buffer, int& index, int channelSize);
+		inline uint32_t readColorAs24(const UChar* buffer, int& index)
+		{
+			uint8_t r, g, b;
+			read1byte(buffer, index, b);
+			read1byte(buffer, index, g);
+			read1byte(buffer, index, r);
+			return encodeAsRGBA(r, g, b);
+		}
 
-		void read_mapped_rle_8(const UChar *buffer, int& index, int channelSize);
-		void read_RGB_rle_16(const UChar *buffer, int& index, int channelSize);
-		void read_RGB_rle_24(const UChar *buffer, int& index, int channelSize);
-		void read_RGB_rle_32(const UChar *buffer, int& index, int channelSize);
+		uint32_t readColorAs32(const UChar* buffer, int& index)
+		{
+			uint8_t r, g, b, a;
+			read1byte(buffer, index, b);
+			read1byte(buffer, index, g);
+			read1byte(buffer, index, r);
+			read1byte(buffer, index, a);
+			return encodeAsRGBA(r, g, b, a);
+		}
 
-		void read_rle_8(const UChar *buffer, int& index, int channelSize);
+		inline uint32_t encodeAsRGBA(uint16_t pixel, uint8_t a = 255)
+		{
+			uint8_t r = (pixel >> 10) & 0x1F;
+			uint8_t g = (pixel >> 5) & 0x1F;
+			uint8_t b = pixel & 0x1F;
+			return encodeAsRGBA(r, g, b, a);
+		}
+
+		inline uint32_t encodeAsRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+		{
+			return (r | (g << 8) || (b << 16) || (a << 24));
+		}
 
 	private:
 		std::string 					m_sFileName;
@@ -99,8 +150,8 @@ namespace TGA
 		int								m_version{ 1 };
 		std::string						m_imageID;
 		TGAHeader						m_header;
-		std::pair<uint8_t*, int>		m_pairPixels{};
-		std::pair<uint8_t*, int>		m_pairColorMap{};
+		std::pair<uint32_t*, int>		m_pairPixels{};
+		std::pair<uint32_t*, int>		m_pairColorMap{};
 	};
 }
 #endif		//#define __FILEHANDLER_H__
