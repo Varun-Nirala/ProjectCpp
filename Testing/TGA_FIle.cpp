@@ -11,6 +11,8 @@ using std::cout;
 using std::endl;
 using std::vector;
 
+const char TRUEVISION_SIGNATURE[] = "TRUEVISION-XFILE.\0";
+
 void TGAHeader::parse(const UChar *buffer)
 {
 	int index = 0;
@@ -35,6 +37,7 @@ void TGAHeader::parse(const UChar *buffer)
 
 void TGAHeader::display() const
 {
+	std::cout << "**************************** HEADER ****************************\n";
 	std::cout << "ID length         :: " << (int)m_IDLength << '\n';
 	std::cout << "Color Map Type    :: " << (int)m_colorMapType << '\n';
 	std::cout << "Image Type        :: " << (int)m_imageType << '\n';
@@ -48,66 +51,104 @@ void TGAHeader::display() const
 	std::cout << "Width in pixel    :: " << (int)m_width << '\n';
 	std::cout << "Height in pixel   :: " << (int)m_height << '\n';
 	std::cout << "Bits per Pixel    :: " << (int)m_Bpp << '\n';
-	std::cout << "Image Descriptor  :: " << (int)m_imageDescriptor << '\n';
+	std::cout << "Image Descriptor  :: " << (int)m_imageDescriptor << "\n\n";
 }
 
-TGAFile::TGAFile(const string &sFilepath)
+int TGAFooter::parse(const UChar* buffer, int length)
 {
-	initialize(sFilepath);
-}
-
-TGAFile::~TGAFile()
-{
-	delete[] m_pairColorMap.first;
-	delete[] m_pairPixels.first;
-}
-
-// PROTECTED MEMBERS
-void TGAFile::initialize(const string &sFilepath)
-{
-	if(parse(sFilepath))
+	int version = 1;
+	memcpy(m_signature, &buffer[length - 18], 18);
+	if (strncmp(TRUEVISION_SIGNATURE, m_signature, 18) == 0)
 	{
-		m_sFileName = extractFileName(sFilepath);
+		version = 2;
+		int index = length - 26;
+		read4byte(buffer, index, m_extensionOffset);
+		read4byte(buffer, index, m_developerOffset);
+	}
+	return version;
+}
+
+void TGAFooter::display() const
+{
+	std::cout << "**************************** FOOTER ****************************\n";
+	if (strncmp(TRUEVISION_SIGNATURE, (char*)m_signature, 16) == 0)
+	{
+		std::cout << "Version                  :: 2\n";
+		std::cout << "Extension area offset    :: " << (int)m_extensionOffset << '\n';
+		std::cout << "Developer area offset    :: " << (int)m_developerOffset << "\n\n";
+	}
+	else
+	{
+		std::cout << "Version 1. No Footer data\n\n";
 	}
 }
 
-string TGAFile::extractFileName(const string &sFilePath)
+TGAFile::TGAFile(const string& sFilepath)
+	:m_sFullPath(sFilepath)
+{}
+
+TGAFile::~TGAFile()
+{
+	delete[] m_vFooterAndExtra.first;
+}
+
+void TGAFile::decode()
+{
+	if (!parse())
+	{
+		LOG_ERROR("Parsing file failed.");
+	}
+}
+
+string TGAFile::getFileName() const
 {
 	string sFileName;
-	if(sFilePath.empty())
+	if(m_sFullPath.empty())
 	{
 		LOG_ERROR("Provided filepath is empty.");
 		//TODO::Throw exception
 	}
 	else
 	{
-		unsigned int matchIndex = sFilePath.rfind('\\') + 1;
+		unsigned int matchIndex = m_sFullPath.rfind('\\') + 1;
 		if(matchIndex != string::npos)
 		{
-			m_sFilePath = sFilePath.substr(0, matchIndex);
-			sFileName = sFilePath.substr(matchIndex);
-		}
-		else
-		{
-			sFileName = sFilePath;
+			sFileName = m_sFullPath.substr(matchIndex);
 		}
 	}
 	return sFileName;
 }
 
-bool TGAFile::parse(const string& sFilepath)
+string TGAFile::getFilePath() const
+{
+	string sFilePath;
+	if (m_sFullPath.empty())
+	{
+		LOG_ERROR("Provided filepath is empty.");
+	}
+	else
+	{
+		unsigned int matchIndex = m_sFullPath.rfind('\\') + 1;
+		if (matchIndex != string::npos)
+		{
+			sFilePath = m_sFullPath.substr(0, matchIndex);
+		}
+	}
+	return sFilePath;
+}
+
+bool TGAFile::parse()
 {
 	UChar* buffer = nullptr;
-	int length = readFileInBuffer(sFilepath, buffer);
+	int length = readFileInBuffer(m_sFullPath, buffer);
 
 	if (length == -1)
 	{
 		return false;
 	}
 
-	readVersion(buffer, length);
-
 	m_header.parse(buffer);
+	m_version = m_footer.parse(buffer, length);
 
 	int index = 18;	// as we have already read the header
 
@@ -131,57 +172,52 @@ bool TGAFile::parse(const string& sFilepath)
 	
 	readPixelData(buffer, index);
 
+	if (m_version == 2)
+	{
+		// Extract extra data after the image the data.
+		m_vFooterAndExtra.second = length - index;
+		m_vFooterAndExtra.first = new uint8_t[m_vFooterAndExtra.second];
+		memcpy(buffer, m_vFooterAndExtra.first, m_vFooterAndExtra.second);
+	}
+
 	delete[] buffer;
 	return true;
 }
 
 void TGAFile::parseColorMap(const UChar* buffer, int& index)
 {
-	m_pairColorMap.second = m_header.m_CMapLength;
-
-	m_pairColorMap.first = new uint32_t[m_pairColorMap.second];
-
+	m_vColorMap.resize(m_header.m_CMapLength);
 	if (m_header.m_CMapBpp == 15 || m_header.m_CMapBpp == 16)
 	{
 		//read as 2 byte
 		uint16_t val;
-		for (int i = 0; i < m_pairColorMap.second; ++i)
+		for (int i = 0; i < m_header.m_CMapLength; ++i)
 		{
 			read2byte(buffer, index, val);
-			m_pairColorMap.first[i] = encodeAsRGBA(val);
+			m_vColorMap[i] = encodeAsRGBA(val);
 		}
 	}
 	else if (m_header.m_CMapBpp == 24)
 	{
-		uint8_t r, g, b;
-		for (int i = 0; i < m_pairColorMap.second; ++i)
+		for (int i = 0; i < m_header.m_CMapLength; ++i)
 		{
-			read1byte(buffer, index, b);
-			read1byte(buffer, index, g);
-			read1byte(buffer, index, r);
-			m_pairColorMap.first[i] = encodeAsRGBA(r, g, b);
+			m_vColorMap[i] = readColorAs24(buffer, index);
 		}
 	}
 	else if (m_header.m_CMapBpp == 32)
 	{
-		uint8_t r, g, b, a;
-		for (int i = 0; i < m_pairColorMap.second; ++i)
+		for (int i = 0; i < m_header.m_CMapLength; ++i)
 		{
-			read1byte(buffer, index, b);
-			read1byte(buffer, index, g);
-			read1byte(buffer, index, r);
-			read1byte(buffer, index, a);
-			m_pairColorMap.first[i] = encodeAsRGBA(r, g, b, a);;
+			m_vColorMap[i] = readColorAs32(buffer, index);
 		}
 	}
 
-	index += m_pairColorMap.second;
+	index += m_header.m_CMapLength;
 }
 
 void TGAFile::readPixelData(const UChar *buffer, int& index)
 {
-	m_pairPixels.second = m_header.m_width * m_header.m_height * (m_header.m_Bpp / 8);
-	m_pairPixels.first = new uint32_t[m_pairPixels.second];
+	m_vPixels.resize(m_header.m_width * m_header.m_height * (m_header.m_Bpp / 8));
 
 	switch (m_header.m_imageType)
 	{
@@ -192,9 +228,10 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			else
 			{
-				LOG_ERROR("Error: Incorrect Data.");
+				LOG_ERROR("Incorrect Data.");
 			}
 			break;
+
 		case UNCOMPRESSED_RGB:
 			switch (m_header.m_Bpp)
 			{
@@ -209,12 +246,11 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 					read_RGB_uc(buffer, index, &TGAFile::readColorAs32);
 					break;
 				default:
-					LOG_ERROR("Error: Incorrect Data.");
+					LOG_ERROR("Incorrect Data.");
 					return;
 			}
-			
-
 			break;
+
 		case UNCOMPRESSED_GRAY:
 			if (m_header.m_Bpp == 8)
 			{
@@ -222,7 +258,7 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			else
 			{
-				LOG_ERROR("Error: Incorrect Data.");
+				LOG_ERROR("Incorrect Data.");
 			}
 			break;
 
@@ -233,9 +269,10 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			else
 			{
-				LOG_ERROR("Error: Incorrect Data.");
+				LOG_ERROR("Incorrect Data.");
 			}
 			break;
+
 		case RLE_RGB:
 			switch (m_header.m_Bpp)
 			{
@@ -250,10 +287,11 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 				read_RGB_rle(buffer, index, &TGAFile::readColorAs32);
 				break;
 			default:
-				LOG_ERROR("Error: Incorrect Data.");
+				LOG_ERROR("Incorrect Data.");
 				return;
 			}
 			break;
+
 		case RLE_GRAY:
 			if (m_header.m_Bpp == 8)
 			{
@@ -261,11 +299,12 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			else
 			{
-				LOG_ERROR("Error: Incorrect Data.");
+				LOG_ERROR("Incorrect Data.");
 			}
 			break;
+
 		default:
-			LOG_ERROR("Error: Image type unkown.");
+			LOG_ERROR("Image type unkown.");
 	}
 }
 
@@ -279,7 +318,7 @@ void TGAFile::read_mapped_uc_8(const UChar* buffer, int& index)
 		for (int j = 0; j < m_header.m_width; ++j)
 		{
 			read1byte(buffer, index, val);
-			m_pairPixels.first[id++] = val;
+			m_vPixels[id++] = val;
 		}
 	}
 }
@@ -291,7 +330,7 @@ void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* r
 	{
 		for (int j = 0; j < m_header.m_width; ++j)
 		{
-			m_pairPixels.first[id++] = (this->*readAsFuncPtr)(buffer,index);
+			m_vPixels[id++] = (this->*readAsFuncPtr)(buffer,index);
 		}
 	}
 }
@@ -322,7 +361,7 @@ void TGAFile::read_mapped_rle_8(const UChar* buffer, int& index)
 				read1byte(buffer, index, val);
 				while (runCount--)
 				{
-					m_pairPixels.first[id++] = val;
+					m_vPixels[id++] = val;
 				}
 			}
 			else
@@ -333,7 +372,7 @@ void TGAFile::read_mapped_rle_8(const UChar* buffer, int& index)
 				while (runCount--)
 				{
 					read1byte(buffer, index, val);
-					m_pairPixels.first[id++] = val;
+					m_vPixels[id++] = val;
 				}
 			}
 		}
@@ -360,7 +399,7 @@ void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* 
 				val = (this->*readAsFuncPtr)(buffer, index);
 				while (runCount--)
 				{
-					m_pairPixels.first[id++] = val;
+					m_vPixels[id++] = val;
 				}
 			}
 			else
@@ -371,7 +410,7 @@ void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* 
 				while (runCount--)
 				{
 					val = (this->*readAsFuncPtr)(buffer, index);
-					m_pairPixels.first[id++] = val;
+					m_vPixels[id++] = val;
 				}
 			}
 		}
@@ -389,7 +428,7 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) con
 
 	if (!file)
 	{
-		LOG_ERROR("Error: Opening file :: " + sFilepath + "\n");
+		LOG_ERROR("Opening file :: " + sFilepath + "\n");
 		file.close();
 		return -1;
 	}
@@ -404,19 +443,9 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) con
 
 	if (!file)
 	{
-		LOG_ERROR("Error: Only :: " + std::to_string(file.gcount()) + " could be read" + "\n");
+		LOG_ERROR("Only :: " + std::to_string(file.gcount()) + " could be read" + "\n");
 	}
 	file.close();
 	return length;
-}
-
-void TGAFile::readVersion(const UChar *buffer, int length)
-{
-	char singature[17]{};
-	memcpy(singature, &buffer[length - 18], 16);
-	if (strncmp("TRUEVISION-XFILE", singature, 16) == 0)
-	{
-		m_version = 2;
-	}
 }
 }

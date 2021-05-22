@@ -38,6 +38,12 @@ namespace TGA
 		index += 2;
 	}
 
+	inline void read4byte(const UChar* srcbuffer, int& index, uint32_t& dst)
+	{
+		memcpy(&dst, &srcbuffer[index], 4);
+		index += 4;
+	}
+
 	struct TGAHeader
 	{
 		uint8_t		m_IDLength;						// Length of image ID field
@@ -61,23 +67,35 @@ namespace TGA
 		void parse(const UChar * const buffer);
 	};
 
+	struct TGAFooter
+	{
+		uint32_t	m_extensionOffset{};
+		uint32_t	m_developerOffset{};
+		char		m_signature[18]{};
+
+		void display() const;
+		// return version of the file format
+		int parse(const UChar* const buffer, int length);
+	};
+
 	class TGAFile
 	{
 	public:
 		TGAFile(const std::string& sFilepath);
 		~TGAFile();
 
-		std::string getFileName() const { return m_sFileName; }
+		void decode();
+		void encode(std::string& newFileName) {};
 
-		std::string getFilePath() const { return m_sFilePath; }
+		std::string getFileName() const;
+
+		std::string getFilePath() const;
 
 		void displayHeader() { m_header.display(); }
+		void displayFooter() { m_footer.display(); }
 
 	protected:
-		void initialize(const std::string& sFilepath);
-		std::string extractFileName(const std::string& sFilePath);
-
-		bool parse(const std::string& sFilepath);
+		bool parse();
 
 		void parseColorMap(const UChar* buffer, int& index);
 
@@ -144,14 +162,18 @@ namespace TGA
 		}
 
 	private:
-		std::string 					m_sFileName;
-		std::string 					m_sFilePath;
+		std::string 					m_sFullPath;
 
 		int								m_version{ 1 };
 		std::string						m_imageID;
+		
 		TGAHeader						m_header;
-		std::pair<uint32_t*, int>		m_pairPixels{};
-		std::pair<uint32_t*, int>		m_pairColorMap{};
+		TGAFooter						m_footer;
+
+		std::vector<uint32_t>			m_vPixels;
+		std::vector<uint32_t>			m_vColorMap;
+
+		std::pair<uint8_t*, int>		m_vFooterAndExtra{};
 	};
 }
 #endif		//#define __FILEHANDLER_H__
