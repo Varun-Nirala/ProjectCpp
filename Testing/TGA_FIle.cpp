@@ -11,29 +11,6 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-enum ImageType {
-	NO_IMAGE_DATA = 0,
-
-	UNCOMPRESSED_INDEX = 1,		// Not handling
-	UNCOMPRESSED_RGB = 2,
-	UNCOMPRESSED_GRAY = 3,
-
-	RLE_INDEXED = 9,			// Not handling
-	RLE_RGB = 10,
-	RLE_GRAY = 11,
-};
-
-void read1byte(const UChar *srcbuffer, int& index, uint8_t& dst)
-{
-	memcpy(&dst, &srcbuffer[index++], 1);
-}
-
-void read2byte(const UChar *srcbuffer, int& index, uint16_t& dst)
-{
-	memcpy(&dst, &srcbuffer[index], 2);
-	index += 2;
-}
-
 void TGAHeader::parse(const UChar *buffer)
 {
 	int index = 0;
@@ -55,67 +32,6 @@ void TGAHeader::parse(const UChar *buffer)
 	read1byte(buffer, index, m_Bpp);
 	read1byte(buffer, index, m_imageDescriptor);
 }
-
-/*
-bool TGAHeader::isUnCompressed() const
-{
-	return m_imageType == UNCOMPRESSED_INDEX || m_imageType == UNCOMPRESSED_RGB || m_imageType == UNCOMPRESSED_GRAY;
-}
-
-bool TGAHeader::isRLE() const
-{
-	return m_imageType == RLE_INDEXED || m_imageType == RLE_RGB || m_imageType == RLE_GRAY;
-}
-
-bool TGAHeader::isIndexed() const
-{
-	return m_imageType == UNCOMPRESSED_INDEX || m_imageType == RLE_INDEXED;
-}
-
-bool TGAHeader::isRGB() const
-{
-	return m_imageType == RLE_RGB || m_imageType == UNCOMPRESSED_RGB;
-}
-
-bool TGAHeader::isGrayScale() const
-{
-	return m_imageType == UNCOMPRESSED_GRAY || m_imageType == RLE_GRAY;
-}
-
-int TGAHeader::bytesPerPixel() const
-{
-	return isRGB() ? 4 : 1;
-}
-
-bool TGAHeader::leftToRightOrder() const
-{
-	return (m_imageDescriptor & 0x10);
-}
-
-bool TGAHeader::topToBottomOrder() const
-{
-	return (m_imageDescriptor & 0x20);
-}
-
-int TGAHeader::getRowStride() const
-{
-	return m_width * bytesPerPixel();
-}
-
-int TGAHeader::getXoffset() const
-{
-	return leftToRightOrder() ? 1 : -1;
-}
-
-int TGAHeader::getYoffset() const
-{
-	return topToBottomOrder() ? 1 : -1;
-}
-
-int TGAHeader::getImageSize() const
-{
-	return getRowStride() * m_height;
-}*/
 
 void TGAHeader::display() const
 {

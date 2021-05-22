@@ -9,8 +9,28 @@ namespace TGA
 {
 	using UChar = unsigned char;
 
-	void read1byte(const UChar *srcbuffer, int& index, uint8_t& dst);
-	void read2byte(const UChar *srcbuffer, int& index, uint16_t& dst);
+	enum ImageType {
+		NO_IMAGE_DATA = 0,
+
+		UNCOMPRESSED_INDEX = 1,
+		UNCOMPRESSED_RGB = 2,
+		UNCOMPRESSED_GRAY = 3,
+
+		RLE_INDEXED = 9,
+		RLE_RGB = 10,
+		RLE_GRAY = 11,
+	};
+
+	void read1byte(const UChar* srcbuffer, int& index, uint8_t& dst)
+	{
+		memcpy(&dst, &srcbuffer[index++], 1);
+	}
+
+	void read2byte(const UChar* srcbuffer, int& index, uint16_t& dst)
+	{
+		memcpy(&dst, &srcbuffer[index], 2);
+		index += 2;
+	}
 
 	struct TGAHeader
 	{
