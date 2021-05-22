@@ -16,6 +16,7 @@ int main()
 
 	TGA::TGAFile file(path + fileName);
 
+	file.displayHeader();
 
 	return 0;
 }

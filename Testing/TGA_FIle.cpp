@@ -23,28 +23,28 @@ enum ImageType {
 	RLE_GRAY = 11,
 };
 
-void read1byte(const unsigned char const* srcbuffer, int& index, uint8_t& dst)
+void read1byte(const UChar *srcbuffer, int& index, uint8_t& dst)
 {
 	memcpy(&dst, &srcbuffer[index++], 1);
 }
 
-void read2byte(const unsigned char const* srcbuffer, int& index, uint16_t& dst)
+void read2byte(const UChar *srcbuffer, int& index, uint16_t& dst)
 {
 	memcpy(&dst, &srcbuffer[index], 2);
 	index += 2;
 }
 
-void TGAHeader::parse(const unsigned char const* buffer)
+void TGAHeader::parse(const UChar *buffer)
 {
 	int index = 0;
-	read1byte(buffer, index, m_idLength);
+	read1byte(buffer, index, m_IDLength);
 	read1byte(buffer, index, m_colorMapType);
 	read1byte(buffer, index, m_imageType);
 
-	read2byte(buffer, index, m_colorMapOrigin);
-	read2byte(buffer, index, m_colorMapLength);
+	read2byte(buffer, index, m_CMapOrigin);
+	read2byte(buffer, index, m_CMapLength);
 
-	read1byte(buffer, index, m_ColorMapbitsPerPixel);
+	read1byte(buffer, index, m_CMapBpp);
 
 	read2byte(buffer, index, m_xOrigin);
 	read2byte(buffer, index, m_yOrigin);
@@ -52,7 +52,7 @@ void TGAHeader::parse(const unsigned char const* buffer)
 	read2byte(buffer, index, m_width);
 	read2byte(buffer, index, m_height);
 
-	read1byte(buffer, index, m_bitsPerPixel);
+	read1byte(buffer, index, m_Bpp);
 	read1byte(buffer, index, m_imageDescriptor);
 }
 
@@ -119,19 +119,19 @@ int TGAHeader::getImageSize() const
 
 void TGAHeader::display() const
 {
-	std::cout << "ID length         :: " << (int)m_idLength << '\n';
+	std::cout << "ID length         :: " << (int)m_IDLength << '\n';
 	std::cout << "Color Map Type    :: " << (int)m_colorMapType << '\n';
 	std::cout << "Image Type        :: " << (int)m_imageType << '\n';
 
-	std::cout << "Color Map Origin  :: " << (int)m_colorMapOrigin << '\n';
-	std::cout << "Color Map Length  :: " << (int)m_colorMapLength << '\n';
-	std::cout << "Color Map Depth   :: " << (int)m_ColorMapbitsPerPixel << '\n';
+	std::cout << "Color Map Origin  :: " << (int)m_CMapOrigin << '\n';
+	std::cout << "Color Map Length  :: " << (int)m_CMapLength << '\n';
+	std::cout << "Color Map Depth   :: " << (int)m_CMapBpp << '\n';
 
 	std::cout << "X Origin          :: " << (int)m_xOrigin << '\n';
 	std::cout << "Y Origin          :: " << (int)m_yOrigin << '\n';
 	std::cout << "Width in pixel    :: " << (int)m_width << '\n';
 	std::cout << "Height in pixel   :: " << (int)m_height << '\n';
-	std::cout << "Bits per Pixel    :: " << (int)m_bitsPerPixel << '\n';
+	std::cout << "Bits per Pixel    :: " << (int)m_Bpp << '\n';
 	std::cout << "Image Descriptor  :: " << (int)m_imageDescriptor << '\n';
 }
 
@@ -189,7 +189,7 @@ string TGAFile::extractFileName(const string &sFilePath)
 
 bool TGAFile::parse(const string& sFilepath)
 {
-	unsigned char* buffer = nullptr;
+	UChar* buffer = nullptr;
 	int length = readFileInBuffer(sFilepath, buffer);
 
 	if (length == -1)
@@ -204,9 +204,9 @@ bool TGAFile::parse(const string& sFilepath)
 	int index = 18;	// as we have already read the header
 
 	// Read image id
-	if (m_header.m_idLength > 0)
+	if (m_header.m_IDLength > 0)
 	{
-		int size = m_header.m_idLength;
+		int size = m_header.m_IDLength;
 		uint8_t val;
 		while (size--)
 		{
@@ -228,35 +228,35 @@ bool TGAFile::parse(const string& sFilepath)
 	return true;
 }
 
-void TGAFile::parseColorMap(const unsigned char const* buffer, int& index)
+void TGAFile::parseColorMap(const UChar *buffer, int& index)
 {
-	m_pairColorMap.second = m_header.m_colorMapLength * m_header.m_ColorMapbitsPerPixel / 8;
-	m_pairColorMap.first = new unsigned char[m_pairColorMap.second];
+	m_pairColorMap.second = m_header.m_CMapLength * m_header.m_CMapBpp / 8;
+	m_pairColorMap.first = new UChar[m_pairColorMap.second];
 
 	memcpy(m_pairColorMap.first, &buffer[index], m_pairColorMap.second);
 
 	index += m_pairColorMap.second;
 }
 
-void TGAFile::readPixelData(const unsigned char const* buffer, int& index)
+void TGAFile::readPixelData(const UChar *buffer, int& index)
 {
-	int channelSize = m_header.m_bitsPerPixel / 8;	// 1, 2, 3 or 4
+	int channelSize = m_header.m_Bpp / 8;	// 1, 2, 3 or 4
 
 	channelSize = (channelSize == 2) ? 3 : channelSize;
 
 	if (m_header.m_colorMapType == UNCOMPRESSED_INDEX || m_header.m_colorMapType == RLE_INDEXED)
 	{
-		channelSize = m_header.m_ColorMapbitsPerPixel / 8;
+		channelSize = m_header.m_CMapBpp / 8;
 	}
 
 	m_pairPixels.second = m_header.m_width * m_header.m_height * channelSize;
 
-	m_pairPixels.first = new unsigned char[m_pairPixels.second];
+	m_pairPixels.first = new UChar[m_pairPixels.second];
 
 	switch (m_header.m_imageType)
 	{
 		case UNCOMPRESSED_INDEX:
-			if (m_header.m_bitsPerPixel == 8)
+			if (m_header.m_Bpp == 8)
 			{
 				read_mapped_8(buffer, index, channelSize);
 			}
@@ -266,7 +266,7 @@ void TGAFile::readPixelData(const unsigned char const* buffer, int& index)
 			}
 			break;
 		case UNCOMPRESSED_RGB:
-			switch (m_header.m_bitsPerPixel)
+			switch (m_header.m_Bpp)
 			{
 				case 16:
 					read_RGB_16(buffer, index, channelSize);
@@ -284,7 +284,7 @@ void TGAFile::readPixelData(const unsigned char const* buffer, int& index)
 
 			break;
 		case UNCOMPRESSED_GRAY:
-			if (m_header.m_bitsPerPixel == 8)
+			if (m_header.m_Bpp == 8)
 			{
 				memcpy(m_pairPixels.first, &buffer[index], m_pairPixels.second);
 			}
@@ -295,7 +295,7 @@ void TGAFile::readPixelData(const unsigned char const* buffer, int& index)
 			break;
 
 		case RLE_INDEXED:
-			if (m_header.m_bitsPerPixel == 8)
+			if (m_header.m_Bpp == 8)
 			{
 				read_mapped_rle_8(buffer, index, channelSize);
 			}
@@ -305,7 +305,7 @@ void TGAFile::readPixelData(const unsigned char const* buffer, int& index)
 			}
 			break;
 		case RLE_RGB:
-			switch (m_header.m_bitsPerPixel)
+			switch (m_header.m_Bpp)
 			{
 			case 16:
 				read_RGB_rle_16(buffer, index, channelSize);
@@ -322,7 +322,7 @@ void TGAFile::readPixelData(const unsigned char const* buffer, int& index)
 			}
 			break;
 		case RLE_GRAY:
-			if (m_header.m_bitsPerPixel == 8)
+			if (m_header.m_Bpp == 8)
 			{
 				read_rle_8(buffer, index, channelSize);
 			}
@@ -336,7 +336,7 @@ void TGAFile::readPixelData(const unsigned char const* buffer, int& index)
 	}
 }
 
-void TGAFile::read_mapped_8(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_mapped_8(const UChar *buffer, int& index, int channelSize)
 {
 	for (int i = 0; i < m_pairPixels.second; ++i)
 	{
@@ -347,7 +347,7 @@ void TGAFile::read_mapped_8(const unsigned char const* buffer, int& index, int c
 	}
 }
 
-void TGAFile::read_RGB_16(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_RGB_16(const UChar *buffer, int& index, int channelSize)
 {
 	int size = m_header.m_width * m_header.m_height;
 
@@ -362,7 +362,7 @@ void TGAFile::read_RGB_16(const unsigned char const* buffer, int& index, int cha
 	}
 }
 
-void TGAFile::read_RGB_24(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_RGB_24(const UChar *buffer, int& index, int channelSize)
 {
 	int size = m_header.m_width * m_header.m_height;
 
@@ -377,7 +377,7 @@ void TGAFile::read_RGB_24(const unsigned char const* buffer, int& index, int cha
 	}
 }
 
-void TGAFile::read_RGB_32(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_RGB_32(const UChar *buffer, int& index, int channelSize)
 {
 	int size = m_header.m_width * m_header.m_height;
 
@@ -394,7 +394,7 @@ void TGAFile::read_RGB_32(const unsigned char const* buffer, int& index, int cha
 	}
 }
 
-void TGAFile::read_mapped_rle_8(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_mapped_rle_8(const UChar *buffer, int& index, int channelSize)
 {
 	int max = m_header.m_width * m_header.m_height * channelSize;
 
@@ -425,7 +425,7 @@ void TGAFile::read_mapped_rle_8(const unsigned char const* buffer, int& index, i
 	}
 }
 
-void TGAFile::read_RGB_rle_16(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_RGB_rle_16(const UChar *buffer, int& index, int channelSize)
 {
 	int max = m_header.m_width * m_header.m_height * channelSize;
 
@@ -456,7 +456,7 @@ void TGAFile::read_RGB_rle_16(const unsigned char const* buffer, int& index, int
 	}
 }
 
-void TGAFile::read_RGB_rle_24(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_RGB_rle_24(const UChar *buffer, int& index, int channelSize)
 {
 	int max = m_header.m_width * m_header.m_height * channelSize;
 
@@ -487,7 +487,7 @@ void TGAFile::read_RGB_rle_24(const unsigned char const* buffer, int& index, int
 	}
 }
 
-void TGAFile::read_RGB_rle_32(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_RGB_rle_32(const UChar *buffer, int& index, int channelSize)
 {
 	int max = m_header.m_width * m_header.m_height * channelSize;
 
@@ -519,7 +519,7 @@ void TGAFile::read_RGB_rle_32(const unsigned char const* buffer, int& index, int
 	}
 }
 
-void TGAFile::read_rle_8(const unsigned char const* buffer, int& index, int channelSize)
+void TGAFile::read_rle_8(const UChar *buffer, int& index, int channelSize)
 {
 	int max = m_header.m_width * m_header.m_height * channelSize;
 
@@ -548,7 +548,7 @@ void TGAFile::read_rle_8(const unsigned char const* buffer, int& index, int chan
 	}
 }
 
-int TGAFile::readFileInBuffer(const std::string& sFilepath, unsigned char *& buffer) const
+int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) const
 {
 	std::ifstream file(sFilepath, std::ios::in | std::ios::binary | std::ios::ate);
 
@@ -560,10 +560,10 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, unsigned char *& buf
 	}
 
 	file.seekg(0, file.end);
-	int length = file.tellg();
+	int length = (int)file.tellg();
 	file.seekg(0, file.beg);
 
-	buffer = new unsigned char[length];
+	buffer = new UChar[length];
 
 	file.read((char *)buffer, length);
 
@@ -572,9 +572,10 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, unsigned char *& buf
 		LOG_ERROR("Error: Only :: " + std::to_string(file.gcount()) + " could be read" + "\n");
 	}
 	file.close();
+	return length;
 }
 
-void TGAFile::readVersion(const unsigned char const* buffer, int length)
+void TGAFile::readVersion(const UChar *buffer, int length)
 {
 	char singature[17]{};
 	memcpy(singature, &buffer[length - 18], 16);
