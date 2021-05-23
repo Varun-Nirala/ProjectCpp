@@ -549,8 +549,6 @@ void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32
 			{
 				(this->*writeAsFuncPtr)(file, m_vPixels[index++]);
 			}
-
-			index += count;
 		}
 	}
 }
@@ -564,14 +562,16 @@ int TGAFile::countRepeatPixel(int startIndex, int &id)  const
 
 	for (id; id < m_header.m_width && count < maxLengthToEncode; ++id)
 	{
-		if (m_vPixels[startIndex] == val)
+		if (startIndex < m_vPixels.size() && m_vPixels[startIndex] == val)
 		{
 			startIndex++;
 			count++;
 		}
+		else
+			break;
 	}
 
-	return count;
+	return (count > 0) ? ++count : count;
 }
 
 int TGAFile::countDifferentPixel(int startIndex, int& id) const
@@ -583,11 +583,14 @@ int TGAFile::countDifferentPixel(int startIndex, int& id) const
 
 	for (id; id < m_header.m_width && count < maxLengthToEncode; ++id)
 	{
-		if (m_vPixels[startIndex] != val)
+		if (startIndex < m_vPixels.size() && m_vPixels[startIndex] != val)
 		{
+			val = m_vPixels[startIndex];
 			startIndex++;
 			count++;
 		}
+		else
+			break;
 	}
 
 	return count;
