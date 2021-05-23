@@ -94,6 +94,10 @@ namespace TGA
 		std::string getFileName() const;
 		std::string getFilePath() const;
 
+		int getWidth() const { return m_header.m_width; }
+		int getHeight() const { return m_header.m_height; }
+		int getBytesPerPixel() const { return (m_header.m_Bpp / 8); }
+
 		void displayHeader() const { m_header.display(); }
 		void displayFooter() const { m_footer.display(); }
 
@@ -174,8 +178,8 @@ namespace TGA
 
 		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index) const;
 
-		int countRepeatPixel(int startIndex, int &id) const;
-		int countDifferentPixel(int startIndex, int& id) const;
+		int countRepeatPixel(int pos, int &id) const;
+		int countDifferentPixel(int pos, int &id) const;
 
 		inline void writeColorAs8(std::ostream& file, uint32_t val) const
 		{

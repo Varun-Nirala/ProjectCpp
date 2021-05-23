@@ -256,12 +256,9 @@ void TGAFile::parseColorMap(const UChar* buffer, int& index)
 	m_vColorMap.resize(m_header.m_CMapLength);
 	if (m_header.m_CMapBpp == 15 || m_header.m_CMapBpp == 16)
 	{
-		//read as 2 byte
-		uint16_t val;
 		for (int i = 0; i < m_header.m_CMapLength; ++i)
 		{
-			read2byte(buffer, index, val);
-			m_vColorMap[i] = encodeAsRGBA(val);
+			m_vColorMap[i] = readColorAs16(buffer, index);;
 		}
 	}
 	else if (m_header.m_CMapBpp == 24)
@@ -279,12 +276,12 @@ void TGAFile::parseColorMap(const UChar* buffer, int& index)
 		}
 	}
 
-	index += m_header.m_CMapLength;
+	index += (m_header.m_CMapLength * (m_header.m_CMapBpp / 8));
 }
 
 void TGAFile::readPixelData(const UChar *buffer, int& index)
 {
-	m_vPixels.resize(m_header.m_width * m_header.m_height * (m_header.m_Bpp / 8));
+	m_vPixels.resize(getHeight() * getWidth());
 
 	switch (m_header.m_imageType)
 	{
@@ -363,7 +360,7 @@ void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* r
 	{
 		for (int j = 0; j < m_header.m_width; ++j)
 		{
-			m_vPixels[id++] = (this->*readAsFuncPtr)(buffer,index);
+			m_vPixels[id++] = (this->*readAsFuncPtr)(buffer, index);
 		}
 	}
 }
@@ -586,46 +583,66 @@ void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32
 	}
 }
 
-int TGAFile::countRepeatPixel(int startIndex, int &id)  const
+int TGAFile::countRepeatPixel(int pos, int &id)  const
 {
 	static const int maxLengthToEncode = 128;
-	
 	int count = 0;
-	uint32_t val = m_vPixels[startIndex++];
 
-	for (id; id < m_header.m_width && count < maxLengthToEncode; ++id)
+	if (pos == m_vPixels.size() - 1 || m_vPixels[pos] != m_vPixels[pos + 1])
 	{
-		if (startIndex < m_vPixels.size() && m_vPixels[startIndex] == val)
+		return 0;
+	}
+
+	uint32_t pixelVal = m_vPixels[pos++];
+	while (id < m_header.m_width && count < maxLengthToEncode)
+	{
+		if (pos < m_vPixels.size() && m_vPixels[pos] == pixelVal)
 		{
-			startIndex++;
+			pos++;
+			id++;
 			count++;
 		}
 		else
 			break;
 	}
 
-	return (count > 0) ? ++count : count;
+	if (pos == m_vPixels.size())
+		id++;
+
+	return count;
 }
 
-int TGAFile::countDifferentPixel(int startIndex, int& id) const
+int TGAFile::countDifferentPixel(int pos, int &id) const
 {
 	static const int maxLengthToEncode = 128;
-
 	int count = 0;
-	uint32_t val = m_vPixels[startIndex++];
 
-	for (id; id < m_header.m_width && count < maxLengthToEncode; ++id)
+	if (pos == m_vPixels.size() - 1)
 	{
-		if (startIndex < m_vPixels.size() && m_vPixels[startIndex] != val)
+		id++;
+		return 1;
+	}
+	
+	if (m_vPixels[pos] == m_vPixels[pos + 1])
+		return 0;
+
+	uint32_t pixelVal = m_vPixels[pos++];
+	while (id <= m_header.m_width && count < maxLengthToEncode)
+	{
+		if (pos < m_vPixels.size() && m_vPixels[pos] != pixelVal)
 		{
-			val = m_vPixels[startIndex];
-			startIndex++;
+			pixelVal = m_vPixels[pos];
+			pos++;
+			id++;
 			count++;
 		}
 		else
 			break;
 	}
 
+	if (pos == m_vPixels.size())
+		id++;
+	
 	return count;
 }
 }

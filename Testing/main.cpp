@@ -11,7 +11,6 @@ int main()
 	string path = R"(D:\Varun\Aristocrat_LapTop_BackUp_Jan_2021\Interviews_2021\StarStable\StarStableRounds\ScalingAlgorithm\src\)";
 
 	vector<string> vfileNames{ "version_1.tga" , "version_2_TopLeft.tga", "version_2_BottomLeft.tga", "version_2_RLE_TopLeft.tga", "version_2_RLE_BottomLeft.tga" };
-	
 
 	for (size_t i = 0; i < vfileNames.size(); ++i)
 	{
