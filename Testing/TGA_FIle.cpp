@@ -218,11 +218,6 @@ string TGAFile::getFilePath() const
 	return sFilePath;
 }
 
-bool TGAFile::parse()
-{
-	
-}
-
 void TGAFile::parseColorMap(const UChar* buffer, int& index)
 {
 	m_vColorMap.resize(m_header.m_CMapLength);
