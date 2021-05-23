@@ -21,12 +21,6 @@ namespace TGA
 		RLE_GRAY = 11,
 	};
 
-	enum ReadType {
-		AS_16_BIT,
-		AS_24_BIT,
-		AS_32_BIT,
-	};
-
 	inline void read1byte(const UChar* srcbuffer, int& index, uint8_t& dst)
 	{
 		memcpy(&dst, &srcbuffer[index++], 1);
@@ -65,6 +59,8 @@ namespace TGA
 
 		void display() const;
 		void parse(const UChar * const buffer);
+
+		void writeToFile(std::ofstream& file);
 	};
 
 	struct TGAFooter
@@ -85,15 +81,15 @@ namespace TGA
 		~TGAFile();
 
 		void decode();
-		void encode(std::string& newFileName) {};
+		void encode(std::string& newFileName);
 
 		std::string getFileName() const;
-
 		std::string getFilePath() const;
 
 		void displayHeader() { m_header.display(); }
 		void displayFooter() { m_footer.display(); }
 
+	// Related to decoding file
 	protected:
 		bool parse();
 
@@ -102,28 +98,28 @@ namespace TGA
 		void readPixelData(const UChar* buffer, int& index);
 
 		// UNCOMPRESSED DATA
-		void read_mapped_uc_8(const UChar* buffer, int& index);
-
 		void read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::*readAsFuncPtr)(const UChar*, int&));
 
-		void read_gray_uc_8(const UChar* buffer, int& index);
-
 		// COMPRESSED DATA
-		void read_mapped_rle_8(const UChar* buffer, int& index);
-
 		void read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::*readAsFuncPtr)(const UChar*, int&));
 
-		void read_gray_rle_8(const UChar* buffer, int& index);
-
+		void readVersion2Specific(const UChar* buffer, int length, int& index);
 
 		int readFileInBuffer(const std::string& sFilepath, UChar*& buffer) const;
-		void readVersion(const UChar* buffer, int length);
 
-		uint32_t readColorAs16(const UChar* buffer, int& index)
+		inline uint32_t readColorAs8(const UChar* buffer, int& index)
+		{
+			uint8_t val;
+			read1byte(buffer, index, val);
+			return val;
+		}
+
+		inline uint32_t readColorAs16(const UChar* buffer, int& index)
 		{
 			uint8_t a = 255;
 			uint16_t val;
 			read2byte(buffer, index, val);
+
 			if (!(val & 0x8000))
 				a = 0;
 			return encodeAsRGBA(val, a);
@@ -138,7 +134,7 @@ namespace TGA
 			return encodeAsRGBA(r, g, b);
 		}
 
-		uint32_t readColorAs32(const UChar* buffer, int& index)
+		inline uint32_t readColorAs32(const UChar* buffer, int& index)
 		{
 			uint8_t r, g, b, a;
 			read1byte(buffer, index, b);
@@ -153,12 +149,71 @@ namespace TGA
 			uint8_t r = (pixel >> 10) & 0x1F;
 			uint8_t g = (pixel >> 5) & 0x1F;
 			uint8_t b = pixel & 0x1F;
-			return encodeAsRGBA(r, g, b, a);
+			return encodeAsRGBA((r << 3 | r >> 2),
+								(g << 3 | g >> 2),
+								(b << 3 | b >> 2),
+								(a << 3 | a >> 2));
 		}
 
 		inline uint32_t encodeAsRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
 		{
 			return (r | (g << 8) || (b << 16) || (a << 24));
+		}
+	
+	// Related to encoding file
+	protected:
+		void writeColorMap(std::ostream& file);
+		void writeImageData(std::ostream& file);
+
+		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t), std::ostream& file, int &index);
+
+		int countRepeatPixel(int startIndex, int &id) const;
+		int countDifferentPixel(int startIndex, int& id) const;
+
+		inline void writeColorAs8(std::ostream& file, uint32_t val)
+		{
+			file.put((uint8_t)val);
+		}
+
+		inline void writeColorAs16(std::ostream &file, uint32_t val)
+		{
+			uint8_t r, g, b, a;
+			decodeAsRGBA(val, r, g, b, a);
+			
+			uint16_t v = 
+				((r >> 3) << 10) |
+				((g >> 3) << 5) |
+				((b >> 3)) |
+				(a != 0 ? 0x8000 : 0);
+
+			file.write((char *)&v, 2);
+		}
+
+		inline void writeColorAs24(std::ostream& file, uint32_t val)
+		{
+			uint8_t r, g, b, a;
+			decodeAsRGBA(val, r, g, b, a);
+			file.put(b);
+			file.put(g);
+			file.put(r);
+		}
+
+		inline void writeColorAs32(std::ostream& file, uint32_t val)
+		{
+			uint8_t r, g, b, a;
+			decodeAsRGBA(val, r, g, b, a);
+			file.put(b);
+			file.put(g);
+			file.put(r);
+			file.put(a);
+		}
+
+		void decodeAsRGBA(uint32_t val, uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a)
+		{
+			r = val & 0xFF;
+			g = (val >> 8) & 0xFF;
+			b = (val >> 16) & 0xFF;
+			a = (val >> 24) & 0xFF;
 		}
 
 	private:

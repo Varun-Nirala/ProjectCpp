@@ -22,5 +22,11 @@ int main()
 	string newFileName{ "copy.tga" };
 	file.encode(newFileName);
 
+	TGA::TGAFile file1(path + newFileName);
+	file1.decode();
+
+	file1.displayHeader();
+	file1.displayFooter();
+
 	return 0;
 }

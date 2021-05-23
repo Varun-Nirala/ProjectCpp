@@ -22,17 +22,32 @@ void TGAHeader::parse(const UChar *buffer)
 
 	read2byte(buffer, index, m_CMapOrigin);
 	read2byte(buffer, index, m_CMapLength);
-
 	read1byte(buffer, index, m_CMapBpp);
 
 	read2byte(buffer, index, m_xOrigin);
 	read2byte(buffer, index, m_yOrigin);
-
 	read2byte(buffer, index, m_width);
 	read2byte(buffer, index, m_height);
-
 	read1byte(buffer, index, m_Bpp);
 	read1byte(buffer, index, m_imageDescriptor);
+}
+
+void TGAHeader::writeToFile(std::ofstream& file)
+{
+	file.put(m_IDLength);
+	file.put(m_colorMapType);
+	file.put(m_imageType);
+
+	file.write((char *)&m_CMapOrigin, 2);
+	file.write((char *)&m_CMapLength, 2);
+	file.put(m_CMapBpp);
+
+	file.write((char*)&m_xOrigin, 2);
+	file.write((char*)&m_yOrigin, 2);
+	file.write((char*)&m_width, 2);
+	file.write((char*)&m_height, 2);
+	file.put(m_Bpp);
+	file.put(m_imageDescriptor);
 }
 
 void TGAHeader::display() const
@@ -174,10 +189,7 @@ bool TGAFile::parse()
 
 	if (m_version == 2)
 	{
-		// Extract extra data after the image the data.
-		m_vFooterAndExtra.second = length - index;
-		m_vFooterAndExtra.first = new uint8_t[m_vFooterAndExtra.second];
-		memcpy(buffer, m_vFooterAndExtra.first, m_vFooterAndExtra.second);
+		readVersion2Specific(buffer, length, index);
 	}
 
 	delete[] buffer;
@@ -222,9 +234,10 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 	switch (m_header.m_imageType)
 	{
 		case UNCOMPRESSED_INDEX:
+		case UNCOMPRESSED_GRAY:
 			if (m_header.m_Bpp == 8)
 			{
-				read_mapped_uc_8(buffer, index);
+				read_RGB_uc(buffer, index, &TGAFile::readColorAs8);
 			}
 			else
 			{
@@ -251,21 +264,11 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			break;
 
-		case UNCOMPRESSED_GRAY:
-			if (m_header.m_Bpp == 8)
-			{
-				read_gray_uc_8(buffer, index);
-			}
-			else
-			{
-				LOG_ERROR("Incorrect Data.");
-			}
-			break;
-
 		case RLE_INDEXED:
+		case RLE_GRAY:
 			if (m_header.m_Bpp == 8)
 			{
-				read_mapped_rle_8(buffer, index);
+				read_RGB_rle(buffer, index, &TGAFile::readColorAs8);
 			}
 			else
 			{
@@ -292,37 +295,12 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			break;
 
-		case RLE_GRAY:
-			if (m_header.m_Bpp == 8)
-			{
-				read_gray_rle_8(buffer, index);
-			}
-			else
-			{
-				LOG_ERROR("Incorrect Data.");
-			}
-			break;
-
 		default:
 			LOG_ERROR("Image type unkown.");
 	}
 }
 
 // UNCOMPRESSED DATA
-void TGAFile::read_mapped_uc_8(const UChar* buffer, int& index)
-{
-	uint8_t val;
-	int id = 0;
-	for (int i = 0; i < m_header.m_height; ++i)
-	{
-		for (int j = 0; j < m_header.m_width; ++j)
-		{
-			read1byte(buffer, index, val);
-			m_vPixels[id++] = val;
-		}
-	}
-}
-
 void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&))
 {
 	int id = 0;
@@ -335,50 +313,7 @@ void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* r
 	}
 }
 
-void TGAFile::read_gray_uc_8(const UChar* buffer, int& index)
-{
-	read_mapped_uc_8(buffer, index);
-}
-
 // COMPRESSED DATA
-void TGAFile::read_mapped_rle_8(const UChar* buffer, int& index)
-{
-	int id = 0;
-	uint8_t rcf;	// repetition count field
-	uint8_t val;	// pixel value field
-	int runCount;
-	for (int i = 0; i < m_header.m_height; ++i)
-	{
-		for (int j = 0; j < m_header.m_width;)
-		{
-			read1byte(buffer, index, rcf);
-
-			if (rcf & 0x80)
-			{
-				// RLE packet
-				runCount = (rcf & 0x7F) + 1;
-				j += runCount;
-				read1byte(buffer, index, val);
-				while (runCount--)
-				{
-					m_vPixels[id++] = val;
-				}
-			}
-			else
-			{
-				// Raw packet
-				runCount = rcf + 1;
-				j += runCount;
-				while (runCount--)
-				{
-					read1byte(buffer, index, val);
-					m_vPixels[id++] = val;
-				}
-			}
-		}
-	}
-}
-
 void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&))
 {
 	int id = 0;
@@ -417,9 +352,13 @@ void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* 
 	}
 }
 
-void TGAFile::read_gray_rle_8(const UChar* buffer, int& index)
+void TGAFile::readVersion2Specific(const UChar* buffer, int length, int& index)
 {
-	read_mapped_rle_8(buffer, index);
+	// Extract extra data after the image the data.
+	m_vFooterAndExtra.second = length - index;
+	m_vFooterAndExtra.first = new uint8_t[m_vFooterAndExtra.second]{};
+
+	memcpy(m_vFooterAndExtra.first, &buffer[index], m_vFooterAndExtra.second);
 }
 
 int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) const
@@ -447,5 +386,217 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) con
 	}
 	file.close();
 	return length;
+}
+
+void TGAFile::writeColorMap(std::ostream &file)
+{
+	if (m_header.m_imageType == 1)
+	{
+		switch (m_header.m_CMapBpp)
+		{
+			case 15:
+			case 16:
+				for (size_t i = 0; i < m_vColorMap.size(); ++i)
+				{
+					writeColorAs16(file, m_vColorMap[i]);
+				}
+				break;
+			case 24:
+				for (size_t i = 0; i < m_vColorMap.size(); ++i)
+				{
+					writeColorAs24(file, m_vColorMap[i]);
+				}
+				break;
+			case 32:
+				for (size_t i = 0; i < m_vColorMap.size(); ++i)
+				{
+					writeColorAs32(file, m_vColorMap[i]);
+				}
+				break;
+			default:
+
+				break;
+		}
+	}
+}
+
+void TGAFile::writeImageData(std::ostream& file)
+{
+	int index = 0;
+	switch (m_header.m_imageType)
+	{
+		case UNCOMPRESSED_INDEX:
+		case UNCOMPRESSED_GRAY:
+			for (size_t i = 0; i < m_vPixels.size(); ++i)
+			{
+				writeColorAs8(file, m_vPixels[i]);
+			}
+		break;
+
+		case UNCOMPRESSED_RGB:
+			switch (m_header.m_Bpp)
+			{
+				case 15:
+				case 16:
+					for (size_t i = 0; i < m_vPixels.size(); ++i)
+					{
+						writeColorAs16(file, m_vPixels[i]);
+					}
+					break;
+
+				case 24:
+					for (size_t i = 0; i < m_vPixels.size(); ++i)
+					{
+						writeColorAs24(file, m_vPixels[i]);
+					}
+					break;
+
+				case 32:
+					for (size_t i = 0; i < m_vPixels.size(); ++i)
+					{
+						writeColorAs32(file, m_vPixels[i]);
+					}
+					break;
+			}
+		break;
+
+		case RLE_INDEXED:
+		case RLE_GRAY:
+			for (int i = 0; i < m_header.m_height; ++i)
+			{
+				writeRleLine(&TGAFile::writeColorAs8, file, index);
+			}
+			break;
+
+		case RLE_RGB:
+			switch (m_header.m_Bpp)
+			{
+				case 15:
+				case 16:
+					for (int i = 0; i < m_header.m_height; ++i)
+					{
+						writeRleLine(&TGAFile::writeColorAs16, file, index);
+					}
+					break;
+
+				case 24:
+					for (int i = 0; i < m_header.m_height; ++i)
+					{
+						writeRleLine(&TGAFile::writeColorAs24, file, index);
+					}
+					break;
+
+				case 32:
+					for (int i = 0; i < m_header.m_height; ++i)
+					{
+						writeRleLine(&TGAFile::writeColorAs32, file, index);
+					}
+					break;
+			}
+			break;
+
+		default:
+			LOG_ERROR("Image type unkown.");
+	}
+}
+
+void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t), std::ostream& file, int &index)
+{
+	int id = 0;
+	while (id < m_header.m_width)
+	{
+		int count = countRepeatPixel(index, id);
+
+		if (count > 0)	// as RLE
+		{
+			uint8_t rcf = 0x80 | (uint8_t(count - 1));
+			file.put(rcf);
+
+			(this->*writeAsFuncPtr)(file, m_vPixels[index]);
+
+			index += count;
+		}
+		else
+		{	// as Raw
+			count = countDifferentPixel(index, id);
+
+			uint8_t rcf((uint8_t)count - 1);
+			file.put(rcf);
+
+			while (count--)
+			{
+				(this->*writeAsFuncPtr)(file, m_vPixels[index++]);
+			}
+
+			index += count;
+		}
+	}
+}
+
+int TGAFile::countRepeatPixel(int startIndex, int &id)  const
+{
+	static const int maxLengthToEncode = 128;
+	
+	int count = 0;
+	uint32_t val = m_vPixels[startIndex++];
+
+	for (id; id < m_header.m_width && count < maxLengthToEncode; ++id)
+	{
+		if (m_vPixels[startIndex] == val)
+		{
+			startIndex++;
+			count++;
+		}
+	}
+
+	return count;
+}
+
+int TGAFile::countDifferentPixel(int startIndex, int& id) const
+{
+	static const int maxLengthToEncode = 128;
+
+	int count = 0;
+	uint32_t val = m_vPixels[startIndex++];
+
+	for (id; id < m_header.m_width && count < maxLengthToEncode; ++id)
+	{
+		if (m_vPixels[startIndex] != val)
+		{
+			startIndex++;
+			count++;
+		}
+	}
+
+	return count;
+}
+
+void TGAFile::encode(std::string& newFileName)
+{
+	std::ofstream file(getFilePath() + newFileName, std::ios::out | std::ios::binary);
+
+	if (!file)
+	{
+		LOG_ERROR("Opening file :: " + getFilePath() + newFileName + "\n");
+		file.close();
+		return;
+	}
+
+	m_header.writeToFile(file);
+
+	for (int i = 0; i < m_header.m_IDLength; ++i)
+	{
+		file.put((char)m_imageID[i]);
+	}
+
+	writeColorMap(file);
+	writeImageData(file);
+
+	if (m_version == 2)
+	{
+		file.write((char*)&m_vFooterAndExtra.first, m_vFooterAndExtra.second);
+	}
+
+	file.close();
 }
 }
