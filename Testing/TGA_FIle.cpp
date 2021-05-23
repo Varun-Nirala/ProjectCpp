@@ -107,15 +107,17 @@ TGAFile::~TGAFile()
 	delete[] m_vFooterAndExtra.first;
 }
 
-void TGAFile::decode()
+bool TGAFile::decode()
 {
 	if (!parse())
 	{
 		LOG_ERROR("Parsing file failed.");
+		return false;
 	}
+	return true;
 }
 
-void TGAFile::encode(std::string& newFileName)
+bool TGAFile::encode(const std::string& newFileName)
 {
 	std::ofstream file(getFilePath() + newFileName, std::ios::out | std::ios::binary);
 
@@ -123,7 +125,7 @@ void TGAFile::encode(std::string& newFileName)
 	{
 		LOG_ERROR("Opening file :: " + getFilePath() + newFileName + "\n");
 		file.close();
-		return;
+		return false;
 	}
 
 	m_header.writeToFile(file);
@@ -142,6 +144,7 @@ void TGAFile::encode(std::string& newFileName)
 	}
 
 	file.close();
+	return true;
 }
 
 string TGAFile::getFileName() const

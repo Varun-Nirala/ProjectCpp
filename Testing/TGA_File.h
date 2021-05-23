@@ -81,8 +81,8 @@ namespace TGA
 		TGAFile(const std::string& sFilepath);
 		~TGAFile();
 
-		void decode();
-		void encode(std::string& newFileName);
+		bool decode();
+		bool encode(const std::string& newFileName);
 
 		std::string getFileName() const;
 		std::string getFilePath() const;
