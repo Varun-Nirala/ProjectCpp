@@ -92,8 +92,6 @@ namespace TGA
 
 	// Related to decoding file
 	protected:
-		bool parse();
-
 		void parseColorMap(const UChar* buffer, int& index);
 		void readPixelData(const UChar* buffer, int& index);
 

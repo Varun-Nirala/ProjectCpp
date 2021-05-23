@@ -109,11 +109,45 @@ TGAFile::~TGAFile()
 
 bool TGAFile::decode()
 {
-	if (!parse())
+	UChar* buffer = nullptr;
+	int length = readFileInBuffer(m_sFullPath, buffer);
+
+	if (length == -1)
 	{
 		LOG_ERROR("Parsing file failed.");
 		return false;
 	}
+
+	m_header.parse(buffer);
+	m_version = m_footer.parse(buffer, length);
+
+	int index = 18;	// as we have already read the header
+
+	// Read image id
+	if (m_header.m_IDLength > 0)
+	{
+		int size = m_header.m_IDLength;
+		uint8_t val;
+		while (size--)
+		{
+			read1byte(buffer, index, val);
+			m_imageID.push_back((char)val);
+		}
+	}
+
+	// Check if we need to parse color Map
+	if (m_header.m_colorMapType == 1)
+	{
+		parseColorMap(buffer, index);
+	}
+
+	readPixelData(buffer, index);
+
+	if (m_version == 2)
+	{
+		readVersion2Specific(buffer, length, index);
+	}
+
 	return true;
 }
 
@@ -186,46 +220,7 @@ string TGAFile::getFilePath() const
 
 bool TGAFile::parse()
 {
-	UChar* buffer = nullptr;
-	int length = readFileInBuffer(m_sFullPath, buffer);
-
-	if (length == -1)
-	{
-		return false;
-	}
-
-	m_header.parse(buffer);
-	m_version = m_footer.parse(buffer, length);
-
-	int index = 18;	// as we have already read the header
-
-	// Read image id
-	if (m_header.m_IDLength > 0)
-	{
-		int size = m_header.m_IDLength;
-		uint8_t val;
-		while (size--)
-		{
-			read1byte(buffer, index, val);
-			m_imageID.push_back((char)val);
-		}
-	}
-
-	// Check if we need to parse color Map
-	if (m_header.m_colorMapType == 1)
-	{
-		parseColorMap(buffer, index);
-	}
 	
-	readPixelData(buffer, index);
-
-	if (m_version == 2)
-	{
-		readVersion2Specific(buffer, length, index);
-	}
-
-	delete[] buffer;
-	return true;
 }
 
 void TGAFile::parseColorMap(const UChar* buffer, int& index)
