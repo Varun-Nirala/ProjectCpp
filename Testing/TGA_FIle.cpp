@@ -32,7 +32,7 @@ void TGAHeader::parse(const UChar *buffer)
 	read1byte(buffer, index, m_imageDescriptor);
 }
 
-void TGAHeader::writeToFile(std::ofstream& file)
+void TGAHeader::writeToFile(std::ofstream& file) const
 {
 	file.put(m_IDLength);
 	file.put(m_colorMapType);
@@ -113,6 +113,35 @@ void TGAFile::decode()
 	{
 		LOG_ERROR("Parsing file failed.");
 	}
+}
+
+void TGAFile::encode(std::string& newFileName)
+{
+	std::ofstream file(getFilePath() + newFileName, std::ios::out | std::ios::binary);
+
+	if (!file)
+	{
+		LOG_ERROR("Opening file :: " + getFilePath() + newFileName + "\n");
+		file.close();
+		return;
+	}
+
+	m_header.writeToFile(file);
+
+	for (int i = 0; i < m_header.m_IDLength; ++i)
+	{
+		file.put((char)m_imageID[i]);
+	}
+
+	writeColorMap(file);
+	writeImageData(file);
+
+	if (m_version == 2)
+	{
+		file.write((char*)&m_vFooterAndExtra.first, m_vFooterAndExtra.second);
+	}
+
+	file.close();
 }
 
 string TGAFile::getFileName() const
@@ -301,7 +330,7 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 }
 
 // UNCOMPRESSED DATA
-void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&))
+void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
 {
 	int id = 0;
 	for (int i = 0; i < m_header.m_height; ++i)
@@ -314,7 +343,7 @@ void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* r
 }
 
 // COMPRESSED DATA
-void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&))
+void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
 {
 	int id = 0;
 	uint8_t rcf;	// repetition count field
@@ -388,7 +417,7 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) con
 	return length;
 }
 
-void TGAFile::writeColorMap(std::ostream &file)
+void TGAFile::writeColorMap(std::ostream &file) const
 {
 	if (m_header.m_imageType == 1)
 	{
@@ -500,7 +529,7 @@ void TGAFile::writeImageData(std::ostream& file)
 	}
 }
 
-void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t), std::ostream& file, int &index)
+void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index)
 {
 	int id = 0;
 	while (id < m_header.m_width)
@@ -569,34 +598,5 @@ int TGAFile::countDifferentPixel(int startIndex, int& id) const
 	}
 
 	return count;
-}
-
-void TGAFile::encode(std::string& newFileName)
-{
-	std::ofstream file(getFilePath() + newFileName, std::ios::out | std::ios::binary);
-
-	if (!file)
-	{
-		LOG_ERROR("Opening file :: " + getFilePath() + newFileName + "\n");
-		file.close();
-		return;
-	}
-
-	m_header.writeToFile(file);
-
-	for (int i = 0; i < m_header.m_IDLength; ++i)
-	{
-		file.put((char)m_imageID[i]);
-	}
-
-	writeColorMap(file);
-	writeImageData(file);
-
-	if (m_version == 2)
-	{
-		file.write((char*)&m_vFooterAndExtra.first, m_vFooterAndExtra.second);
-	}
-
-	file.close();
 }
 }
