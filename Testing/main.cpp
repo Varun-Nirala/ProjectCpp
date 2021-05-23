@@ -13,12 +13,12 @@ int main()
 	vector<string> vfileNames{ "version_1.tga" , "version_2_TopLeft.tga", "version_2_BottomLeft.tga", "version_2_RLE_TopLeft.tga", "version_2_RLE_BottomLeft.tga" };
 	
 
-	for (int i = 0; i < vfileNames.size(); ++i)
+	for (size_t i = 0; i < vfileNames.size(); ++i)
 	{
 		string fileName = vfileNames[i];
-		TGA::TGAFile file(path + fileName);
+		TGA::TGAFile file;
 
-		if (!file.decode())
+		if (!file.decode(path + fileName))
 		{
 			cout << "Break";
 		}

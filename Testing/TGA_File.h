@@ -8,7 +8,7 @@
 namespace TGA
 {
 	using UChar = unsigned char;
-
+	
 	enum ImageType {
 		NO_IMAGE_DATA = 0,
 
@@ -57,6 +57,8 @@ namespace TGA
 		uint8_t		m_Bpp;							// bits per pixel [8, 16, 24, 32]
 		uint8_t		m_imageDescriptor;				// bits 0-3 give the alpha channel depth, bits 5-4 give direction
 
+		void clear();
+
 		void display() const;
 		void parse(const UChar * const buffer);
 
@@ -69,19 +71,24 @@ namespace TGA
 		uint32_t	m_developerOffset{};
 		char		m_signature[18]{};
 
+		void clear();
+
 		void display() const;
 		// return version of the file format
 		int parse(const UChar* const buffer, int length);
 	};
 
+	//
+	class ScaleImage;
 	class TGAFile
 	{
+		friend class ScaleImage;
+
 	public:
-		TGAFile() = delete;
-		TGAFile(const std::string& sFilepath);
+		TGAFile() {};
 		~TGAFile();
 
-		bool decode();
+		bool decode(const std::string& sFilepath);
 		bool encode(const std::string& newFileName);
 
 		std::string getFileName() const;
@@ -92,6 +99,8 @@ namespace TGA
 
 	// Related to decoding file
 	protected:
+		void clear();
+
 		void parseColorMap(const UChar* buffer, int& index);
 		void readPixelData(const UChar* buffer, int& index);
 
@@ -161,9 +170,9 @@ namespace TGA
 	// Related to encoding file
 	protected:
 		void writeColorMap(std::ostream& file) const;
-		void writeImageData(std::ostream& file);
+		void writeImageData(std::ostream& file) const;
 
-		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index);
+		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index) const;
 
 		int countRepeatPixel(int startIndex, int &id) const;
 		int countDifferentPixel(int startIndex, int& id) const;
@@ -229,4 +238,4 @@ namespace TGA
 		std::pair<uint8_t*, int>		m_vFooterAndExtra{};
 	};
 }
-#endif		//#define __FILEHANDLER_H__
+#endif		//#define __TGA_FILE_H__

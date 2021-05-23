@@ -13,6 +13,15 @@ using std::vector;
 
 const char TRUEVISION_SIGNATURE[] = "TRUEVISION-XFILE.\0";
 
+void TGAHeader::clear()
+{
+	m_IDLength = m_colorMapType = m_imageType = 0;
+
+	m_CMapOrigin = m_CMapLength = m_CMapBpp = 0;
+
+	m_xOrigin = m_yOrigin = m_width = m_height = m_Bpp = m_imageDescriptor = 0;
+}
+
 void TGAHeader::parse(const UChar *buffer)
 {
 	int index = 0;
@@ -69,6 +78,12 @@ void TGAHeader::display() const
 	std::cout << "Image Descriptor  :: " << (int)m_imageDescriptor << "\n\n";
 }
 
+void TGAFooter::clear()
+{
+	m_extensionOffset = m_developerOffset = 0;
+	memset(m_signature, 0, 18);
+}
+
 int TGAFooter::parse(const UChar* buffer, int length)
 {
 	int version = 1;
@@ -98,17 +113,35 @@ void TGAFooter::display() const
 	}
 }
 
-TGAFile::TGAFile(const string& sFilepath)
-	:m_sFullPath(sFilepath)
-{}
 
 TGAFile::~TGAFile()
 {
-	delete[] m_vFooterAndExtra.first;
+	clear();
 }
 
-bool TGAFile::decode()
+void TGAFile::clear()
 {
+	m_sFullPath.clear();
+	m_version = 1;
+	m_imageID.clear();
+
+	m_header.clear();
+	m_footer.clear();
+
+	m_vPixels.clear();
+	m_vColorMap.clear();
+
+	delete[] m_vFooterAndExtra.first;
+	m_vFooterAndExtra.second = 0;
+}
+
+bool TGAFile::decode(const std::string& sFilepath)
+{
+	if (!m_sFullPath.empty())
+		clear();
+
+	m_sFullPath = sFilepath;
+
 	UChar* buffer = nullptr;
 	int length = readFileInBuffer(m_sFullPath, buffer);
 
@@ -442,7 +475,7 @@ void TGAFile::writeColorMap(std::ostream &file) const
 	}
 }
 
-void TGAFile::writeImageData(std::ostream& file)
+void TGAFile::writeImageData(std::ostream& file) const
 {
 	int index = 0;
 	switch (m_header.m_imageType)
@@ -522,7 +555,7 @@ void TGAFile::writeImageData(std::ostream& file)
 	}
 }
 
-void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index)
+void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index) const
 {
 	int id = 0;
 	while (id < m_header.m_width)

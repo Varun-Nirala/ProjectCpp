@@ -20,8 +20,8 @@
 #define NDEBUG
 
 #ifdef NDEBUG
-    #define LOG_INFO(msg)   std::cout << "INFO :: " << __FUNCTION__ << "::" << __LINE__ << " -> " << msg << std::endl
-	#define LOG_DEBUG(msg)  std::cout << "DEBUG :: " << __FUNCTION__ << "::" << __LINE__ << " -> " << msg << std::endl
+    #define LOG_INFO(msg)   std::cout << "INFO :: " << __FUNCTION__ << "::" << __LINE__ <<  msg << std::endl
+	#define LOG_DEBUG(msg)  std::cout << "DEBUG :: " << __FUNCTION__ << "::" << __LINE__ <<  msg << std::endl
 	#define LOG_ENTRY       std::cout << "INFO :: ENTERING -> " << __FUNCTION__ << " :: " << __LINE__ << std::endl
 	#define LOG_EXIT        std::cout << "INFO :: EXITING  <- " << __FUNCTION__ << " :: " << __LINE__ << std::endl
 #else
@@ -31,7 +31,7 @@
     #define LOG_EXIT        ;
 #endif
 
-#define LOG_ERROR(msg)  std::cout << "ERROR :: " << __FUNCTION__ << "::" << __LINE__ << ":: " << " -> "<< msg << std::endl
+#define LOG_ERROR(msg)  std::cout << "ERROR :: " << __FUNCTION__ << "::" << __LINE__ << ":: " << msg << std::endl
 
 template<typename T>    // For int, char, float, double and long
 T ReadInput()
