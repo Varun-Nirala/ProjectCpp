@@ -19,35 +19,28 @@ bool ScaleImage::scaleUsingNearestNeighbour(const std::string& fullPath, int per
 		return false;
 	}
 
-	/*
-	const PixelHelper oldData(m_tgaFile.m_vPixels, m_tgaFile.getHeight(), m_tgaFile.getWidth());
-
 	double rat = percent / 100.0;
 
-	int newHeight = (int)(oldData.getHeight() * rat);
-	int newWidth = (int)(oldData.getWidth() * rat);
+	int newHeight = (int)(m_tgaFile.getHeight() * rat);
+	int newWidth = (int)(m_tgaFile.getWidth() * rat);
 
-	std::vector<uint32_t> m_vec;
-	m_vec.resize(newHeight * newWidth);
-
-	PixelHelper newData(m_vec, newHeight, newWidth);
+	TGAFile::uint32Mat& oldData = m_tgaFile.m_pixelMat;
+	TGAFile::uint32Mat newData(newHeight, TGAFile::uint32Vec(newWidth));
 	
 	for (int i = 0; i < newHeight; ++i)
 	{
 		for (int j = 0; j < newWidth; ++j)
 		{
-			newData.setPixelAt(i, j) = oldData.getPixelAt(int(i / rat), int(j / rat));
+			newData[i][j] = oldData[int(i / rat)][int(j / rat)];
 		}
 	}
 
 	m_tgaFile.m_header.m_height = newHeight;
 	m_tgaFile.m_header.m_width = newWidth;
 
-	m_tgaFile.m_vPixels = m_vec;
-
+	m_tgaFile.m_pixelMat = std::move(newData);
 	
 	m_tgaFile.encode("Scaled_" + m_tgaFile.getFileName());
-	*/
 	return true;
 }
 

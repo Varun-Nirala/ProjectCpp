@@ -17,8 +17,8 @@ int main()
 	//vector<string> vfileNames{ "version_1_BottomLeft.tga", "version_1_TopLeft.tga" };
 	//vector<string> vfileNames{ "version_2_RLE_TopLeft.tga" };
 
-	MakeCopyOf(path, vfileNames);
-	//SampleFile(path, vfileNames);
+	//MakeCopyOf(path, vfileNames);
+	SampleFile(path, vfileNames);
 	
 	return 0;
 }
