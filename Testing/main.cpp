@@ -20,6 +20,7 @@ int main()
 	MakeCopyOf(path, vfileNames);
 
 	SampleFile(path, vfileNames, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR);
+	SampleFile(path, vfileNames, TGA::ScaleImage::ALGO_TYPE::BILINEAR);
 	
 	return 0;
 }

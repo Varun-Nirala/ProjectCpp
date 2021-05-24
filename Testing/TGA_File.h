@@ -101,6 +101,26 @@ namespace TGA
 		{
 			return !(*this == c);
 		}
+
+		Color operator*(uint8_t val)
+		{
+			return Color{uint8_t(r*val), uint8_t(g*val), uint8_t(b*val), uint8_t(a*val)};
+		}
+
+		Color operator*(Color val)
+		{
+			return Color{ uint8_t(r * val.r), uint8_t(g * val.g), uint8_t(b * val.b), uint8_t(a * val.a) };
+		}
+
+		Color operator+(uint8_t val)
+		{
+			return Color{ uint8_t(r + val), uint8_t(g + val), uint8_t(b + val), uint8_t(a + val) };
+		}
+
+		Color operator+(Color val)
+		{
+			return Color{ uint8_t(r + val.r), uint8_t(g + val.g), uint8_t(b + val.b), uint8_t(a + val.a) };
+		}
 	};
 
 	//
@@ -175,7 +195,6 @@ namespace TGA
 		inline Color readColorAs24(const UChar* buffer, int& index) const
 		{
 			Color c;
-			uint8_t r, g, b;
 			read1byte(buffer, index, c.b);
 			read1byte(buffer, index, c.g);
 			read1byte(buffer, index, c.r);

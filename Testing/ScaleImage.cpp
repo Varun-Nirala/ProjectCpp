@@ -18,18 +18,36 @@ bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
 		LOG_ERROR("Unable to parse file : " + fullPath);
 		return false;
 	}
+
 	if (type == ALGO_TYPE::NEAREST_NEIGHBOUR)
 	{
-		return scaleUsingNearestNeighbour(percent);
+		if (scaleUsingNearestNeighbour(percent))
+		{
+			return m_tgaFile.encode("NN_" + getNameToSaveAs(percent));
+		}
 	}
 	else if (type == ALGO_TYPE::BILINEAR)
 	{
-		return scaleUsingBilinear(percent);
+		if(scaleUsingBilinear(percent))
+		{
+			return m_tgaFile.encode("BiLi_" + getNameToSaveAs(percent));
+		}
 	}
 
 	LOG_ERROR("Unkown scaling type");
 
 	return false;
+}
+
+Color ScaleImage::interpolateBiLinearly(uint8_t tx, uint8_t ty, Color& c00, Color& c10, Color& c01, Color& c11) const
+{
+	Color a = c00 * (1 - tx) + c10 * tx;
+
+	Color b = c01 * (1 - tx) + c11 * tx;
+
+	Color res = a * (1 - tx) + b * tx;
+
+	return res;
 }
 
 bool ScaleImage::scaleUsingBilinear(int percent)
@@ -55,7 +73,7 @@ bool ScaleImage::scaleUsingBilinear(int percent)
 			Color c01 = oldData[old_i + 1][old_j];
 			Color c11 = oldData[old_i + 1][old_j + 1];
 
-			newData[i][j] = oldData[old_i][old_j];
+			newData[i][j] = interpolateBiLinearly(abs(old_i - i), abs(old_j - j), c00, c10, c01, c11);
 		}
 	}
 
@@ -64,7 +82,6 @@ bool ScaleImage::scaleUsingBilinear(int percent)
 
 	m_tgaFile.m_pixelMat = std::move(newData);
 
-	return m_tgaFile.encode(getNameToSaveAs(percent));
 	return true;
 }
 
@@ -94,7 +111,7 @@ bool ScaleImage::scaleUsingNearestNeighbour(int percent)
 
 	m_tgaFile.m_pixelMat = std::move(newData);
 
-	return m_tgaFile.encode(getNameToSaveAs(percent));
+	return true;
 }
 
 bool ScaleImage::parseFile(const std::string& fullPath)
@@ -105,11 +122,7 @@ bool ScaleImage::parseFile(const std::string& fullPath)
 		return false;
 	}
 
-	if (!m_tgaFile.decode(fullPath))
-	{
-		return false;
-	}
-	return true;
+	return m_tgaFile.decode(fullPath);
 }
 
 bool ScaleImage::checkValidExtension(const std::string& fullPath) const

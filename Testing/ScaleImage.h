@@ -16,8 +16,9 @@ class ScaleImage
 		
 	protected:
 		bool scaleUsingNearestNeighbour(int percent);
-		
 		bool scaleUsingBilinear(int percent);
+
+		Color interpolateBiLinearly(uint8_t tx, uint8_t ty, Color& c00, Color& c10, Color& c01, Color& c11) const;
 
 		bool parseFile(const std::string& fullPath);
 		bool checkValidExtension(const std::string& fullPath) const;
