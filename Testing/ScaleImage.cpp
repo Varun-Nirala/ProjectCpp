@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include "helper.h"
 #include "ScaleImage.h"
@@ -124,7 +125,7 @@ bool ScaleImage::checkValidExtension(const std::string& fullPath) const
 		return false;
 	}
 
-	const std::vector<std::string> validExtensions{ {"tga"}, {"icb"} ,{"vda"}, {"vst"} };
+	const std::array<std::string, 4> validExtensions{ {"tga"}, {"icb"} ,{"vda"}, {"vst"} };
 
 	std::string ext = fullPath.substr(fullPath.size() - 3);
 	
