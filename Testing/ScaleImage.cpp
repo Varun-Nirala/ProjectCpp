@@ -49,20 +49,22 @@ bool ScaleImage::scaleUsingBilinear(int percent)
 	TGAFile::ColorMat& oldData = m_tgaFile.m_pixelMat;
 	TGAFile::ColorMat newData(newHeight, TGAFile::ColorVec(newWidth));
 
-	double old_i, old_j;
-	for (int i = 0; i < newHeight; ++i)
+	for (int row = 0, i = 0, j = 0; row < newHeight; ++row)
 	{
-		for (int j = 0; j < newWidth; ++j)
+		for (int col = 0; col < newWidth; ++col)
 		{
-			old_i = std::min(std::max(0.0, i / rat), (double)oldData.size() - 2);
-			old_j = std::min(std::max(0.0, j / rat), (double)oldData[0].size() - 2);
+			const double d_i = std::min(std::max(0.0, row / rat), (double)oldData.size() - 2);
+			const double d_j = std::min(std::max(0.0, col / rat), (double)oldData[0].size() - 2);
 
-			Color c00 = oldData[old_i][old_j];
-			Color c10 = oldData[old_i + 1][old_j];
-			Color c01 = oldData[old_i][old_j + 1];
-			Color c11 = oldData[old_i + 1][old_j + 1];
+			i = int(d_i);
+			j = int(d_j);
 
-			newData[i][j] = blerp(c00, c10, c01, c11, old_j - int(old_j), old_i - int(old_i));
+			const Color c00 = oldData[i][j];
+			const Color c10 = oldData[i + 1][j];
+			const Color c01 = oldData[i][j + 1];
+			const Color c11 = oldData[i + 1][j + 1];
+
+			newData[row][col] = blerp(c00, c10, c01, c11, uint8_t(d_j - j), uint8_t(d_i - i));
 		}
 	}
 
