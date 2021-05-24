@@ -15,9 +15,10 @@ int main()
 	vector<string> vfileNames{ "version_1_BottomLeft.tga" , "version_1_TopLeft.tga", "version_2_TopLeft.tga", "version_2_BottomLeft.tga", "version_2_RLE_TopLeft.tga", "version_2_RLE_BottomLeft.tga" };
 	
 	//vector<string> vfileNames{ "version_1_BottomLeft.tga", "version_1_TopLeft.tga" };
+	//vector<string> vfileNames{ "version_2_RLE_TopLeft.tga" };
 
-	//MakeCopyOfpath, (vfileNames);
-	SampleFile(path, vfileNames);
+	MakeCopyOf(path, vfileNames);
+	//SampleFile(path, vfileNames);
 	
 	return 0;
 }
@@ -40,7 +41,7 @@ void SampleFile(const string& path, const vector<string> &vfileNames)
 	}
 }
 
-void MakeCopyOfAll(const string& path, const vector<string> &vfileNames)
+void MakeCopyOf(const string& path, const vector<string> &vfileNames)
 {
 	for (size_t i = 0; i < vfileNames.size(); ++i)
 	{

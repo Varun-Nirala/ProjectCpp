@@ -176,10 +176,18 @@ namespace TGA
 		void writeColorMap(std::ostream& file) const;
 		void writeImageData(std::ostream& file) const;
 
-		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index) const;
+		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int row) const;
 
-		int countRepeatPixel(int pos, int &id) const;
-		int countDifferentPixel(int pos, int &id) const;
+		int countRepeatPixel(int row, int col) const;
+		int countDifferentPixel(int row, int col) const;
+
+		inline bool isLastInRow(int row) const { return (row == m_pixelMat.size() - 1); }
+		inline bool isLastInCol(int col) const { return (m_pixelMat.size() && col == m_pixelMat[0].size() - 1); }
+
+		inline bool isLastInMat(int row, int col) const 
+		{ 
+			return isLastInRow(row) && isLastInCol(col);
+		}
 
 		inline void writeColorAs8(std::ostream& file, uint32_t val) const
 		{
@@ -227,6 +235,8 @@ namespace TGA
 			a = (val >> 24) & 0xFF;
 		}
 
+		using uint32Vec = std::vector<uint32_t>;
+		using uint32Mat = std::vector<std::vector<uint32_t>>;
 	private:
 		std::string 					m_sFullPath;
 
@@ -236,8 +246,8 @@ namespace TGA
 		TGAHeader						m_header{};
 		TGAFooter						m_footer{};
 
-		std::vector<uint32_t>			m_vPixels;
-		std::vector<uint32_t>			m_vColorMap;
+		uint32Vec						m_vColorMap;
+		uint32Mat						m_pixelMat;
 
 		std::pair<uint8_t*, int>		m_vFooterAndExtra{};
 	};

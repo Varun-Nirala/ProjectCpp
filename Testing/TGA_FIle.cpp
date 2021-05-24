@@ -128,7 +128,7 @@ void TGAFile::clear()
 	m_header.clear();
 	m_footer.clear();
 
-	m_vPixels.clear();
+	m_pixelMat.clear();
 	m_vColorMap.clear();
 
 	delete[] m_vFooterAndExtra.first;
@@ -281,7 +281,7 @@ void TGAFile::parseColorMap(const UChar* buffer, int& index)
 
 void TGAFile::readPixelData(const UChar *buffer, int& index)
 {
-	m_vPixels.resize(getHeight() * getWidth());
+	m_pixelMat = uint32Mat(getHeight(), uint32Vec(getWidth()));
 
 	switch (m_header.m_imageType)
 	{
@@ -355,12 +355,11 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 // UNCOMPRESSED DATA
 void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
 {
-	int id = 0;
 	for (int i = 0; i < m_header.m_height; ++i)
 	{
 		for (int j = 0; j < m_header.m_width; ++j)
 		{
-			m_vPixels[id++] = (this->*readAsFuncPtr)(buffer, index);
+			m_pixelMat[i][j] = (this->*readAsFuncPtr)(buffer, index);
 		}
 	}
 }
@@ -368,7 +367,6 @@ void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* r
 // COMPRESSED DATA
 void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
 {
-	int id = 0;
 	uint8_t rcf;	// repetition count field
 	uint32_t val;	// pixel value field
 	int runCount;
@@ -382,22 +380,20 @@ void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* 
 			{
 				// RLE packet
 				runCount = (rcf & 0x7F) + 1;
-				j += runCount;
 				val = (this->*readAsFuncPtr)(buffer, index);
 				while (runCount--)
 				{
-					m_vPixels[id++] = val;
+					m_pixelMat[i][j++] = val;
 				}
 			}
 			else
 			{
 				// Raw packet
 				runCount = rcf + 1;
-				j += runCount;
 				while (runCount--)
 				{
 					val = (this->*readAsFuncPtr)(buffer, index);
-					m_vPixels[id++] = val;
+					m_pixelMat[i][j++] = val;
 				}
 			}
 		}
@@ -474,14 +470,16 @@ void TGAFile::writeColorMap(std::ostream &file) const
 
 void TGAFile::writeImageData(std::ostream& file) const
 {
-	int index = 0;
 	switch (m_header.m_imageType)
 	{
 		case UNCOMPRESSED_INDEX:
 		case UNCOMPRESSED_GRAY:
-			for (size_t i = 0; i < m_vPixels.size(); ++i)
+			for (size_t i = 0; i < m_header.m_height; ++i)
 			{
-				writeColorAs8(file, m_vPixels[i]);
+				for (size_t j = 0; j < m_header.m_width; ++j)
+				{
+					writeColorAs8(file, m_pixelMat[i][j]);
+				}
 			}
 		break;
 
@@ -490,23 +488,32 @@ void TGAFile::writeImageData(std::ostream& file) const
 			{
 				case 15:
 				case 16:
-					for (size_t i = 0; i < m_vPixels.size(); ++i)
+					for (size_t i = 0; i < m_header.m_height; ++i)
 					{
-						writeColorAs16(file, m_vPixels[i]);
+						for (size_t j = 0; j < m_header.m_width; ++j)
+						{
+							writeColorAs16(file, m_pixelMat[i][j]);
+						}
 					}
 					break;
 
 				case 24:
-					for (size_t i = 0; i < m_vPixels.size(); ++i)
+					for (size_t i = 0; i < m_header.m_height; ++i)
 					{
-						writeColorAs24(file, m_vPixels[i]);
+						for (size_t j = 0; j < m_header.m_width; ++j)
+						{
+							writeColorAs24(file, m_pixelMat[i][j]);
+						}
 					}
 					break;
 
 				case 32:
-					for (size_t i = 0; i < m_vPixels.size(); ++i)
+					for (size_t i = 0; i < m_header.m_height; ++i)
 					{
-						writeColorAs32(file, m_vPixels[i]);
+						for (size_t j = 0; j < m_header.m_width; ++j)
+						{
+							writeColorAs32(file, m_pixelMat[i][j]);
+						}
 					}
 					break;
 			}
@@ -514,9 +521,9 @@ void TGAFile::writeImageData(std::ostream& file) const
 
 		case RLE_INDEXED:
 		case RLE_GRAY:
-			for (int i = 0; i < m_header.m_height; ++i)
+			for (size_t i = 0; i < m_header.m_height; ++i)
 			{
-				writeRleLine(&TGAFile::writeColorAs8, file, index);
+				writeRleLine(&TGAFile::writeColorAs8, file, i);
 			}
 			break;
 
@@ -525,23 +532,23 @@ void TGAFile::writeImageData(std::ostream& file) const
 			{
 				case 15:
 				case 16:
-					for (int i = 0; i < m_header.m_height; ++i)
+					for (size_t i = 0; i < m_header.m_height; ++i)
 					{
-						writeRleLine(&TGAFile::writeColorAs16, file, index);
+						writeRleLine(&TGAFile::writeColorAs16, file, i);
 					}
 					break;
 
 				case 24:
-					for (int i = 0; i < m_header.m_height; ++i)
+					for (size_t i = 0; i < m_header.m_height; ++i)
 					{
-						writeRleLine(&TGAFile::writeColorAs24, file, index);
+						writeRleLine(&TGAFile::writeColorAs24, file, i);
 					}
 					break;
 
 				case 32:
-					for (int i = 0; i < m_header.m_height; ++i)
+					for (size_t i = 0; i < m_header.m_height; ++i)
 					{
-						writeRleLine(&TGAFile::writeColorAs32, file, index);
+						writeRleLine(&TGAFile::writeColorAs32, file, i);
 					}
 					break;
 			}
@@ -552,96 +559,93 @@ void TGAFile::writeImageData(std::ostream& file) const
 	}
 }
 
-void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int &index) const
+void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int row) const
 {
 	int id = 0;
-	while (id < m_header.m_width)
+	int col = 0;
+	while (col < m_header.m_width)
 	{
-		int count = countRepeatPixel(index, id);
+		int count = countRepeatPixel(row, col);
 
 		if (count > 0)	// as RLE
 		{
 			uint8_t rcf = 0x80 | (uint8_t(count - 1));
 			file.put(rcf);
 
-			(this->*writeAsFuncPtr)(file, m_vPixels[index]);
+			(this->*writeAsFuncPtr)(file, m_pixelMat[row][col]);
 
-			index += count;
+			col += count;
 		}
 		else
 		{	// as Raw
-			count = countDifferentPixel(index, id);
+			count = countDifferentPixel(row, col);
 
 			uint8_t rcf((uint8_t)count - 1);
 			file.put(rcf);
 
 			while (count--)
 			{
-				(this->*writeAsFuncPtr)(file, m_vPixels[index++]);
+				(this->*writeAsFuncPtr)(file, m_pixelMat[row][col++]);
 			}
 		}
 	}
 }
 
-int TGAFile::countRepeatPixel(int pos, int &id)  const
+int TGAFile::countRepeatPixel(int row, int col)  const
 {
 	static const int maxLengthToEncode = 128;
 	int count = 0;
 
-	if (pos == m_vPixels.size() - 1 || m_vPixels[pos] != m_vPixels[pos + 1])
+	if (isLastInCol(col) || m_pixelMat[row][col] != m_pixelMat[row][col + 1])
 	{
 		return 0;
 	}
 
-	uint32_t pixelVal = m_vPixels[pos++];
-	while (id < m_header.m_width && count < maxLengthToEncode)
+	uint32_t pixelVal = m_pixelMat[row][col++];
+	count++;
+
+	while (col < m_header.m_width && count < maxLengthToEncode)
 	{
-		if (pos < m_vPixels.size() && m_vPixels[pos] == pixelVal)
+		if (m_pixelMat[row][col] == pixelVal)
 		{
-			pos++;
-			id++;
+			col++;
 			count++;
 		}
 		else
 			break;
 	}
-
-	if (pos == m_vPixels.size())
-		id++;
 
 	return count;
 }
 
-int TGAFile::countDifferentPixel(int pos, int &id) const
+int TGAFile::countDifferentPixel(int row, int col) const
 {
 	static const int maxLengthToEncode = 128;
 	int count = 0;
 
-	if (pos == m_vPixels.size() - 1)
+	if (isLastInCol(col))
 	{
-		id++;
 		return 1;
 	}
-	
-	if (m_vPixels[pos] == m_vPixels[pos + 1])
-		return 0;
 
-	uint32_t pixelVal = m_vPixels[pos++];
-	while (id <= m_header.m_width && count < maxLengthToEncode)
+	if (m_pixelMat[row][col] == m_pixelMat[row][col + 1])
 	{
-		if (pos < m_vPixels.size() && m_vPixels[pos] != pixelVal)
+		return 0;
+	}
+
+	uint32_t pixelVal = m_pixelMat[row][col++];
+	count++;
+	while (col < m_header.m_width && count < maxLengthToEncode)
+	{
+		if (m_pixelMat[row][col] != pixelVal)
 		{
-			pixelVal = m_vPixels[pos];
-			pos++;
-			id++;
+			pixelVal = m_pixelMat[row][col];
+			col++;
 			count++;
 		}
 		else
 			break;
 	}
-
-	if (pos == m_vPixels.size())
-		id++;
 	
 	return count;
 }
