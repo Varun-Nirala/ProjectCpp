@@ -14,10 +14,20 @@ class PixelHelper
 			,m_w(width)
 		{}
 
-		uint32_t getPixelAt(int i, int j) const { return m_v[i * m_h + j]; }
+		inline uint32_t getPixelAt(int i, int j) const 
+		{ 
+			return m_v[i * m_h + j]; 
+		}
 
-		uint32_t& setPixelAt(int i, int j) { return m_v[i * m_h + j]; }
-		const uint32_t& setPixelAt(int i, int j) const { return m_v[i * m_h + j]; }
+		inline uint32_t& setPixelAt(int i, int j) 
+		{
+			return m_v[i * m_h + j]; 
+		}
+		
+		inline const uint32_t& setPixelAt(int i, int j) const
+		{
+			return m_v[i * m_h + j];
+		}
 
 		int getWidth() const { return m_w; }
 		int getHeight() const { return m_h; }
