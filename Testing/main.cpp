@@ -6,16 +6,24 @@
 
 using namespace std;
 
-void MakeCopyOfAll();
+void MakeCopyOf(const string &path, const vector<string> &fileNames);
+void SampleFile(const string& path, const vector<string> &fileNames);
 
 int main()
 {
 	string path = R"(D:\Varun\Aristocrat_LapTop_BackUp_Jan_2021\Interviews_2021\StarStable\StarStableRounds\ScalingAlgorithm\src\)";
+	vector<string> vfileNames{ "version_1_BottomLeft.tga" , "version_1_TopLeft.tga", "version_2_TopLeft.tga", "version_2_BottomLeft.tga", "version_2_RLE_TopLeft.tga", "version_2_RLE_BottomLeft.tga" };
+	
+	//vector<string> vfileNames{ "version_1_BottomLeft.tga", "version_1_TopLeft.tga" };
 
-	//MakeCopyOfAll();
+	//MakeCopyOfpath, (vfileNames);
+	SampleFile(path, vfileNames);
+	
+	return 0;
+}
 
-	vector<string> vfileNames{ "version_1_BottomLeft.tga", "version_1_TopLeft.tga" };
-
+void SampleFile(const string& path, const vector<string> &vfileNames)
+{
 	int scalePercent = 50;
 	std::cout << "Enter percentage to scale to : ";
 	std::cin >> scalePercent;
@@ -30,15 +38,10 @@ int main()
 
 		cout << "Done " << i << endl;
 	}
-	return 0;
 }
 
-void MakeCopyOfAll()
+void MakeCopyOfAll(const string& path, const vector<string> &vfileNames)
 {
-	string path = R"(D:\Varun\Aristocrat_LapTop_BackUp_Jan_2021\Interviews_2021\StarStable\StarStableRounds\ScalingAlgorithm\src\)";
-
-	vector<string> vfileNames{ "version_1_BottomLeft.tga" , "version_1_TopLeft.tga", "version_2_TopLeft.tga", "version_2_BottomLeft.tga", "version_2_RLE_TopLeft.tga", "version_2_RLE_BottomLeft.tga" };
-
 	for (size_t i = 0; i < vfileNames.size(); ++i)
 	{
 		string fileName = vfileNames[i];
