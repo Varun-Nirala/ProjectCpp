@@ -39,8 +39,8 @@ bool ScaleImage::scaleUsingNearestNeighbour(const std::string& fullPath, int per
 	m_tgaFile.m_header.m_width = newWidth;
 
 	m_tgaFile.m_pixelMat = std::move(newData);
-	
-	m_tgaFile.encode("Scaled_" + m_tgaFile.getFileName());
+
+	m_tgaFile.encode(getNameToSaveAs(percent));
 	return true;
 }
 
@@ -72,5 +72,10 @@ bool ScaleImage::checkValidExtension(const std::string& fullPath) const
 	std::string ext = fullPath.substr(fullPath.size() - 3);
 	
 	return validExtensions.end() != std::find(validExtensions.begin(), validExtensions.end(), ext);
+}
+
+std::string ScaleImage::getNameToSaveAs(double percent) const
+{
+	return "Scaled_to_" + std::to_string((int)percent) + "_" + m_tgaFile.getFileName();
 }
 }
