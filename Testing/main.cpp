@@ -17,9 +17,9 @@ int main()
 	//vector<string> vfileNames{ "version_1_BottomLeft.tga", "version_1_TopLeft.tga" };
 	//vector<string> vfileNames{ "version_2_RLE_TopLeft.tga" };
 
-	MakeCopyOf(path, vfileNames);
+	//MakeCopyOf(path, vfileNames);
 
-	SampleFile(path, vfileNames, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR);
+	//SampleFile(path, vfileNames, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR);
 	SampleFile(path, vfileNames, TGA::ScaleImage::ALGO_TYPE::BILINEAR);
 	
 	return 0;

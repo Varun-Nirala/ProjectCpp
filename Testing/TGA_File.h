@@ -92,34 +92,44 @@ namespace TGA
 			, a(aa)
 		{}
 
-		bool operator==(const Color& c) const
+		inline bool operator==(const Color& c) const
 		{
 			return r == c.r && g == c.g && b == c.b && a == c.a;
 		}
 
-		bool operator!=(const Color& c) const
+		inline bool operator!=(const Color& c) const
 		{
 			return !(*this == c);
 		}
 
-		Color operator*(uint8_t val)
+		inline Color operator*(uint8_t val) const
 		{
 			return Color{uint8_t(r*val), uint8_t(g*val), uint8_t(b*val), uint8_t(a*val)};
 		}
 
-		Color operator*(Color val)
+		inline Color operator*(const Color& val) const
 		{
 			return Color{ uint8_t(r * val.r), uint8_t(g * val.g), uint8_t(b * val.b), uint8_t(a * val.a) };
 		}
 
-		Color operator+(uint8_t val)
+		inline Color operator+(uint8_t val) const
 		{
 			return Color{ uint8_t(r + val), uint8_t(g + val), uint8_t(b + val), uint8_t(a + val) };
 		}
 
-		Color operator+(Color val)
+		inline Color operator+(const Color& val) const
 		{
 			return Color{ uint8_t(r + val.r), uint8_t(g + val.g), uint8_t(b + val.b), uint8_t(a + val.a) };
+		}
+
+		inline Color operator-(uint8_t val) const
+		{
+			return Color{ uint8_t(r - val), uint8_t(g - val), uint8_t(b - val), uint8_t(a - val) };
+		}
+
+		inline Color operator-(const Color& val) const
+		{
+			return Color{ uint8_t(r - val.r), uint8_t(g - val.g), uint8_t(b - val.b), uint8_t(a - val.a) };
 		}
 	};
 

@@ -39,17 +39,6 @@ bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
 	return false;
 }
 
-Color ScaleImage::interpolateBiLinearly(uint8_t tx, uint8_t ty, Color& c00, Color& c10, Color& c01, Color& c11) const
-{
-	Color a = c00 * (1 - tx) + c10 * tx;
-
-	Color b = c01 * (1 - tx) + c11 * tx;
-
-	Color res = a * (1 - tx) + b * tx;
-
-	return res;
-}
-
 bool ScaleImage::scaleUsingBilinear(int percent)
 {
 	double rat = percent / 100.0;
@@ -60,20 +49,20 @@ bool ScaleImage::scaleUsingBilinear(int percent)
 	TGAFile::ColorMat& oldData = m_tgaFile.m_pixelMat;
 	TGAFile::ColorMat newData(newHeight, TGAFile::ColorVec(newWidth));
 
-	int old_i, old_j;
+	double old_i, old_j;
 	for (int i = 0; i < newHeight; ++i)
 	{
 		for (int j = 0; j < newWidth; ++j)
 		{
-			old_i = std::min((unsigned)std::max(0, int(i / rat)), oldData.size() - 2);
-			old_j = std::min((unsigned)std::max(0, int(j / rat)), oldData[0].size() - 2);
+			old_i = std::min(std::max(0.0, i / rat), (double)oldData.size() - 2);
+			old_j = std::min(std::max(0.0, j / rat), (double)oldData[0].size() - 2);
 
 			Color c00 = oldData[old_i][old_j];
-			Color c10 = oldData[old_i][old_j + 1];
-			Color c01 = oldData[old_i + 1][old_j];
+			Color c10 = oldData[old_i + 1][old_j];
+			Color c01 = oldData[old_i][old_j + 1];
 			Color c11 = oldData[old_i + 1][old_j + 1];
 
-			newData[i][j] = interpolateBiLinearly(abs(old_i - i), abs(old_j - j), c00, c10, c01, c11);
+			newData[i][j] = blerp(c00, c10, c01, c11, old_j - int(old_j), old_i - int(old_i));
 		}
 	}
 
@@ -138,10 +127,5 @@ bool ScaleImage::checkValidExtension(const std::string& fullPath) const
 	std::string ext = fullPath.substr(fullPath.size() - 3);
 	
 	return validExtensions.end() != std::find(validExtensions.begin(), validExtensions.end(), ext);
-}
-
-std::string ScaleImage::getNameToSaveAs(int percent) const
-{
-	return "Scaled_to_" + std::to_string(percent) + "_" + m_tgaFile.getFileName();
 }
 }
