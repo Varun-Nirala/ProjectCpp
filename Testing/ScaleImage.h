@@ -7,13 +7,22 @@ namespace TGA
 class ScaleImage
 {
 	public:
-		bool scaleUsingNearestNeighbour(const std::string& fullPath, int percent);
-
+		enum ALGO_TYPE
+		{
+			NEAREST_NEIGHBOUR,
+			BILINEAR,
+		};
+		bool scale(const std::string& fullPath, ALGO_TYPE type, int percent = 50);
+		
 	protected:
+		bool scaleUsingNearestNeighbour(int percent);
+		
+		bool scaleUsingBilinear(int percent);
+
 		bool parseFile(const std::string& fullPath);
 		bool checkValidExtension(const std::string& fullPath) const;
 
-		std::string getNameToSaveAs(double percent) const;
+		std::string getNameToSaveAs(int percent) const;
 
 	private:
 		TGAFile						m_tgaFile;

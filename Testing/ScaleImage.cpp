@@ -3,9 +3,10 @@
 #include <algorithm>
 #include "helper.h"
 #include "ScaleImage.h"
+#include <algorithm>
 
 namespace TGA {
-bool ScaleImage::scaleUsingNearestNeighbour(const std::string& fullPath, int percent)
+bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
 {
 	if (percent <= 0)
 	{
@@ -18,7 +19,25 @@ bool ScaleImage::scaleUsingNearestNeighbour(const std::string& fullPath, int per
 		LOG_ERROR("Unable to parse file : " + fullPath);
 		return false;
 	}
+	if (type == NEAREST_NEIGHBOUR)
+	{
+		return scaleUsingNearestNeighbour(percent);
+	}
+	else
+		return scaleUsingBilinear(percent);
 
+	LOG_ERROR("Unkown scaling type");
+
+	return false;
+}
+
+bool ScaleImage::scaleUsingBilinear(int percent)
+{
+	return true;
+}
+
+bool ScaleImage::scaleUsingNearestNeighbour(int percent)
+{
 	double rat = percent / 100.0;
 
 	int newHeight = (int)(m_tgaFile.getHeight() * rat);
@@ -26,12 +45,15 @@ bool ScaleImage::scaleUsingNearestNeighbour(const std::string& fullPath, int per
 
 	TGAFile::uint32Mat& oldData = m_tgaFile.m_pixelMat;
 	TGAFile::uint32Mat newData(newHeight, TGAFile::uint32Vec(newWidth));
-	
+
+	int old_i, old_j;
 	for (int i = 0; i < newHeight; ++i)
 	{
 		for (int j = 0; j < newWidth; ++j)
 		{
-			newData[i][j] = oldData[int(i / rat)][int(j / rat)];
+			old_i = std::min((unsigned)std::max(0, int(i / rat)), oldData.size() - 1);
+			old_j = std::min((unsigned)std::max(0, int(j / rat)), oldData[0].size() - 1);
+			newData[i][j] = oldData[old_i][old_j];
 		}
 	}
 
@@ -40,8 +62,7 @@ bool ScaleImage::scaleUsingNearestNeighbour(const std::string& fullPath, int per
 
 	m_tgaFile.m_pixelMat = std::move(newData);
 
-	m_tgaFile.encode(getNameToSaveAs(percent));
-	return true;
+	return m_tgaFile.encode(getNameToSaveAs(percent));
 }
 
 bool ScaleImage::parseFile(const std::string& fullPath)
@@ -74,8 +95,8 @@ bool ScaleImage::checkValidExtension(const std::string& fullPath) const
 	return validExtensions.end() != std::find(validExtensions.begin(), validExtensions.end(), ext);
 }
 
-std::string ScaleImage::getNameToSaveAs(double percent) const
+std::string ScaleImage::getNameToSaveAs(int percent) const
 {
-	return "Scaled_to_" + std::to_string((int)percent) + "_" + m_tgaFile.getFileName();
+	return "Scaled_to_" + std::to_string(percent) + "_" + m_tgaFile.getFileName();
 }
 }

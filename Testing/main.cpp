@@ -7,7 +7,7 @@
 using namespace std;
 
 void MakeCopyOf(const string &path, const vector<string> &fileNames);
-void SampleFile(const string& path, const vector<string> &fileNames);
+void SampleFile(const string& path, const vector<string> &fileNames, TGA::ScaleImage::ALGO_TYPE type);
 
 int main()
 {
@@ -18,12 +18,13 @@ int main()
 	//vector<string> vfileNames{ "version_2_RLE_TopLeft.tga" };
 
 	//MakeCopyOf(path, vfileNames);
-	SampleFile(path, vfileNames);
+
+	SampleFile(path, vfileNames, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR);
 	
 	return 0;
 }
 
-void SampleFile(const string& path, const vector<string> &vfileNames)
+void SampleFile(const string& path, const vector<string> &vfileNames, TGA::ScaleImage::ALGO_TYPE type)
 {
 	int scalePercent = 50;
 	std::cout << "Enter percentage to scale to : ";
@@ -35,7 +36,7 @@ void SampleFile(const string& path, const vector<string> &vfileNames)
 
 		TGA::ScaleImage scaleImage;
 
-		scaleImage.scaleUsingNearestNeighbour(fileName, scalePercent);
+		scaleImage.scale(fileName, type, scalePercent);
 
 		cout << "Done " << i << endl;
 	}
