@@ -2,8 +2,8 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include "helper.h"
 #include "ScaleImage.h"
+#include "TGA_File.h"
 
 namespace TGA {
 bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
@@ -125,7 +125,7 @@ bool ScaleImage::checkValidExtension(const std::string& fullPath) const
 		return false;
 	}
 
-	const std::array<std::string, 4> validExtensions{ {"tga"}, {"icb"} ,{"vda"}, {"vst"} };
+	const std::array<std::string, 4> validExtensions {"tga", "icb", "vda", "vst"};
 
 	std::string ext = fullPath.substr(fullPath.size() - 3);
 	

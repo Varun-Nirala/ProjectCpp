@@ -2,7 +2,6 @@
 #include <iterator>
 #include <algorithm>
 #include "TGA_File.h"
-#include "helper.h"
 
 namespace TGA {
 
@@ -190,7 +189,7 @@ bool TGAFile::encode(const std::string& newFileName)
 
 	if (!file)
 	{
-		LOG_ERROR("Opening file :: " + getFilePath() + newFileName + "\n");
+		LOG_ERROR("Opening file :: " + getFilePath() + newFileName);
 		file.close();
 		return false;
 	}
@@ -415,7 +414,7 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) con
 
 	if (!file)
 	{
-		LOG_ERROR("Opening file :: " + sFilepath + "\n");
+		LOG_ERROR("Opening file :: " + sFilepath);
 		file.close();
 		return -1;
 	}
@@ -430,7 +429,7 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) con
 
 	if (!file)
 	{
-		LOG_ERROR("Only :: " + std::to_string(file.gcount()) + " could be read" + "\n");
+		LOG_ERROR("Only :: " + std::to_string(file.gcount()) + " could be read");
 	}
 	file.close();
 	return length;

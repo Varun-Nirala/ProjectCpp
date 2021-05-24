@@ -3,7 +3,11 @@
 
 #include <fstream>
 #include <cstdio>
+#include <iostream>
 #include <vector>
+#include <string>
+
+#define LOG_ERROR(msg)  std::cout << "ERROR :: " << __FUNCTION__ << "::" << __LINE__ << ":: " << msg << std::endl
 
 namespace TGA
 {
