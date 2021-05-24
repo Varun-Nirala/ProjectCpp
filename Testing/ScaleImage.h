@@ -7,7 +7,7 @@ namespace TGA
 class ScaleImage
 {
 	public:
-		enum ALGO_TYPE
+		enum class ALGO_TYPE
 		{
 			NEAREST_NEIGHBOUR,
 			BILINEAR,

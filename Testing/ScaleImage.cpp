@@ -3,7 +3,6 @@
 #include <algorithm>
 #include "helper.h"
 #include "ScaleImage.h"
-#include <algorithm>
 
 namespace TGA {
 bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
@@ -19,12 +18,14 @@ bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
 		LOG_ERROR("Unable to parse file : " + fullPath);
 		return false;
 	}
-	if (type == NEAREST_NEIGHBOUR)
+	if (type == ALGO_TYPE::NEAREST_NEIGHBOUR)
 	{
 		return scaleUsingNearestNeighbour(percent);
 	}
-	else
+	else if (type == ALGO_TYPE::BILINEAR)
+	{
 		return scaleUsingBilinear(percent);
+	}
 
 	LOG_ERROR("Unkown scaling type");
 
