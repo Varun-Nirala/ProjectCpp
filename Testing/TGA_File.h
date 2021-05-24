@@ -78,6 +78,31 @@ namespace TGA
 		int parse(const UChar* const buffer, int length);
 	};
 
+	struct Color
+	{
+		uint8_t r{};	// also act as index in color of 8bit encoding
+		uint8_t g{};
+		uint8_t b{};
+		uint8_t a{};
+
+		explicit Color(uint8_t rr = 0, uint8_t gg = 0, uint8_t bb = 0, uint8_t aa = 255)
+			:r(rr)
+			, g(gg)
+			, b(bb)
+			, a(aa)
+		{}
+
+		bool operator==(const Color& c) const
+		{
+			return r == c.r && g == c.g && b == c.b && a == c.a;
+		}
+
+		bool operator!=(const Color& c) const
+		{
+			return !(*this == c);
+		}
+	};
+
 	//
 	class ScaleImage;
 	class TGAFile
@@ -109,66 +134,62 @@ namespace TGA
 		void readPixelData(const UChar* buffer, int& index);
 
 		// UNCOMPRESSED DATA
-		void read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::*readAsFuncPtr)(const UChar*, int&) const);
+		void read_RGB_uc(const UChar* buffer, int& index, Color(TGAFile::*readAsFuncPtr)(const UChar*, int&) const);
 
 		// COMPRESSED DATA
-		void read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::*readAsFuncPtr)(const UChar*, int&) const);
+		void read_RGB_rle(const UChar* buffer, int& index, Color(TGAFile::*readAsFuncPtr)(const UChar*, int&) const);
 
 		void readVersion2Specific(const UChar* buffer, int length, int& index);
 
 		int readFileInBuffer(const std::string& sFilepath, UChar*& buffer) const;
 
-		inline uint32_t readColorAs8(const UChar* buffer, int& index) const
+		inline Color readColorAs8(const UChar* buffer, int& index) const
 		{
-			uint8_t val;
-			read1byte(buffer, index, val);
-			return val;
+			Color c;
+			read1byte(buffer, index, c.r);
+			return c;
 		}
 
-		inline uint32_t readColorAs16(const UChar* buffer, int& index) const
+		inline Color readColorAs16(const UChar* buffer, int& index) const
 		{
-			uint8_t a = 255;
+			Color c;
+			c.a = 255;
 			uint16_t val;
 			read2byte(buffer, index, val);
 
 			if (!(val & 0x8000))
-				a = 0;
-			return encodeAsRGBA(val, a);
+				c.a = 0;
+
+			c.r = (val >> 10) & 0x1F;
+			c.g = (val >> 5) & 0x1F;
+			c.b = val & 0x1F;
+
+			c.r = (c.r << 3 | c.r >> 2);
+			c.g = (c.g << 3 | c.g >> 2);
+			c.b = (c.b << 3 | c.b >> 2);
+			c.a = (c.a << 3 | c.a >> 2);
+
+			return c;
 		}
 
-		inline uint32_t readColorAs24(const UChar* buffer, int& index) const
+		inline Color readColorAs24(const UChar* buffer, int& index) const
 		{
+			Color c;
 			uint8_t r, g, b;
-			read1byte(buffer, index, b);
-			read1byte(buffer, index, g);
-			read1byte(buffer, index, r);
-			return encodeAsRGBA(r, g, b);
+			read1byte(buffer, index, c.b);
+			read1byte(buffer, index, c.g);
+			read1byte(buffer, index, c.r);
+			return c;
 		}
 
-		inline uint32_t readColorAs32(const UChar* buffer, int& index) const
+		inline Color readColorAs32(const UChar* buffer, int& index) const
 		{
-			uint8_t r, g, b, a;
-			read1byte(buffer, index, b);
-			read1byte(buffer, index, g);
-			read1byte(buffer, index, r);
-			read1byte(buffer, index, a);
-			return encodeAsRGBA(r, g, b, a);
-		}
-
-		inline uint32_t encodeAsRGBA(uint16_t pixel, uint8_t a = 255) const
-		{
-			uint8_t r = (pixel >> 10) & 0x1F;
-			uint8_t g = (pixel >> 5) & 0x1F;
-			uint8_t b = pixel & 0x1F;
-			return encodeAsRGBA((r << 3 | r >> 2),
-								(g << 3 | g >> 2),
-								(b << 3 | b >> 2),
-								(a << 3 | a >> 2));
-		}
-
-		inline uint32_t encodeAsRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) const
-		{
-			return (r | (g << 8) | (b << 16) | (a << 24));
+			Color c;
+			read1byte(buffer, index, c.b);
+			read1byte(buffer, index, c.g);
+			read1byte(buffer, index, c.r);
+			read1byte(buffer, index, c.a);
+			return c;
 		}
 	
 	// Related to encoding file
@@ -176,7 +197,7 @@ namespace TGA
 		void writeColorMap(std::ostream& file) const;
 		void writeImageData(std::ostream& file) const;
 
-		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int row) const;
+		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color) const, std::ostream& file, int row) const;
 
 		int countRepeatPixel(int row, int col) const;
 		int countDifferentPixel(int row, int col) const;
@@ -189,54 +210,39 @@ namespace TGA
 			return isLastInRow(row) && isLastInCol(col);
 		}
 
-		inline void writeColorAs8(std::ostream& file, uint32_t val) const
+		inline void writeColorAs8(std::ostream& file, Color c) const
 		{
-			file.put((uint8_t)val);
+			file.put(c.r);
 		}
 
-		inline void writeColorAs16(std::ostream &file, uint32_t val) const
+		inline void writeColorAs16(std::ostream &file, Color c) const
 		{
-			uint8_t r, g, b, a;
-			decodeAsRGBA(val, r, g, b, a);
-			
 			uint16_t v = 
-				((r >> 3) << 10) |
-				((g >> 3) << 5) |
-				((b >> 3)) |
-				(a != 0 ? 0x8000 : 0);
+				((c.r >> 3) << 10) |
+				((c.g >> 3) << 5) |
+				((c.b >> 3)) |
+				(c.a != 0 ? 0x8000 : 0);
 
 			file.write((char *)&v, 2);
 		}
 
-		inline void writeColorAs24(std::ostream& file, uint32_t val) const
+		inline void writeColorAs24(std::ostream& file, Color c) const
 		{
-			uint8_t r, g, b, a;
-			decodeAsRGBA(val, r, g, b, a);
-			file.put(b);
-			file.put(g);
-			file.put(r);
+			file.put(c.b);
+			file.put(c.g);
+			file.put(c.r);
 		}
 
-		inline void writeColorAs32(std::ostream& file, uint32_t val) const
+		inline void writeColorAs32(std::ostream& file, Color c) const
 		{
-			uint8_t r, g, b, a;
-			decodeAsRGBA(val, r, g, b, a);
-			file.put(b);
-			file.put(g);
-			file.put(r);
-			file.put(a);
+			file.put(c.b);
+			file.put(c.g);
+			file.put(c.r);
+			file.put(c.a);
 		}
 
-		void decodeAsRGBA(uint32_t val, uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a) const
-		{
-			r = val & 0xFF;
-			g = (val >> 8) & 0xFF;
-			b = (val >> 16) & 0xFF;
-			a = (val >> 24) & 0xFF;
-		}
-
-		using uint32Vec = std::vector<uint32_t>;
-		using uint32Mat = std::vector<std::vector<uint32_t>>;
+		using ColorVec = std::vector<Color>;
+		using ColorMat = std::vector<std::vector<Color>>;
 	private:
 		std::string 					m_sFullPath;
 
@@ -246,8 +252,8 @@ namespace TGA
 		TGAHeader						m_header{};
 		TGAFooter						m_footer{};
 
-		uint32Vec						m_vColorMap;
-		uint32Mat						m_pixelMat;
+		ColorVec						m_vColorMap;
+		ColorMat						m_pixelMat;
 
 		std::pair<uint8_t*, int>		m_vFooterAndExtra{};
 	};

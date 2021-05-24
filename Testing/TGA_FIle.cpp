@@ -281,7 +281,7 @@ void TGAFile::parseColorMap(const UChar* buffer, int& index)
 
 void TGAFile::readPixelData(const UChar *buffer, int& index)
 {
-	m_pixelMat = uint32Mat(getHeight(), uint32Vec(getWidth()));
+	m_pixelMat = ColorMat(getHeight(), ColorVec(getWidth()));
 
 	switch (m_header.m_imageType)
 	{
@@ -353,7 +353,7 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 }
 
 // UNCOMPRESSED DATA
-void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
+void TGAFile::read_RGB_uc(const UChar* buffer, int& index, Color(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
 {
 	for (int i = 0; i < m_header.m_height; ++i)
 	{
@@ -365,10 +365,10 @@ void TGAFile::read_RGB_uc(const UChar* buffer, int& index, uint32_t(TGAFile::* r
 }
 
 // COMPRESSED DATA
-void TGAFile::read_RGB_rle(const UChar* buffer, int& index, uint32_t(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
+void TGAFile::read_RGB_rle(const UChar* buffer, int& index, Color(TGAFile::* readAsFuncPtr)(const UChar*, int&) const)
 {
 	uint8_t rcf;	// repetition count field
-	uint32_t val;	// pixel value field
+	Color val;		// pixel value field
 	int runCount;
 	for (int i = 0; i < m_header.m_height; ++i)
 	{
@@ -559,7 +559,7 @@ void TGAFile::writeImageData(std::ostream& file) const
 	}
 }
 
-void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, uint32_t) const, std::ostream& file, int row) const
+void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color) const, std::ostream& file, int row) const
 {
 	int id = 0;
 	int col = 0;
@@ -601,7 +601,7 @@ int TGAFile::countRepeatPixel(int row, int col)  const
 		return 0;
 	}
 
-	uint32_t pixelVal = m_pixelMat[row][col++];
+	Color pixelVal = m_pixelMat[row][col++];
 	count++;
 
 	while (col < m_header.m_width && count < maxLengthToEncode)
@@ -633,7 +633,7 @@ int TGAFile::countDifferentPixel(int row, int col) const
 		return 0;
 	}
 
-	uint32_t pixelVal = m_pixelMat[row][col++];
+	Color pixelVal = m_pixelMat[row][col++];
 	count++;
 	while (col < m_header.m_width && count < maxLengthToEncode)
 	{

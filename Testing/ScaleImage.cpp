@@ -34,6 +34,37 @@ bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
 
 bool ScaleImage::scaleUsingBilinear(int percent)
 {
+	double rat = percent / 100.0;
+
+	int newHeight = (int)(m_tgaFile.getHeight() * rat);
+	int newWidth = (int)(m_tgaFile.getWidth() * rat);
+
+	TGAFile::ColorMat& oldData = m_tgaFile.m_pixelMat;
+	TGAFile::ColorMat newData(newHeight, TGAFile::ColorVec(newWidth));
+
+	int old_i, old_j;
+	for (int i = 0; i < newHeight; ++i)
+	{
+		for (int j = 0; j < newWidth; ++j)
+		{
+			old_i = std::min((unsigned)std::max(0, int(i / rat)), oldData.size() - 2);
+			old_j = std::min((unsigned)std::max(0, int(j / rat)), oldData[0].size() - 2);
+
+			Color c00 = oldData[old_i][old_j];
+			Color c10 = oldData[old_i][old_j + 1];
+			Color c01 = oldData[old_i + 1][old_j];
+			Color c11 = oldData[old_i + 1][old_j + 1];
+
+			newData[i][j] = oldData[old_i][old_j];
+		}
+	}
+
+	m_tgaFile.m_header.m_height = newHeight;
+	m_tgaFile.m_header.m_width = newWidth;
+
+	m_tgaFile.m_pixelMat = std::move(newData);
+
+	return m_tgaFile.encode(getNameToSaveAs(percent));
 	return true;
 }
 
@@ -44,8 +75,8 @@ bool ScaleImage::scaleUsingNearestNeighbour(int percent)
 	int newHeight = (int)(m_tgaFile.getHeight() * rat);
 	int newWidth = (int)(m_tgaFile.getWidth() * rat);
 
-	TGAFile::uint32Mat& oldData = m_tgaFile.m_pixelMat;
-	TGAFile::uint32Mat newData(newHeight, TGAFile::uint32Vec(newWidth));
+	TGAFile::ColorMat& oldData = m_tgaFile.m_pixelMat;
+	TGAFile::ColorMat newData(newHeight, TGAFile::ColorVec(newWidth));
 
 	int old_i, old_j;
 	for (int i = 0; i < newHeight; ++i)
