@@ -219,7 +219,6 @@ string TGAFile::getFileName() const
 	if(m_sFullPath.empty())
 	{
 		LOG_ERROR("Provided filepath is empty.");
-		//TODO::Throw exception
 	}
 	else
 	{

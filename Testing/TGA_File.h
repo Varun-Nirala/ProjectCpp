@@ -153,12 +153,11 @@ namespace TGA
 		std::string getFileName() const;
 		std::string getFilePath() const;
 
-		int getWidth() const { return m_header.m_width; }
-		int getHeight() const { return m_header.m_height; }
-		int getBytesPerPixel() const { return (m_header.m_Bpp / 8); }
+		inline int getWidth() const { return m_header.m_width; }
+		inline int getHeight() const { return m_header.m_height; }
 
-		void displayHeader() const { m_header.display(); }
-		void displayFooter() const { m_footer.display(); }
+		inline void displayHeader() const { m_header.display(); }
+		inline void displayFooter() const { m_footer.display(); }
 
 	// Related to decoding file
 	protected:
