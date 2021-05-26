@@ -66,33 +66,17 @@ void MinHeapify(int *arr, int size, int i)
 
 void minHeapSort(int *arr, int size)
 {
-	// Heapify the array
-	for (int i = parent(size); i >= 0; --i)
+	for (int last = (size/2) - 1; last > 0; --last)
 	{
-		MinHeapify(arr, size, i);
-	}
-
-	// Now we have a eiter min or max heap
-	for (int last = size - 1; last > 0; --last)
-	{
-		swap(arr[0], arr[last]);
-		MinHeapify(arr, last, 0);
+		MinHeapify(arr, size, last);
 	}
 }
 
 void maxHeapSort(int *arr, int size)
 {
-	// Heapify the array
-	for (int i = parent(size); i >= 0; --i)
+	for (int last = (size/2) - 1; last > 0; --last)
 	{
-		MaxHeapify(arr, size, i);
-	}
-
-	// Now we have a eiter min or max heap
-	for (int last = size - 1; last > 0; --last)
-	{
-		swap(arr[0], arr[last]);
-		MaxHeapify(arr, last, 0);
+		MaxHeapify(arr, size, last);
 	}
 }
 
@@ -106,13 +90,13 @@ void test_heapSort()
 	int size = sizeof(arr) / sizeof(arr[0]);
 
 	printArray(arr, size);
-	minHeapSort(arr, size);
-	cout << "After MinHeap Sorting\n";
+	maxHeapSort(arr, size);
+	cout << "After MaxHeap Sorting\n";
 	printArray(arr, size);
 
 	int arr1[] = { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
 	printArray(arr1, size);
-	maxHeapSort(arr1, size);
-	cout << "After MaxHeap Sorting\n";
+	minHeapSort(arr1, size);
+	cout << "After MinHeap Sorting\n";
 	printArray(arr1, size);
 }
