@@ -62,9 +62,9 @@ int main(int argc, char *argv[])
 	{
 		try
 		{
-			percent = stoi(argv[3]);
+			percent = stoi(argv[2]);
 			if (argc == 4)
-				algo = stoi(argv[4]);
+				algo = stoi(argv[3]);
 		}
 		catch (std::exception &e)
 		{
