@@ -53,8 +53,6 @@ int main(int argc, char *argv[])
 
 	string filepath(argv[1]);
 
-	std::cout << "File : " << filepath << '\n';
-
 	int percent = 50;
 	int algo = 0;
 	
@@ -82,12 +80,14 @@ int main(int argc, char *argv[])
 		case 1:
 			scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::BILINEAR, percent);
 			break;
-		case 3:
+		case 2:
 			scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR, percent);
 			scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::BILINEAR, percent);
 			break;
-	default:
-		break;
+		default:
+			LOG_ERROR("Unkown algorithm specified.");
+			printUsage();
+			break;
 	}
 	return 0;
 }

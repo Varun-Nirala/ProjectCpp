@@ -36,14 +36,14 @@ Description
 			[integer] this is the option to specify which algorithm we want to be used.
 			0 -> Nearest neighbour
 			1 -> Bilinear interpolation
-			3 -> Create two copy by using both algorithms
+			2 -> Create two copy by using both algorithms
 
 
 Usage
 -----
 	Use the provided scaleImage.exe inside x64.
 	exe file percentage algorithm
-
+	
 	Relevant field are explained above in the description tag.
 
 Output
