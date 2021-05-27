@@ -569,9 +569,9 @@ void TGAFile::writeImageData(std::ostream& file) const
 	}
 }
 
-void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color) const, std::ostream& file, int row) const
+void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color) const, std::ostream& file, size_t row) const
 {
-	int col = 0;
+	size_t col = 0;
 	while (col < m_header.m_width)
 	{
 		int count = countRepeatPixel(row, col);
@@ -600,7 +600,7 @@ void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color)
 	}
 }
 
-int TGAFile::countRepeatPixel(int row, int col)  const
+int TGAFile::countRepeatPixel(size_t row, size_t col)  const
 {
 	static const int maxLengthToEncode = 128;
 	int count = 0;
@@ -627,7 +627,7 @@ int TGAFile::countRepeatPixel(int row, int col)  const
 	return count;
 }
 
-int TGAFile::countDifferentPixel(int row, int col) const
+int TGAFile::countDifferentPixel(size_t row, size_t col) const
 {
 	static const int maxLengthToEncode = 128;
 	int count = 0;

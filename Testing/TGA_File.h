@@ -241,15 +241,15 @@ namespace TGA
 		void writeColorMap(std::ostream& file) const;
 		void writeImageData(std::ostream& file) const;
 
-		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color) const, std::ostream& file, int row) const;
+		void writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color) const, std::ostream& file, size_t row) const;
 
-		int countRepeatPixel(int row, int col) const;
-		int countDifferentPixel(int row, int col) const;
+		int countRepeatPixel(size_t row, size_t col) const;
+		int countDifferentPixel(size_t row, size_t col) const;
 
-		inline bool isLastInRow(int row) const { return (row == m_pixelMat.size() - 1); }
-		inline bool isLastInCol(int col) const { return (m_pixelMat.size() && col == m_pixelMat[0].size() - 1); }
+		inline bool isLastInRow(size_t row) const { return (row == m_pixelMat.size() - 1); }
+		inline bool isLastInCol(size_t col) const { return (m_pixelMat.size() && col == m_pixelMat[0].size() - 1); }
 
-		inline bool isLastInMat(int row, int col) const 
+		inline bool isLastInMat(size_t row, size_t col) const
 		{ 
 			return isLastInRow(row) && isLastInCol(col);
 		}

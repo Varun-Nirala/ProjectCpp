@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <algorithm>
+#include <utility>
 #include "ScaleImage.h"
 #include "TGA_File.h"
 
@@ -31,7 +31,7 @@ bool ScaleImage::scale(const std::string& fullPath, ALGO_TYPE type, int percent)
 	{
 		if(scaleUsingBilinear(percent))
 		{
-			return m_tgaFile.encode("BiLi_" + getNameToSaveAs(percent));
+			return m_tgaFile.encode("BL_" + getNameToSaveAs(percent));
 		}
 	}
 
@@ -92,8 +92,8 @@ bool ScaleImage::scaleUsingNearestNeighbour(int percent)
 	{
 		for (int j = 0; j < newWidth; ++j)
 		{
-			old_i = std::min((unsigned)std::max(0, int(i / rat)), oldData.size() - 1);
-			old_j = std::min((unsigned)std::max(0, int(j / rat)), oldData[0].size() - 1);
+			old_i = (int)std::min((size_t)std::max(0, int(i / rat)), oldData.size() - 1);
+			old_j = (int)std::min((size_t)std::max(0, int(j / rat)), oldData[0].size() - 1);
 			newData[i][j] = oldData[old_i][old_j];
 		}
 	}

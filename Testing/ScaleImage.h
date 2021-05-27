@@ -33,7 +33,7 @@ class ScaleImage
 
 		const std::string getNameToSaveAs(int percent) const
 		{
-			return "Scaled_to_" + std::to_string(percent) + "_" + m_tgaFile.getFileName();
+			return std::to_string(percent) + "_" + m_tgaFile.getFileName();
 		}
 
 	private:
