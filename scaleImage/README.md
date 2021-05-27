@@ -41,7 +41,7 @@ Description
 
 Usage
 -----
-	Use the provided scaleImage.exe inside x32 or x64 .
+	Use the provided scaleImage.exe inside bin\x32 or bin\x64 .
 	exe file percentage algorithm
 
 	Relevant field are explained above in the description tag.
