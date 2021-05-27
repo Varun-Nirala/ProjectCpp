@@ -8,7 +8,14 @@ Parse the TARGA image and save a scaled copy of the provided image.
 
 Project & System Configuration
 ------------------------------
-Use cmake to create a Visual Studio solution.
+[Required] : CMake 3.0 or above
+Use cmake to create a Visual Studio solution. CMakeLists.txt for the same.
+	Create Solution :
+		1. Extract zip and copy [scaleImage] folder to a location.
+		2. In same directory where scaleImage is copied create a [build] folder.
+		3. Move inside the build folder and run command provided below in CMD/Powershell.
+		4. Command [cmake -G "Visual Studio 16" ..\scaleImage\]
+		5. If step 4 is successful. build folder will contain a Visual Studio solution.
 
 
 Description
@@ -34,6 +41,7 @@ Description
 
 Usage
 -----
+	Use the provided scaleImage.exe inside x32 or x64 .
 	exe file percentage algorithm
 
 	Relevant field are explained above in the description tag.
