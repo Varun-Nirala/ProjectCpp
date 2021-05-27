@@ -6,9 +6,6 @@
 
 using namespace std;
 
-void MakeCopyOf(const string &path, const vector<string> &fileNames);
-void SampleFile(const string& path, const vector<string> &fileNames, TGA::ScaleImage::ALGO_TYPE type);
-
 void printUsage()
 {
 	string usage = R"(
