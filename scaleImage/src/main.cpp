@@ -72,22 +72,28 @@ int main(int argc, char *argv[])
 	}
 
 	TGA::ScaleImage scaleImage;
+	bool rc = false;
 	switch (algo)
 	{
 		case 0:
-			scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR, percent);
+			rc = scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR, percent);
 			break;
+
 		case 1:
-			scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::BILINEAR, percent);
+			rc = scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::BILINEAR, percent);
 			break;
+
 		case 2:
-			scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR, percent);
-			scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::BILINEAR, percent);
+			rc = scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::NEAREST_NEIGHBOUR, percent);
+			rc &= scaleImage.scale(filepath, TGA::ScaleImage::ALGO_TYPE::BILINEAR, percent);
 			break;
+
 		default:
 			LOG_ERROR("Unkown algorithm specified.");
 			printUsage();
+			rc = false;
 			break;
 	}
-	return 0;
+
+	return !rc;
 }
