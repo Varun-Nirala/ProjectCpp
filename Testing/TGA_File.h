@@ -14,15 +14,15 @@ namespace TGA
 	using UChar = unsigned char;
 	
 	enum ImageType {
-		NO_IMAGE_DATA = 0,
+		NO_IMAGE_DATA		= 0,
 
-		UNCOMPRESSED_INDEX = 1,
-		UNCOMPRESSED_RGB = 2,
-		UNCOMPRESSED_GRAY = 3,
+		UNCOMPRESSED_INDEX	= 1,
+		UNCOMPRESSED_RGB	= 2,
+		UNCOMPRESSED_GRAY	= 3,
 
-		RLE_INDEXED = 9,
-		RLE_RGB = 10,
-		RLE_GRAY = 11,
+		RLE_INDEXED			= 9,
+		RLE_RGB				= 10,
+		RLE_GRAY			= 11,
 	};
 
 	inline void read1byte(const UChar* srcbuffer, int& index, uint8_t& dst)
@@ -96,6 +96,12 @@ namespace TGA
 			, a(aa)
 		{}
 
+		Color(const Color&) = default;
+		Color(Color&&) = default;
+
+		Color& operator=(const Color&) = default;
+		Color& operator=(Color&&) = default;
+
 		inline bool operator==(const Color& c) const
 		{
 			return r == c.r && g == c.g && b == c.b && a == c.a;
@@ -146,6 +152,12 @@ namespace TGA
 	public:
 		TGAFile() {};
 		~TGAFile();
+
+		TGAFile(const TGAFile&) = delete;
+		TGAFile(TGAFile&&) = delete;
+
+		TGAFile& operator=(const TGAFile&) = delete;
+		TGAFile& operator=(TGAFile&&) = delete;
 
 		bool decode(const std::string& sFilepath);
 		bool encode(const std::string& newFileName);

@@ -131,6 +131,7 @@ void TGAFile::clear()
 	m_vColorMap.clear();
 
 	delete[] m_vFooterAndExtra.first;
+	m_vFooterAndExtra.first = nullptr;
 	m_vFooterAndExtra.second = 0;
 }
 
@@ -222,7 +223,7 @@ string TGAFile::getFileName() const
 	}
 	else
 	{
-		unsigned int matchIndex = m_sFullPath.rfind('\\') + 1;
+		size_t matchIndex = m_sFullPath.rfind('\\') + 1;
 		if(matchIndex != string::npos)
 		{
 			sFileName = m_sFullPath.substr(matchIndex);
@@ -240,7 +241,7 @@ string TGAFile::getFilePath() const
 	}
 	else
 	{
-		unsigned int matchIndex = m_sFullPath.rfind('\\') + 1;
+		size_t matchIndex = m_sFullPath.rfind('\\') + 1;
 		if (matchIndex != string::npos)
 		{
 			sFilePath = m_sFullPath.substr(0, matchIndex);
@@ -273,6 +274,11 @@ void TGAFile::parseColorMap(const UChar* buffer, int& index)
 			m_vColorMap[i] = readColorAs32(buffer, index);
 		}
 	}
+	else
+	{
+		LOG_ERROR("Incorrect Color Map Data.");
+		return;
+	}
 
 	index += (m_header.m_CMapLength * (m_header.m_CMapBpp / 8));
 }
@@ -291,7 +297,7 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			else
 			{
-				LOG_ERROR("Incorrect Data.");
+				LOG_ERROR("Incorrect Color Data.");
 			}
 			break;
 
@@ -309,8 +315,7 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 					read_RGB_uc(buffer, index, &TGAFile::readColorAs32);
 					break;
 				default:
-					LOG_ERROR("Incorrect Data.");
-					return;
+					LOG_ERROR("Incorrect Color Data.");
 			}
 			break;
 
@@ -322,7 +327,7 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 			}
 			else
 			{
-				LOG_ERROR("Incorrect Data.");
+				LOG_ERROR("Incorrect Color Data.");
 			}
 			break;
 
@@ -341,7 +346,6 @@ void TGAFile::readPixelData(const UChar *buffer, int& index)
 				break;
 			default:
 				LOG_ERROR("Incorrect Data.");
-				return;
 			}
 			break;
 
@@ -422,15 +426,23 @@ int TGAFile::readFileInBuffer(const std::string& sFilepath, UChar *& buffer) con
 	int length = (int)file.tellg();
 	file.seekg(0, file.beg);
 
-	buffer = new UChar[length];
+	buffer = new (std::nothrow) UChar[length];
 
-	file.read((char *)buffer, length);
-
-	if (!file)
+	if (!buffer)
 	{
-		LOG_ERROR("Only :: " + std::to_string(file.gcount()) + " could be read");
+		LOG_ERROR("Memory allocation failed.");
+		length = -1;
 	}
-	file.close();
+	else
+	{
+		file.read((char*)buffer, length);
+
+		if (!file)
+		{
+			LOG_ERROR("Only :: " + std::to_string(file.gcount()) + " could be read");
+		}
+		file.close();
+	}
 	return length;
 }
 
@@ -553,13 +565,12 @@ void TGAFile::writeImageData(std::ostream& file) const
 			break;
 
 		default:
-			LOG_ERROR("Image type unkown.");
+			LOG_ERROR("Image type: unkown.");
 	}
 }
 
 void TGAFile::writeRleLine(void(TGAFile::* writeAsFuncPtr)(std::ostream&, Color) const, std::ostream& file, int row) const
 {
-	int id = 0;
 	int col = 0;
 	while (col < m_header.m_width)
 	{
