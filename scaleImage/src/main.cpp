@@ -9,10 +9,10 @@ using namespace std;
 void printUsage()
 {
 	const string usage = R"(
-Usage       : scaleImage.exe file percentage algorithm
+Usage       : executable file percentage algorithm
 
-Description : Read a targa file and save a scaled copy of the image at the same locaton with new name.
-              By default image is scaled to 50 percent using the nearest neighbour algorithm.
+Description : Read a targa image file and save a scaled copy of the image at the same locaton with new name.
+              By default image is scaled to 50 % using the nearest neighbour algorithm.
               Excepted image extensions are tga, icb, vda and vst.
 
               file (required)
@@ -27,17 +27,18 @@ Description : Read a targa file and save a scaled copy of the image at the same 
                  [integer] this is the option to specify which algorithm we want to be used.
                  0 -> Nearest neighbour
                  1 -> Bilinear interpolation
-                 3 -> Create two copy by using both algorithms
+                 2 -> Create two copy by using both algorithms
 
 Options :
    -h
        Print this help.
 
 Example :
-     D:\User\Files\image_name.tga
-     D:\User\Files\image_name.tga 150
-     D:\User\Files\image_name.tga 200 0
-     D:\User\Files\image_name.tga 50 1
+     executable D:\User\Files\image_name.tga
+     executable D:\User\Files\image_name.tga 150
+     executable D:\User\Files\image_name.tga 200 0
+     executable D:\User\Files\image_name.tga 50 1
+     executable D:\User\Files\image_name.tga 50 2
 )";
 
 	puts(usage.c_str());
