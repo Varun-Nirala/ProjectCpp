@@ -31,7 +31,7 @@ class ScaleImage
 		bool parseFile(const std::string& fullPath);
 		bool checkValidExtension(const std::string& fullPath) const;
 
-		const std::string getNameToSaveAs(int percent) const
+		inline const std::string getNameToSaveAs(int percent) const
 		{
 			return std::to_string(percent) + "_" + m_tgaFile.getFileName();
 		}

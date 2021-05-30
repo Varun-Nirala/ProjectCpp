@@ -8,7 +8,7 @@ using namespace std;
 
 void printUsage()
 {
-	string usage = R"(
+	const string usage = R"(
 Usage       : scaleImage.exe file percentage algorithm
 
 Description : Read a targa file and save a scaled copy of the image at the same locaton with new name.
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	string filepath(argv[1]);
+	const string filepath(argv[1]);
 
 	int percent = 50;
 	int algo = 0;

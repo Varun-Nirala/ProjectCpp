@@ -223,7 +223,11 @@ string TGAFile::getFileName() const
 	}
 	else
 	{
+#ifdef WIN32
 		size_t matchIndex = m_sFullPath.rfind('\\') + 1;
+#else
+		size_t matchIndex = m_sFullPath.rfind('/') + 1;
+#endif
 		if(matchIndex != string::npos)
 		{
 			sFileName = m_sFullPath.substr(matchIndex);
@@ -241,7 +245,11 @@ string TGAFile::getFilePath() const
 	}
 	else
 	{
+#ifdef WIN32
 		size_t matchIndex = m_sFullPath.rfind('\\') + 1;
+#else
+		size_t matchIndex = m_sFullPath.rfind('/') + 1;
+#endif
 		if (matchIndex != string::npos)
 		{
 			sFilePath = m_sFullPath.substr(0, matchIndex);
