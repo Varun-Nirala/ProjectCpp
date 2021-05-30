@@ -27,8 +27,6 @@ Description
 
 Usage
 -----
-	Use the provided executable inside x64.
-	
 	[executable file percentage algorithm]
 	
 		file [required]
