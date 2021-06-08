@@ -21,13 +21,6 @@ class GameManager
 		{
             while (m_window.isOpen())
             {
-                // handle events
-                sf::Event event;
-                while (m_window.pollEvent(event))
-                {
-                    if (event.type == sf::Event::Closed)
-                        m_window.close();
-                }
                 m_game.update();
                 m_game.render();
 

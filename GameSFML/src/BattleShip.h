@@ -2,6 +2,7 @@
 #define __BATTLESHIP_H__
 
 #include <SFML/Graphics.hpp>
+#include "Bullet.h"
 
 namespace AsteroidNS
 {
@@ -16,7 +17,7 @@ class BattleShip
     public:
         BattleShip(const sf::Vector2f& headPos = {0, 0}, int size = 50)
             :m_triangle(sf::Triangles, 3)
-            ,m_headPos(headPos)
+            ,m_originPos(headPos)
             ,m_size(size)
         {
             adjustPos();    // always call after changing head as it orient according to head
@@ -26,13 +27,20 @@ class BattleShip
             m_triangle[LEFT].color = m_triangle[RIGHT].color = sf::Color::Red;
         }
 
-        void setHead(const sf::Vector2i& head)
+        void setPosition(const sf::Vector2i& head)
         {
-            m_headPos = head;
+            m_originPos = head;
             adjustPos();
         }
 
-        void draw(sf::RenderWindow& w) const
+        Bullet* fire() const
+        {
+            Bullet* b = new Bullet();
+            b->setPosition(m_triangle[HEAD].position);
+            return b;
+        }
+
+        void render(sf::RenderWindow& w) const
         {
             w.draw(m_triangle);
         }
@@ -40,18 +48,19 @@ class BattleShip
     private:
         void adjustPos()
         {
-            m_triangle[HEAD].position = (sf::Vector2f)m_headPos;
+            m_triangle[HEAD].position.x = m_originPos.x;
+            m_triangle[HEAD].position.y = m_originPos.y - m_size;
 
-            m_triangle[LEFT].position.x = (float)m_headPos.x - m_size;
-            m_triangle[LEFT].position.y = (float)m_headPos.y + m_size;
+            m_triangle[LEFT].position.x = m_originPos.x - m_size;
+            m_triangle[LEFT].position.y = m_originPos.y + m_size;
 
-            m_triangle[RIGHT].position.x = (float)m_headPos.x + m_size;
-            m_triangle[RIGHT].position.y = (float)m_headPos.y + m_size;
+            m_triangle[RIGHT].position.x = m_originPos.x + m_size;
+            m_triangle[RIGHT].position.y = m_originPos.y + m_size;
         }
 
 	private:
         sf::VertexArray     m_triangle;
-        sf::Vector2i        m_headPos;
+        sf::Vector2i        m_originPos;
         int                 m_size;
 };
 }
