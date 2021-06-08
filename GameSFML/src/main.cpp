@@ -11,5 +11,6 @@ int main()
 {
     AsteroidNS::GameManager gm;
     gm.startGame();
+
     return 0;
 }

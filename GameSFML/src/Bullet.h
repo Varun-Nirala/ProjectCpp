@@ -2,26 +2,34 @@
 #define __BULLET_H__
 
 #include <SFML/Graphics.hpp>
+#include <cassert>
 
 namespace AsteroidNS
 {
 class Bullet
 {
 	public:
-		Bullet(int size = 5)
+		Bullet(int size = 5, float speed = 0.05f)
 			:m_shape(size)
+			,m_speed(speed)
 		{
-			m_shape.setOrigin({ m_shape.getPosition().x + size, m_shape.getPosition().y + size });
+			assert(speed > 0.0f);
+			m_shape.setOrigin(m_shape.getRadius(), m_shape.getRadius());
 		}
 
-		void setPosition(const sf::Vector2i& pos)
-		{
-			m_shape.setPosition((sf::Vector2f)pos);
-		}
-
-		void setPosition(const sf::Vector2f& pos)
+		void setPosition(const sf::Vector2f &pos)
 		{
 			m_shape.setPosition(pos);
+		}
+
+		void setDirection(const sf::Vector2f& dir)
+		{
+			m_direction = dir;
+		}
+
+		void update()
+		{
+			m_shape.move(m_direction * m_speed);
 		}
 
 		void render(sf::RenderWindow& w) const
@@ -30,8 +38,9 @@ class Bullet
 		}
 
 	private:
-		sf::CircleShape		m_shape;
-		sf::Vector2f		m_direction;
+		sf::CircleShape		m_shape{};
+		sf::Vector2f		m_direction{};
+		float				m_speed{};
 
 };
 }
